@@ -7,88 +7,65 @@
 """
 
 import serial
-import modbus_tk
+#import modbus_tk
 
 import modbus_tk.defines as cst
 from modbus_tk import modbus_rtu
 
-PORT = '/dev/ttyUSB0'
-
 class DPSdriver () :
+    registers = {
+        'vSet'   : (0x00,  'rw',  'decimal',  'Voltage setting'), 
+        'iSet'   : (0x01,  'rw',  'decimal',  'Current setting'), 
+        'vOut'   : (0x02,  'r',   'decimal',   'Output voltage'), 
+        'iOut'   : (0x03,  'r',   'decimal',   'Output current'), 
+        'pOut'   : (0x04,  'r',   'decimal',   'Output power'), 
+        'vInp'   : (0x05,  'r',   'decimal',   'Input voltage'), 
+        'lock'   : (0x06,  'rw',  'int',         'Key lock: 0 is not lock, 1 is locked'  ), 
+        'prot'   : (0x07,  'r',    'int',         'Protection status: 0 OK, 1 is over voltage protection, 2 over current protection, 3 over power protection'  ), 
+        'cvcc'   : (0x08,  'r',    'int',         'Constant voltage or current status: 0 constant voltage, 1 constant current'  ), 
+        'onoff' : (0x09,  'rw',  'int',         'Switch output states: 0 off , 1 on'  ), 
+        'bled'   : (0x0A,  'rw',  'int',         'Backlight brightness level: 0 darkest, 5 brightest'  ), 
+        'model' : (0x0B,  'r',    'int',         'Product model'  ), 
+        'fware' : (0x0C,  'r',    'int',         'Firmware version'  ), 
+        'gSet'   : (0x23,   'rw',  'int',        'Set as active the required data group ')
+        
+        }
+
     #port is the serial port where the converter is linked to
     def __init__ (self,  port):
-        self.port = port
-        
-    def connect (self):
+        self.port = port    
         self.master = modbus_rtu.RtuMaster(serial.Serial(self.port, baudrate=9600, bytesize=8, parity='N', stopbits=1, xonxoff=0))
         self.master.set_timeout(5.0)
         self.master.set_verbose(True)        
         
-    def disconnect (self):
-        self.master.
-        
+    def ___del___ (self):
+        self.master.__del__()
 
-def main():
-    """main"""
-
-    try:
-        master = modbus_rtu.RtuMaster(
-            serial.Serial(port=PORT, baudrate=9600, bytesize=8, parity='N', stopbits=1, xonxoff=0)
-        )
-        master.set_timeout(5.0)
-        master.set_verbose(True)
-
-        voltSetRegister = 0x00        
-        volt = 5.01
+    def get (self,  reg) :
+        r = DPSdriver.registers[reg]        
+        v = self.master.execute(1, cst.READ_HOLDING_REGISTERS, r[0],  1) 
+        if r[2]=='decimal' : return v[0]/100.
+        return v[0]
         
-        print ('Read setting voltage '+str(master.execute(1, cst.READ_HOLDING_REGISTERS, voltSetRegister,  16)[0]/100.))
-        print ('Write setting voltage ' +str(master.execute(1, cst.WRITE_SINGLE_REGISTER, voltSetRegister, 16,   output_value=int (volt*100))[1]/100.))
-        print ('Read setting voltage '+str(master.execute(1, cst.READ_HOLDING_REGISTERS, voltSetRegister,  16)[0]/100.))
-        
-        currSetRegister = 0x01       
-        curr = 1.23 
-        
-        print ('Read setting current  '+str(master.execute(1, cst.READ_HOLDING_REGISTERS, currSetRegister, 16)[0]/100.))
-        print ('Write setting current ' +str(master.execute(1, cst.WRITE_SINGLE_REGISTER, currSetRegister, 16,  output_value=int (curr*100))[1]/100.))
-        print ('Read setting current  '+str(master.execute(1, cst.READ_HOLDING_REGISTERS, currSetRegister, 16)[0]/100.))        
-        
-        outVoltRegister = 0x02    
-        print ('Read output voltage '+str(master.execute(1, cst.READ_HOLDING_REGISTERS, outVoltRegister, 16)[0]/100.))
-        
-        outCurrRegister = 0x03    
-        print ('Read output current '+str(master.execute(1, cst.READ_HOLDING_REGISTERS, outCurrRegister , 16)[0]/100.))
-        
-        outPowrRegister = 0x04    
-        print ('Read output power '+str(master.execute(1, cst.READ_HOLDING_REGISTERS, outPowrRegister , 16)[0]))
-               
-        inpVoltRegister = 0x05    
-        print ('Read input voltage '+str(master.execute(1, cst.READ_HOLDING_REGISTERS, inpVoltRegister, 16)[0]/100.))
-        
-#        return
-        
-        outSwitchRegister = 0x09
-        osw = 1
-        print ('Read output switch '+str(master.execute(1, cst.READ_HOLDING_REGISTERS, outSwitchRegister , 16)[0]))
-        print ('Write setting current ' +str(master.execute(1, cst.WRITE_SINGLE_REGISTER, outSwitchRegister, 16,  output_value=osw )[1]))
-        
-        for volt in range (1,  10,  1) :
-            print ('Write setting voltage ' +str(master.execute(1, cst.WRITE_SINGLE_REGISTER, voltSetRegister, 16,  output_value=int (volt*100))[1]/100.))
-        
-        for volt in range (10,  1,  -1) :
-            print ('Write setting voltage ' +str(master.execute(1, cst.WRITE_SINGLE_REGISTER, voltSetRegister, 16,  output_value=int (volt*100))[1]/100.))
-            
-        #again without prints
-        for volt in range (1,  10,  1) :
-            master.execute(1, cst.WRITE_SINGLE_REGISTER, voltSetRegister, 16,  output_value=int (volt*100))
-        
-        for volt in range (10,  1,  -1) :
-            master.execute(1, cst.WRITE_SINGLE_REGISTER, voltSetRegister, 16,  output_value=int (volt*100))
-            
-
-        
-
-    except modbus_tk.modbus.ModbusError as exc:
-        print ('Exception: '+str(exc))
+    def set  (self,  reg,  val) :
+        r = DPSdriver.registers[reg]    
+        if not 'w' in r[1] : raise Exception ('It is a read only register')
+        if r[2]=='decimal' :    val = int (val*100.)
+        v = self.master.execute(1, cst.WRITE_SINGLE_REGISTER, r[0],  1,  output_value = val) 
+        if r[2]=='decimal' : return v[1]/100.
+        return v[1]        
 
 if __name__ == "__main__":
-    main()
+    dps =DPSdriver('/dev/ttyUSB0')
+    print dps.get('vInp')
+    print dps.get('model')
+    print dps.get('fware')
+    print dps.set('vSet',  10.04)
+    print dps.set('iSet',  0.12)
+    print dps.set('onoff',  0)
+    print dps.get('lock')
+    print dps.set('lock',  1)
+    print dps.get('vOut')
+    print dps.get('iOut')    
+    print dps.set('bled', 0)
+
