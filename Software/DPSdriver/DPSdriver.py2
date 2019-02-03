@@ -1,0 +1,94 @@
+#!/usr/bin/env python
+
+"""
+ DPS serial driver 
+ (C)2019 - Simone Pernice - pernice@libero.it
+  This is distributed under GNU LGPL license, see license.txt
+"""
+
+import serial
+import modbus_tk
+
+import modbus_tk.defines as cst
+from modbus_tk import modbus_rtu
+
+PORT = '/dev/ttyUSB0'
+
+class DPSdriver () :
+    #port is the serial port where the converter is linked to
+    def __init__ (self,  port):
+        self.port = port
+        
+    def connect (self):
+        self.master = modbus_rtu.RtuMaster(serial.Serial(self.port, baudrate=9600, bytesize=8, parity='N', stopbits=1, xonxoff=0))
+        self.master.set_timeout(5.0)
+        self.master.set_verbose(True)        
+        
+    def disconnect (self):
+        self.master.
+        
+
+def main():
+    """main"""
+
+    try:
+        master = modbus_rtu.RtuMaster(
+            serial.Serial(port=PORT, baudrate=9600, bytesize=8, parity='N', stopbits=1, xonxoff=0)
+        )
+        master.set_timeout(5.0)
+        master.set_verbose(True)
+
+        voltSetRegister = 0x00        
+        volt = 5.01
+        
+        print ('Read setting voltage '+str(master.execute(1, cst.READ_HOLDING_REGISTERS, voltSetRegister,  16)[0]/100.))
+        print ('Write setting voltage ' +str(master.execute(1, cst.WRITE_SINGLE_REGISTER, voltSetRegister, 16,   output_value=int (volt*100))[1]/100.))
+        print ('Read setting voltage '+str(master.execute(1, cst.READ_HOLDING_REGISTERS, voltSetRegister,  16)[0]/100.))
+        
+        currSetRegister = 0x01       
+        curr = 1.23 
+        
+        print ('Read setting current  '+str(master.execute(1, cst.READ_HOLDING_REGISTERS, currSetRegister, 16)[0]/100.))
+        print ('Write setting current ' +str(master.execute(1, cst.WRITE_SINGLE_REGISTER, currSetRegister, 16,  output_value=int (curr*100))[1]/100.))
+        print ('Read setting current  '+str(master.execute(1, cst.READ_HOLDING_REGISTERS, currSetRegister, 16)[0]/100.))        
+        
+        outVoltRegister = 0x02    
+        print ('Read output voltage '+str(master.execute(1, cst.READ_HOLDING_REGISTERS, outVoltRegister, 16)[0]/100.))
+        
+        outCurrRegister = 0x03    
+        print ('Read output current '+str(master.execute(1, cst.READ_HOLDING_REGISTERS, outCurrRegister , 16)[0]/100.))
+        
+        outPowrRegister = 0x04    
+        print ('Read output power '+str(master.execute(1, cst.READ_HOLDING_REGISTERS, outPowrRegister , 16)[0]))
+               
+        inpVoltRegister = 0x05    
+        print ('Read input voltage '+str(master.execute(1, cst.READ_HOLDING_REGISTERS, inpVoltRegister, 16)[0]/100.))
+        
+#        return
+        
+        outSwitchRegister = 0x09
+        osw = 1
+        print ('Read output switch '+str(master.execute(1, cst.READ_HOLDING_REGISTERS, outSwitchRegister , 16)[0]))
+        print ('Write setting current ' +str(master.execute(1, cst.WRITE_SINGLE_REGISTER, outSwitchRegister, 16,  output_value=osw )[1]))
+        
+        for volt in range (1,  10,  1) :
+            print ('Write setting voltage ' +str(master.execute(1, cst.WRITE_SINGLE_REGISTER, voltSetRegister, 16,  output_value=int (volt*100))[1]/100.))
+        
+        for volt in range (10,  1,  -1) :
+            print ('Write setting voltage ' +str(master.execute(1, cst.WRITE_SINGLE_REGISTER, voltSetRegister, 16,  output_value=int (volt*100))[1]/100.))
+            
+        #again without prints
+        for volt in range (1,  10,  1) :
+            master.execute(1, cst.WRITE_SINGLE_REGISTER, voltSetRegister, 16,  output_value=int (volt*100))
+        
+        for volt in range (10,  1,  -1) :
+            master.execute(1, cst.WRITE_SINGLE_REGISTER, voltSetRegister, 16,  output_value=int (volt*100))
+            
+
+        
+
+    except modbus_tk.modbus.ModbusError as exc:
+        print ('Exception: '+str(exc))
+
+if __name__ == "__main__":
+    main()
