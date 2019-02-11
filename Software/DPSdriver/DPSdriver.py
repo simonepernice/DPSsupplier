@@ -61,6 +61,7 @@ class DPSdriver () :
     def get (self,  reg,  group = 0) :
         if reg not in DPSdriver.REGISTERS : raise Exception ('The given register is not known')
         r = DPSdriver.REGISTERS[reg]        
+        if 'r' not in r[1] : raise Exception ('The giver register is not readable, therefore get is not allowed')        
         regAddress = r[0]
         if group != 0 :
             if 'g' not in r[1] : raise Exception ('The given register is not part of a memory group, therefore memory group cannot be specified')
@@ -71,7 +72,7 @@ class DPSdriver () :
     def set  (self,  reg,  val,  group = 0) :
         if reg not in DPSdriver.REGISTERS : raise Exception ('The given register is not known')
         r = DPSdriver.REGISTERS[reg]    
-        if not 'w' in r[1] : raise Exception ('The giver register is a read only, set is not allowed')
+        if 'w' not in r[1] : raise Exception ('The giver register is not writeable, therefore set is not allowed')
         regAddress = r[0]
         if group != 0 :
             if 'g' not in r[1] : raise Exception ('The given register is not part of a memory group, therefore memory group cannot be specified')
