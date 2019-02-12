@@ -12,34 +12,53 @@ import serial
 import modbus_tk.defines as cst
 from modbus_tk import modbus_rtu
 
-class DPSdriver () :
-    REGISTERS = {
-        'vSet'   : (0x00,  'rw',    2,  'Voltage setting'), 
-        'iSet'   : (0x01,  'rw',    2,  'Current setting'), 
-        'vOut'   : (0x02,  'r',      2,   'Output voltage'), 
-        'iOut'   : (0x03,  'r',      2,   'Output current'), 
-        'pOut'   : (0x04,  'r',      2,   'Output power'), 
-        'vInp'   : (0x05,  'r',      2,   'Input voltage'), 
+def initializeRegisters () :
+    reg = {
+        'vset'   : (0x00,  'rw',    2,  'Voltage setting'), 
+        'iset'   : (0x01,  'rw',    2,  'Current setting'), 
+        'vout'   : (0x02,  'r',      2,   'Output voltage'), 
+        'iout'   : (0x03,  'r',      2,   'Output current'), 
+        'pout'   : (0x04,  'r',      2,   'Output power'), 
+        'vinp'   : (0x05,  'r',      2,   'Input voltage'), 
         'lock'   : (0x06,  'rw',    0,   'Key lock: 0 is not lock, 1 is locked'  ), 
         'prot'   : (0x07,  'r',      0,   'Protection status: 0 OK, 1 is over voltage protection, 2 over current protection, 3 over power protection'  ), 
         'cvcc'   : (0x08,  'r',      0,   'Constant voltage or current status: 0 constant voltage, 1 constant current'  ), 
-        'onoff' : (0x09,  'rw',    0,   'Switch output states: 0 off , 1 on'  ), 
+        'onoff' : (0x09,  'rw',    0,   'Switch output status: 0 off , 1 on'  ), 
         'bled'   : (0x0A,  'rw',    0,   'Backlight brightness level: 0 darkest, 5 brightest'  ), 
         'model' : (0x0B,  'r',      0,   'Product model'), 
         'fware' : (0x0C,  'r',      0,   'Firmware version'  ), 
-        'gSet'   : (0x23,   'grw',  0,   'Set as active the required data group ') ,         
-        'gvSet'  : (0x50,  'grw',  2,  'Voltage setting'), 
-        'giSet'  : (0x51,  'grw',  2,  'Current setting'), 
-        'govp'    : (0x52,  'grw',  2,  'Over voltage protection'), 
-        'gocp'    : (0x53,  'grw',  2,  'Over current protection'), 
-        'gopp'    : (0x54,  'grw',  1,  'Over power protection'), 
-        'gbled'  : (0x55,  'grw',  0,  'Backlight brightness level: 0 darkest, 5 brightest'  ), 
-        'gmPre'  : (0x56,  'grw',  0,  'Memory preset number'), 
-        'gonoff': (0x57,  'grw',  0,  'Switch output states: 0 off , 1 on'  ),         
-    }    
+        'mSet'   : (0x23,   'rw',  0,   'Set as active the required meomory data group ')
+    }
+
+    memReg = {  
+        'vset'  : (0x50,  'rw',  2,  ' voltage setting'), 
+        'iset'  : (0x51,  'rw',  2,  ' current setting'), 
+        'ovp'    : (0x52,  'rw',  2,  ' over voltage protection'), 
+        'ocp'    : (0x53,  'rw',  2,  ' over current protection'), 
+        'opp'    : (0x54,  'rw',  1,  ' over power protection'), 
+        'bled'  : (0x55,  'rw',  0,  ' backlight brightness level: 0 darkest, 5 brightest'  ), 
+        'pre'  : (0x56,  'rw',  0,  ' preset number'), 
+        'onoff': (0x57,  'rw',  0,  ' switch output status: 0 off , 1 on'  ),         
+    }
+   
+   for i in range (10) :
+       for mreg in memReg :
+           v = mem[mreg]
+           nv = [v[0]+i*0x10]
+           for j in range (1, len(v)-1) :
+               nv.append(v[j])
+           nv.append('Memory '+str(i)+v[-1]))
+           reg['m'+str(i)+mreg] = tuple (nv)
+        
+    return reg       
+       
+
+class DPSdriver () :
+    REGISTERS = initializeRegisters()
 
     #port is the serial port where the converter is linked to
-    def __init__ (self,  port,  address=1):
+    #address is the supplier address as far as I know they are all address 0x01
+    def __init__ (self,  port,  address=0x01):
         self.address = address
 
         try :
@@ -58,27 +77,26 @@ class DPSdriver () :
     def ___del___ (self):
         self.master.__del__()
 
-    def get (self,  reg,  group = 0) :
+    def get (self,  reg,  nreg = 1) :
         if reg not in DPSdriver.REGISTERS : raise Exception ('The given register is not known')
         r = DPSdriver.REGISTERS[reg]        
         if 'r' not in r[1] : raise Exception ('The giver register is not readable, therefore get is not allowed')        
         regAddress = r[0]
-        if group != 0 :
-            if 'g' not in r[1] : raise Exception ('The given register is not part of a memory group, therefore memory group cannot be specified')
-            regAddress += 0x10 * group
-        v = self.master.execute(self.address, cst.READ_HOLDING_REGISTERS, regAddress,  1) 
-        return self.toDecimal (v[0],  r[2])
+        v = self.master.execute(self.address, cst.READ_HOLDING_REGISTERS, regAddress,  nreg) 
+        if nreg == 1 : return self.toDecimal (v[0], r[2])
+        return [self.toDecimal (val, r[2]) for val in v]
         
-    def set  (self,  reg,  val,  group = 0) :
+    def set  (self,  reg,  val,  nreg = 1) :
         if reg not in DPSdriver.REGISTERS : raise Exception ('The given register is not known')
         r = DPSdriver.REGISTERS[reg]    
         if 'w' not in r[1] : raise Exception ('The giver register is not writeable, therefore set is not allowed')
-        regAddress = r[0]
-        if group != 0 :
-            if 'g' not in r[1] : raise Exception ('The given register is not part of a memory group, therefore memory group cannot be specified')
-            regAddress += 0x10 * group        
-        v = self.master.execute(self.address, cst.WRITE_SINGLE_REGISTER, regAddress,  1,  output_value = self.toInteger(val,  r[2]))
-        return self.toDecimal(v[1],  r[2])
+        regAddress = r[0]     
+        if nreg == 1:
+            v = self.master.execute(self.address, cst.WRITE_SINGLE_REGISTER, regAddress,  1,  output_value = self.toInteger(val,  r[2]))
+        else :
+            v = self.master.execute(self.address, cst.WRITE_MULTIPLE_REGISTER, regAddress,  nreg,  output_value = [self.toInteger(v,  r[2]) for v in val]) 
+        if nreg == 1 : return self.toDecimal(v[1],  r[2])
+        return [self.toDecimal (val, r[2]) for val in v[1:-1]]
         
     def toDecimal (self,  val,  digits) :
         if digits == 0:
