@@ -125,6 +125,17 @@ class DPSdriver () :
         h += ', decimal digits: '+str(r[2])
         h += ', function: '+str(r[3])
         return h
+       
+   def memoryMap (self) :
+       mm = []
+       for r in DPSdriver.REGISTERS :
+           val =  DPSdriver.REGISTERS[r]
+           adr = val[0]
+           i = 0
+           for i in range (len(mm)) :
+               if adr < mm[i][0] : break
+           mm.insert(i,(adr, r, val[1], val[3]))
+       return mm
 
 if __name__ == "__main__":
     dps =DPSdriver('/dev/ttyUSB0')
