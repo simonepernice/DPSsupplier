@@ -31,7 +31,7 @@ def initialize_registers():
         'bled'   : (0x0A, 'rw', 0, 'Backlight brightness level: 0 darkest, 5 brightest'),
         'model' : (0x0B, 'r', 0, 'Product model'),
         'fware' : (0x0C, 'r', 0, 'Firmware version'),
-        'mSet'   : (0x23, 'rw', 0, 'Set the required meomory as active data group')
+        'mset'   : (0x23, 'rw', 0, 'Set the required meomory as active data group')
     }
 
     memreg = {
@@ -133,7 +133,7 @@ class DPSdriver():
             dgts.append(ad[1])
 
         v = self.master.execute(self.address, cst.READ_HOLDING_REGISTERS, baseadd, nreg)
-        red += [todecimal(va, r[2]) for va, d in zip(v, dgts)]
+        red += [todecimal(va, d) for va, d in zip(v, dgts)]
 
         #reorder the result as for the caller registers order
         if adrdgt != adrdgtsrt:
@@ -141,7 +141,7 @@ class DPSdriver():
             for v, a in zip(red, adrdgtsrt):
                 rslt[adrdgt.index(a)] = v
         else:
-            rslt = v
+            rslt = red
 
         return rslt
 
@@ -178,9 +178,11 @@ class DPSdriver():
         for ad in adrdgtvalsrt:
             if nreg > 0 and ad[0] != baseadd+nreg:
                 if nreg == 1:
-                    v = self.master.execute(self.address, cst.WRITE_SINGLE_REGISTER, baseadd, 1, output_value=wrt[0])[1:-1]
+                    v = self.master.execute(self.address, cst.WRITE_SINGLE_REGISTER, baseadd, 1, output_value=wrt[0])[1:]
                 else:
-                    v = self.master.execute(self.address, cst.WRITE_MULTIPLE_REGISTERS, baseadd, nreg, output_value=wrt)[len(wrt):-1]
+                    v = self.master.execute(self.address, cst.WRITE_MULTIPLE_REGISTERS, baseadd, nreg, output_value=wrt)[1:]
+
+                print 'from write 1 got:'+str(v)
 
                 red += [todecimal(va, d) for va, d in zip(v, dgts)]
                 nreg = 0
@@ -194,12 +196,14 @@ class DPSdriver():
             dgts.append(ad[1])
             wrt.append(ad[2])
 
-            if nreg == 1:
-                v = self.master.execute(self.address, cst.WRITE_SINGLE_REGISTER, baseadd, 1, output_value=wrt[0])[1:-1]
-            else:
-                v = self.master.execute(self.address, cst.WRITE_MULTIPLE_REGISTERS, baseadd, nreg, output_value=wrt)[len(wrt):-1]
+        if nreg == 1:
+            v = self.master.execute(self.address, cst.WRITE_SINGLE_REGISTER, baseadd, 1, output_value=wrt[0])[1:]
+        else:
+            v = self.master.execute(self.address, cst.WRITE_MULTIPLE_REGISTERS, baseadd, nreg, output_value=wrt)[1:]
 
-            red += [todecimal(va, d) for va, d in zip(v, dgts)]
+        print 'from write 2 got:'+str(v)
+
+        red += [todecimal(va, d) for va, d in zip(v, dgts)]
 
         #reorder the result as for the caller registers order
         if adrdgtval != adrdgtvalsrt:
@@ -207,7 +211,7 @@ class DPSdriver():
             for v, a in zip(red, adrdgtvalsrt):
                 rslt[adrdgtval.index(a)] = v
         else:
-            rslt = v
+            rslt = red
 
         return rslt
 
@@ -269,7 +273,7 @@ def tointeger(val, digits):
         digits -= 1
     return int(round(val))
 
-def memorymap():
+def memory_map():
     """
     Provide a list with the memory map of the DPS.
     The lists is made by tuples with registers: (address, name, function explanation)
@@ -279,27 +283,31 @@ def memorymap():
     mm = []
     for r in DPSdriver.REGISTERS:
         val = DPSdriver.REGISTERS[r]
-        mm.append(val[0], r, val[1], val[3])
-    return mm.sort()
+        mm.append([val[0], r, val[1], val[3]])
+    mm.sort()
+    return mm
 
 if __name__ == "__main__":
     DPS = DPSdriver('/dev/ttyUSB0')
-#    print DPS.get('vInp')
-    print DPS.get('model')
-    print DPS.get('fware')
-    print DPS.set('vSet', 4.54)
-    print DPS.get('vSet')
-    print DPS.set('vSet', 4.55)
-    print DPS.get('vSet')
-    print DPS.set('vSet', 4.56)
-    print DPS.get('vSet')
-    print DPS.set('vSet', 4.57)
-    print DPS.get('vSet')
-#    print DPS.set('vSet',  10.04)
-#    print DPS.set('iSet',  0.12)
+    print DPS.get(['vinp'])
+#    print DPS.get(['model'])
+#    print DPS.get(['fware'])
+    print DPS.set(['vset'], [4.54])
+#    print DPS.get(['vset'])
+#    print DPS.set(['vset'], [4.55])
+#    print DPS.get(['vset'])
+#    print DPS.set(['vset'], [4.56])
+#    print DPS.get(['vset'])
+#    print DPS.set(['vset'], [4.57])
+#    print DPS.get(['vset'])
+#    print DPS.set(['iset', 'vset'],  [1.23,  5.67])
+    print DPS.set(['iset', 'vset', 'lock'],  [0.11,  6.78, 1])
+    print DPS.get(['m0pre',  'm1pre',  'm2pre', 'm3pre',  'm4pre'])
+#    print DPS.set('vset',  10.04)
+#    print DPS.set('iset',  0.12)
 #    print DPS.set('onoff',  0)
 #    print DPS.get('lock')
 #    print DPS.set('lock',  1)
-#    print DPS.get('vOut')
-#    print DPS.get('iOut')
+#    print DPS.get('vout')
+#    print DPS.get('iout')
 #    print DPS.set('bled', 0)
