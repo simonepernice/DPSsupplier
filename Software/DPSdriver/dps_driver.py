@@ -153,7 +153,6 @@ class DPSdriver():
 
         :param reglist: is the list with the string of register names to be read
         :param vallist: is the list with the values to write in the registers
-        :returns: the list of values read after the write function
         :raises NameError: if any of the register names is not found
         :raises MemoryError: if any of the required registers is not readable
         """
@@ -173,18 +172,14 @@ class DPSdriver():
         nreg = 0
         dgts = []
         wrt = []
-        red = []
         baseadd = 0
         for ad in adrdgtvalsrt:
             if nreg > 0 and ad[0] != baseadd+nreg:
                 if nreg == 1:
-                    v = self.master.execute(self.address, cst.WRITE_SINGLE_REGISTER, baseadd, 1, output_value=wrt[0])[1:]
+                    self.master.execute(self.address, cst.WRITE_SINGLE_REGISTER, baseadd, 1, output_value=wrt[0])
                 else:
-                    v = self.master.execute(self.address, cst.WRITE_MULTIPLE_REGISTERS, baseadd, nreg, output_value=wrt)[1:]
+                    self.master.execute(self.address, cst.WRITE_MULTIPLE_REGISTERS, baseadd, nreg, output_value=wrt)
 
-                print 'from write 1 got:'+str(v)
-
-                red += [todecimal(va, d) for va, d in zip(v, dgts)]
                 nreg = 0
 
             if nreg == 0:
@@ -197,23 +192,9 @@ class DPSdriver():
             wrt.append(ad[2])
 
         if nreg == 1:
-            v = self.master.execute(self.address, cst.WRITE_SINGLE_REGISTER, baseadd, 1, output_value=wrt[0])[1:]
+            self.master.execute(self.address, cst.WRITE_SINGLE_REGISTER, baseadd, 1, output_value=wrt[0])
         else:
-            v = self.master.execute(self.address, cst.WRITE_MULTIPLE_REGISTERS, baseadd, nreg, output_value=wrt)[1:]
-
-        print 'from write 2 got:'+str(v)
-
-        red += [todecimal(va, d) for va, d in zip(v, dgts)]
-
-        #reorder the result as for the caller registers order
-        if adrdgtval != adrdgtvalsrt:
-            rslt = [0] * len(red)
-            for v, a in zip(red, adrdgtvalsrt):
-                rslt[adrdgtval.index(a)] = v
-        else:
-            rslt = red
-
-        return rslt
+            self.master.execute(self.address, cst.WRITE_MULTIPLE_REGISTERS, baseadd, nreg, output_value=wrt)
 
 def list_registers():
     """
@@ -288,11 +269,20 @@ def memory_map():
     return mm
 
 if __name__ == "__main__":
-    DPS = DPSdriver('/dev/ttyUSB0')
+    import time
+    DPS = DPSdriver('/dev/ttyUSB1')
+    t = time.time()
     print DPS.get(['vinp'])
+    print time.time() - t
+    t = time.time()
+    print DPS.get(['iset', 'vset'])    
+    print time.time() - t
+    t = time.time()
+    print DPS.get(['vset', 'iset'])    
+    print time.time() - t
 #    print DPS.get(['model'])
 #    print DPS.get(['fware'])
-    print DPS.set(['vset'], [4.54])
+#    print DPS.set(['mset'], [0])
 #    print DPS.get(['vset'])
 #    print DPS.set(['vset'], [4.55])
 #    print DPS.get(['vset'])
@@ -301,8 +291,11 @@ if __name__ == "__main__":
 #    print DPS.set(['vset'], [4.57])
 #    print DPS.get(['vset'])
 #    print DPS.set(['iset', 'vset'],  [1.23,  5.67])
-    print DPS.set(['iset', 'vset', 'lock'],  [0.11,  6.78, 1])
-    print DPS.get(['m0pre',  'm1pre',  'm2pre', 'm3pre',  'm4pre'])
+#    print DPS.set(['iset', 'vset', 'lock'],  [15.80,  22.78, 0])
+    print DPS.set(['iset'],  [14.80])
+#    print DPS.get(['m0pre',  'm1pre',  'm2pre', 'm3pre',  'm4pre',  'm5pre',  'm6pre',  'm7pre',  'm8pre',  'm9pre'])
+#    print DPS.set(['mset'], [5])
+#    print DPS.get(['m0pre',  'm1pre',  'm2pre', 'm3pre',  'm4pre',  'm5pre',  'm6pre',  'm7pre',  'm8pre',  'm9pre'])
 #    print DPS.set('vset',  10.04)
 #    print DPS.set('iset',  0.12)
 #    print DPS.set('onoff',  0)
