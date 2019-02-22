@@ -145,9 +145,9 @@ class DPSinterface:
         sc.grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         col+=colspan
         self.dvarcscalef=DoubleVar()
-        self.curntscale=Scale(root, variable=self.dvarcscalef, from_=0, to=0.99, resolution=0.01, orient="horizontal")
-        self.curntscale.bind("<ButtonRelease-1>", self.scalecurntaction)
-        self.curntscale.grid(row=row, column=col, columnspan=colspan, sticky=E+W)
+        sc=Scale(root, variable=self.dvarcscalef, from_=0, to=0.99, resolution=0.01, orient="horizontal")
+        sc.bind("<ButtonRelease-1>", self.scalecurntaction)
+        sc.grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         
         colspan=1
         row+=rowspan
