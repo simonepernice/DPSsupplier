@@ -1,17 +1,25 @@
-from Tkinter import Tk, Label, Button, Checkbutton, Entry, Scale, IntVar, StringVar, DoubleVar, Canvas, N, S, E, W, NORMAL, DISABLED
+from Tkinter import Tk, Label, Button, Checkbutton, Entry, Scale, IntVar, StringVar, DoubleVar, E, W, NORMAL, DISABLED
+import tkMessageBox
 import tkFileDialog
 from ttk import Separator
 
+from threading import Thread, Lock
+
+from time import time, sleep
+
 from scopetube import Scopetube
-#import dps_driver
+from dps_driver import DPSdriver
 
 class DPSinterface:        
-    def __init__(self, root):
-        self.dps=None
+    def __init__(self, root):        
         self.root=root
         root.title("DPS power supplier interface by Simone Pernice")
+        
+        self.dps=None
+        self.lock=Lock()
+        self.threadacquire=None
 
-        ENTRYWIDTH=8
+        ENTRYWIDTH=10
 
         row=0
         col=0
@@ -19,9 +27,9 @@ class DPSinterface:
         colspan=1
         Label(root, text="Serial port: ").grid(row=row, column=col, sticky=E)
         col+=colspan
-        self.svardsport=StringVar()
-        self.svardsport.set('/dev/ttyUSB0')        
-        self.entryserport=Entry(root, textvariable=self.svardsport, width=ENTRYWIDTH)
+        self.svardpsport=StringVar()
+        self.svardpsport.set('/dev/ttyUSB0')        
+        self.entryserport=Entry(root, textvariable=self.svardpsport, width=ENTRYWIDTH)
         self.entryserport.grid(row=row, column=col, sticky=W)                
         col+=colspan
         Label(root, text="DPS address: ").grid(row=row, column=col, sticky=E)
@@ -46,37 +54,7 @@ class DPSinterface:
         row+=rowspan
         col=0
         colspan=1
-        Separator(root, orient='horizontal').grid(row=row, columnspan=8, sticky=E+W, pady=8)
-
-        rowspan=1
-        col=0
-        row+=rowspan        
-        Label(root, text="Y [V/div]: ").grid(row=row, column=col, sticky=E)
-        col+=colspan
-        self.dvarvdiv=DoubleVar()
-        self.dvarvdiv.set(1.0)
-        self.entryydivv=Entry(root, textvariable=self.dvarvdiv, width=ENTRYWIDTH)
-        self.entryydivv.grid(row=row, column=col, sticky=W)
-        col+=colspan
-        Label(root, text="Y [A/div]: ").grid(row=row, column=col, sticky=E)
-        col+=colspan
-        self.dvaradiv=DoubleVar()
-        self.dvaradiv.set(1.0)
-        self.entryydiva=Entry(root, textvariable=self.dvaradiv, width=ENTRYWIDTH)
-        self.entryydiva.grid(row=row, column=col, sticky=W)
-        
-        row+=rowspan
-        col=0 
-        Label(root, text="X [sec/div]: ").grid(row=row, column=col, sticky=E)
-        col+=colspan
-        self.dvarsecdiv=DoubleVar()
-        self.dvarsecdiv.set(60)
-        self.entryxdiv=Entry(root, textvariable=self.dvarsecdiv, width=ENTRYWIDTH)
-        self.entryxdiv.grid(row=row, column=col, sticky=W)
-        col+=colspan
-        self.ivaracquire=IntVar()
-        self.ivaracquire.set(0)        
-        Checkbutton(root, variable=self.ivaracquire, text='Acquire', command=self.buttonacqaction).grid(row=row, column=col, columnspan=2, sticky=E+W)                        
+        Separator(root, orient='horizontal').grid(row=row, columnspan=8, sticky=E+W, pady=8)               
 
         rowspan=1
         col=0
@@ -93,12 +71,12 @@ class DPSinterface:
 
         row+=rowspan
         col=0
-        Label(root, text="Vout [V]: ").grid(row=row, column=col, sticky=E)
+        Label(root, text="Vout [V]: ", foreground=Scopetube.VCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarvout=DoubleVar()
         Entry(root, textvariable=self.dvarvout, state=DISABLED, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
         col+=colspan
-        Label(root, text="Cout [A]: ").grid(row=row, column=col, sticky=E)
+        Label(root, text="Cout [A]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarcout=DoubleVar()
         Entry(root, textvariable=self.dvarcout, state=DISABLED, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
@@ -110,15 +88,60 @@ class DPSinterface:
         self.outgraph=Scopetube(root)
         self.outgraph.grid(row=row, column=col, columnspan=colspan, rowspan=rowspan, sticky=E+W)
         self.outgraph.update()
-        self.outgraph.setvdiv(1)
-        self.outgraph.setcdiv(1)
-        self.outgraph.settdiv(60, 0)        
+        self.dvarvdiv=DoubleVar()
+        self.dvarvdiv.set(1.0)        
+        self.dvaradiv=DoubleVar()
+        self.dvaradiv.set(1.0)
+        self.dvarsdiv=DoubleVar()
+        self.dvarsdiv.set(60.)
+        self.dvarst0=DoubleVar()
+        self.dvarst0.set(0.)
+        self.outgraph.setratios(self.dvarvdiv.get(), self.dvaradiv.get(), self.dvarsdiv.get(), self.dvarst0.get())
         self.outgraph.drawgrid()
-        self.outgraph.addpoint((2, 1, 0))
+        self.outgraph.addpoint((2, 1, 1))
         self.outgraph.addpoint((3, 1, 60))
         self.outgraph.addpoint((4, 1, 120))
         self.outgraph.addpoint((3, 2, 180))
         self.outgraph.addpoint((2, 3, 240))
+        print(self.outgraph.sampletime())
+        print(self.outgraph.winfo_width())
+        
+        row+=rowspan
+        rowspan=1
+        colspan=1
+        col=0 
+        Label(root, text="Y [V/div]: ", foreground=Scopetube.VCOL).grid(row=row, column=col, sticky=E)
+        col+=colspan
+        e=Entry(root, textvariable=self.dvarvdiv, width=ENTRYWIDTH)
+        e.bind('<FocusOut>', self.scopeupdate)
+        e.grid(row=row, column=col, sticky=W)
+        col+=colspan
+        Label(root, text="Y [A/div]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
+        col+=colspan
+        e=Entry(root, textvariable=self.dvaradiv, width=ENTRYWIDTH)
+        e.bind('<FocusOut>', self.scopeupdate)
+        e.grid(row=row, column=col, sticky=W)
+        row+=rowspan
+
+        col=0
+        row+=rowspan
+        Label(root, text="X0 [s]: ").grid(row=row, column=col, sticky=E)
+        col+=colspan
+        e=Entry(root, textvariable=self.dvarst0, width=ENTRYWIDTH)
+        e.bind('<FocusOut>', self.scopeupdate)
+        e.grid(row=row, column=col, sticky=W)        
+        col+=colspan
+        Label(root, text="X [s/div]: ").grid(row=row, column=col, sticky=E)
+        col+=colspan
+        e=Entry(root, textvariable=self.dvarsdiv, width=ENTRYWIDTH)
+        e.bind('<FocusOut>', self.scopeupdate)
+        e.grid(row=row, column=col, sticky=W)
+
+        col=2
+        row+=rowspan
+        self.ivaracquire=IntVar()
+        self.ivaracquire.set(0)        
+        Checkbutton(root, variable=self.ivaracquire, text='Acquire', command=self.buttonacqaction).grid(row=row, column=col, columnspan=2, sticky=E+W)         
         
         row+=rowspan
         col=0
@@ -128,9 +151,9 @@ class DPSinterface:
         col=0
         rowspan=1
         colspan=2        
-        Label(root, text="Vset [V]").grid(row=row, column=col, columnspan=colspan)
+        Label(root, text="Vset [V]", foreground=Scopetube.VCOL).grid(row=row, column=col, columnspan=colspan)
         col+=colspan
-        Label(root, text="Cset [A]").grid(row=row, column=col, columnspan=colspan)
+        Label(root, text="Cset [A]", foreground=Scopetube.CCOL).grid(row=row, column=col, columnspan=colspan)
         col+=colspan
 
         row+=rowspan
@@ -178,12 +201,12 @@ class DPSinterface:
 
         row+=rowspan
         col=0
-        Label(root, text="Vmax [V]: ").grid(row=row, column=col, sticky=E)
+        Label(root, text="Vmax [V]: ", foreground=Scopetube.VCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarvmax=DoubleVar()
         Entry(root, textvariable=self.dvarvmax, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
         col+=colspan
-        Label(root, text="Cmax [A]: ").grid(row=row, column=col, sticky=E)
+        Label(root, text="Cmax [A]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
         col+=1
         self.dvarcmax=DoubleVar()
         Entry(root, textvariable=self.dvarcmax, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
@@ -252,32 +275,69 @@ class DPSinterface:
                 
     def buttonconnectaction(self):
         if self.ivarconctd.get():
+            try:
+                self.dps=DPSdriver(self.svardpsport.get(), self.ivardpsaddr.get())
+            except Exception as e:
+                tkMessageBox.showerror('Error',  'Cannot connect: '+str(e))
+                self.ivarconctd.set(0)
+                self.dps=None
+                return
+            
+            m=self.dps.get(['model'])
+            self.ivarmodel.set(m)
+            self.voltscale.config(to=m/100)
+            self.curntscale.config(t0=m%100)
             self.entryserport.config(state=DISABLED)
             self.entrydpsadd.config(state=DISABLED)
         else:
+            self.dps=None
             self.entryserport.config(state=NORMAL)
             self.entrydpsadd.config(state=NORMAL)
-        print str(self.ivardpsaddr.get())
-        print str(self.svardsport.get())
+
+    def polling(self):
+        while self.ivaracquire.get() and self.dps is not None:
+            t=time()
+            self.lock.aquire()
+            vi=self.dps.get(['vout', 'iout'])
+            vi.append(time())
+            self.lock.release()            
+            self.outgraph.addpoint(vi)
+            self.dvarvout.set(vi[0])
+            self.dvarcout.set(vi[1])
+            t=(time()-t)-self.outgraph.sampletime()
+            if t>0:
+                sleep(t)
 
     def buttonacqaction(self):
         if self.ivaracquire.get():
-            self.entryxdiv.config(state=DISABLED)
-            self.entryydivv.config(state=DISABLED)
-            self.entryydiva.config(state=DISABLED)
+            if self.dps is None:
+                tkMessageBox.showinfo('Not connected',  'Enstablish a connection before aqcuire') 
+                self.ivaracquire.set(0)
+                return
+            if self.threadacquire is not None and self.threadacquire.isAlive():
+                self.ivaracquire.set(0)
+                tkMessageBox.showwarning('Still acquiring',  'Previous acquisition session is still running, it will finish after the next sample acquisition.')
+                return
+            self.threadacquire=Thread(target=self.polling)
         else:
-            self.entryxdiv.config(state=NORMAL)
-            self.entryydivv.config(state=NORMAL)
-            self.entryydiva.config(state=NORMAL)
+#            sleep(1.)
+            if self.threadacquire is not None and self.threadacquire.isAlive():
+                tkMessageBox.showinfo('Still acquiring',  'Current acquisition session will complete after the next sample') 
+
+    def scopeupdate(self,  event):
+        self.outgraph.setratios(self.dvarvdiv.get(), self.dvaradiv.get(), self.dvarsdiv.get(), self.dvarst0.get())
+        self.outgraph.redraw()
 
     def scalevoltaction(self, event):
-        print str(self.dvarvscale.get()+self.dvarvscalef.get())
+        if self.dps is not None:
+            self.dps.set(['vset'],  [self.dvarvscale.get()+self.dvarvscalef.get()])
 
     def scalecurntaction(self, event):
-        print str(self.dvarcscale.get()+self.dvarcscalef.get())
+        if self.dps is not None:
+            self.dps.set(['vset'],  [self.dvarvscale.get()+self.dvarvscalef.get()])
 
     def buttonselwveaction (self):
-        self.svarwave.set(tkFileDialog.askopenfilename(initialdir = ".", title = "Select wave file", filetypes = (("wave files","*.wave"),("all files","*.*"))))
+        self.svarwave.set(tkFileDialog.askopenfilename(initialdir = ".", title = "Select dps file", filetypes = (("dps files","*.dps"), ("all files","*.*"))))
 
 root=Tk()
 my_gui=DPSinterface(root)
