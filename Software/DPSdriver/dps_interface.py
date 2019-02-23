@@ -1,6 +1,8 @@
 from Tkinter import Tk, Label, Button, Checkbutton, Entry, Scale, IntVar, StringVar, DoubleVar, Canvas, N, S, E, W, NORMAL, DISABLED
 import tkFileDialog
 from ttk import Separator
+
+from scopetube import Scopetube
 #import dps_driver
 
 class DPSinterface:        
@@ -19,7 +21,7 @@ class DPSinterface:
         col+=colspan
         self.svardsport=StringVar()
         self.svardsport.set('/dev/ttyUSB0')        
-        self.entryserport=Entry(root, textvariable=self.svardsport)
+        self.entryserport=Entry(root, textvariable=self.svardsport, width=ENTRYWIDTH)
         self.entryserport.grid(row=row, column=col, sticky=W)                
         col+=colspan
         Label(root, text="DPS address: ").grid(row=row, column=col, sticky=E)
@@ -34,7 +36,7 @@ class DPSinterface:
         Label(root, text="Model: ").grid(row=row, column=col, sticky=E)        
         col+=colspan
         self.ivarmodel=IntVar()
-        Entry(root, textvariable=self.ivarmodel, state="readonly").grid(row=row, column=col, sticky=W)
+        Entry(root, textvariable=self.ivarmodel, state="readonly", width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
         col+=colspan
         colspan=2
         self.ivarconctd=IntVar()
@@ -105,9 +107,19 @@ class DPSinterface:
         col=0
         rowspan=4
         colspan=5        
-        self.outgraph=Canvas(root, background='white')        
+        self.outgraph=Scopetube(root)
         self.outgraph.grid(row=row, column=col, columnspan=colspan, rowspan=rowspan, sticky=E+W)
-
+        self.outgraph.update()
+        self.outgraph.setvdiv(1)
+        self.outgraph.setcdiv(1)
+        self.outgraph.settdiv(60, 0)        
+        self.outgraph.drawgrid()
+        self.outgraph.addpoint((2, 1, 0))
+        self.outgraph.addpoint((3, 1, 60))
+        self.outgraph.addpoint((4, 1, 120))
+        self.outgraph.addpoint((3, 2, 180))
+        self.outgraph.addpoint((2, 3, 240))
+        
         row+=rowspan
         col=0
         Separator(root, orient='horizontal').grid(row=row, columnspan=4, sticky=E+W, pady=8)        
