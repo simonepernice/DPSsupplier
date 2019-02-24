@@ -2,7 +2,7 @@ from Tkinter import Canvas, ALL
 
 class Scopetube(Canvas):
     XDIV=10.
-    YDIV=8.
+    YDIV=10.
     GRIDDASH=(1, 6)
     GRIDCOL='black'
     VCOL='red'
@@ -12,7 +12,7 @@ class Scopetube(Canvas):
     def __init__(self, root):
         Canvas.__init__(self, root, background='white')
         
-        self.resetpoints()
+        self.points=[]
                 
     def setratios(self, vdiv,  cdiv,  tdiv, t0):
         self.vm=-self.winfo_height()/Scopetube.YDIV/vdiv
@@ -38,6 +38,7 @@ class Scopetube(Canvas):
 
     def resetpoints(self):
         self.points=[]
+        self.redraw()
     
     #a point is made by: (voltage, current, time)
     def addpoint(self, p):

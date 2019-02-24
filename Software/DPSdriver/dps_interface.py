@@ -18,6 +18,7 @@ class DPSinterface:
         self.dps=None
         self.lock=Lock()
         self.threadacquire=None
+        self.strtme=time()
 
         ENTRYWIDTH=10
 
@@ -113,13 +114,6 @@ class DPSinterface:
         self.dvarst0.set(0.)
         self.scopetube.setratios(self.dvarvdiv.get(), self.dvaradiv.get(), self.dvarsdiv.get(), self.dvarst0.get())
         self.scopetube.drawgrid()
-#        self.scopetube.addpoint((2, 1, 1))
-#        self.scopetube.addpoint((3, 1, 60))
-#        self.scopetube.addpoint((4, 1, 120))
-#        self.scopetube.addpoint((3, 2, 180))
-#        self.scopetube.addpoint((2, 3, 240))
-#        print(self.scopetube.sampletime())
-#        print(self.scopetube.winfo_width())
         
         row+=rowspan
         rowspan=1
@@ -129,12 +123,14 @@ class DPSinterface:
         col+=colspan
         e=Entry(root, textvariable=self.dvarvdiv, width=ENTRYWIDTH)
         e.bind('<FocusOut>', self.scopeupdate)
+        e.bind('<Return>', self.scopeupdate)
         e.grid(row=row, column=col, sticky=W)
         col+=colspan
         Label(root, text="Y [A/div]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         e=Entry(root, textvariable=self.dvaradiv, width=ENTRYWIDTH)
         e.bind('<FocusOut>', self.scopeupdate)
+        e.bind('<Return>', self.scopeupdate)
         e.grid(row=row, column=col, sticky=W)
         row+=rowspan
 
@@ -144,12 +140,14 @@ class DPSinterface:
         col+=colspan
         e=Entry(root, textvariable=self.dvarst0, width=ENTRYWIDTH)
         e.bind('<FocusOut>', self.scopeupdate)
+        e.bind('<Return>', self.scopeupdate)
         e.grid(row=row, column=col, sticky=W)        
         col+=colspan
         Label(root, text="X [s/div]: ").grid(row=row, column=col, sticky=E)
         col+=colspan
         e=Entry(root, textvariable=self.dvarsdiv, width=ENTRYWIDTH)
         e.bind('<FocusOut>', self.scopeupdate)
+        e.bind('<Return>', self.scopeupdate)
         e.grid(row=row, column=col, sticky=W)
 
         col=0
@@ -160,6 +158,7 @@ class DPSinterface:
         self.dvarsecsmp.set(round(self.scopetube.sampletime(), 1))
         e=Entry(root, textvariable=self.dvarsecsmp, width=ENTRYWIDTH)
         e.bind('<FocusOut>', self.scopeupdate)
+        e.bind('<Return>', self.scopeupdate)
         e.grid(row=row, column=col, sticky=W)        
         col+=colspan
         self.ivaracquire=IntVar()
@@ -184,12 +183,12 @@ class DPSinterface:
         colspan=2
         col=0
         self.dvarvscale=DoubleVar()
-        self.voltscale=Scale(root, variable=self.dvarvscale, from_=0, to=50, resolution=1, orient="horizontal")
+        self.voltscale=Scale(root, variable=self.dvarvscale, from_=0, to=15, resolution=1, orient="horizontal")
         self.voltscale.bind("<ButtonRelease-1>", self.sclcmdvolt)
         self.voltscale.grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         col+=colspan
         self.dvarcscale=DoubleVar()
-        self.curntscale=Scale(root, variable=self.dvarcscale, from_=0, to=15, resolution=1, orient="horizontal")
+        self.curntscale=Scale(root, variable=self.dvarcscale, from_=0, to=5, resolution=1, orient="horizontal")
         self.curntscale.bind("<ButtonRelease-1>", self.sclcmdcurrent)
         self.curntscale.grid(row=row, column=col, columnspan=colspan, sticky=E+W)
 
@@ -263,7 +262,7 @@ class DPSinterface:
         row+=rowspan
         col=0
         colspan=1
-        Button(root, text='Select wave', command=self.butcmdselwve).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)
+        Button(root, text='Select', command=self.butcmdselwve).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)
         col+=colspan
         Label(root, text="Waveform: ").grid(row=row, column=col, sticky=E)
         col+=colspan
@@ -297,15 +296,19 @@ class DPSinterface:
                 self.dps=None
                 return
             
-            m=self.dps.get(['model'])
+            m=self.dps.get(['model'])[0]
             self.ivarmodel.set(m)
             self.voltscale.config(to=m/100)
-            self.curntscale.config(t0=m%100)
+            self.curntscale.config(to=m%100)
+            
+            self.ivarmem.set(0)
+            self.butcmdrecallmem()
+            
+            self.ivarkeylock.set(0) #otherwise update fields does not read all
             self.updatefields()
             self.ivarkeylock.set(1)
             self.butcmdkeylock()
-            self.ivarmem.set(0)
-            self.butcmdrecallmem()
+            
             self.entryserport.config(state=DISABLED)
             self.entrydpsadd.config(state=DISABLED)
         else:
@@ -314,15 +317,18 @@ class DPSinterface:
             self.entrydpsadd.config(state=NORMAL)
 
     def polling(self):
+        print ('entering polling')
         while self.ivaracquire.get() and self.dps is not None:
+            print ('i am polling')
             t=time()
             vi=self.updatefields()
+            print 'read point '+str(vi)
             self.scopetube.addpoint(vi)
-            self.dvarvout.set(vi[0])
-            self.dvarcout.set(vi[1])
-            t=(time()-t)-self.scopetube.dvarsecsmp
+            t=self.dvarsecsmp.get()-(time()-t)
+            print 'sleep for '+str(t)
             if t>0:
                 sleep(t)
+        print ('exiting polling')
 
     def setvscale(self, v):
         self.dvarvscale.set(int(v))
@@ -339,24 +345,21 @@ class DPSinterface:
         self.dvarcscalef.set(round(c-int(c), 2))
         
     def updatefields(self):
-        if self.ivarkeylock.get():
+        if self.ivarkeylock.get():#if user keep locked only few datas are read, otherwise all 
             self.lock.acquire()
             data=self.dps.get(['vout', 'iout', 'pout', 'vinp', 'lock', 'prot', 'cvcc'])
-            self.lock.release()
-            if data[4]:#user unlocked the device all fields need to be read
-                self.ivarkeylock.set(1)
-                return self.updatefields()                            
+            self.lock.release()                      
             self.dvarvout.set(data[0])
             self.dvarcout.set(data[1])
             self.dvarpout.set(data[2])
             self.dvarvinp.set(data[3])
+            self.ivarkeylock.set(data[4])
             self.svarprot.set({0: 'ok', 1: 'ovp', 2: 'ocp', 3: 'opp'}[data[5]])
             self.svarwrmde.set({0: 'cv', 1: 'cc'}[data[6]])
-            return data[0:2]+[time()]
+            return data[0:2]+[time()-self.strtme]
 
         self.lock.acquire()
         data=self.dps.get(['vset', 'iset',  'vout', 'iout', 'pout', 'vinp', 'lock', 'prot', 'cvcc', 'onoff', 'bled'])
-        data.append(time())
         self.lock.release()
         self.setvscale(data[0])
         self.setcscale(data[1])
@@ -368,7 +371,7 @@ class DPSinterface:
         self.svarprot.set({0: 'ok', 1: 'ovp', 2: 'ocp', 3: 'opp'}[data[7]])
         self.svarwrmde.set({0: 'cv', 1: 'cc'}[data[8]])
         self.ivaroutenab.set(data[9])
-        return data[2:4]+[time()]
+        return data[2:4]+[time()-self.strtme]
 
 
     def getmem(self):
@@ -431,9 +434,11 @@ class DPSinterface:
                 self.ivaracquire.set(0)
                 tkMessageBox.showwarning('Still acquiring',  'Previous acquisition session is still running, it will finish after the next sample acquisition.')
                 return
+            self.scopetube.resetpoints()
+            self.strtme=time()
             self.threadacquire=Thread(target=self.polling)
+            self.threadacquire.start()
         else:
-#            sleep(1.)
             if self.threadacquire is not None and self.threadacquire.isAlive():
                 tkMessageBox.showinfo('Still acquiring',  'Current acquisition session will complete after the next sample') 
 
@@ -443,11 +448,15 @@ class DPSinterface:
 
     def sclcmdvolt(self, event):
         if self.isconnected():
+            self.lock.acquire()
             self.dps.set(['vset'],  [self.getvscale()])
+            self.lock.release()
 
     def sclcmdcurrent(self, event):
         if self.isconnected():
-            self.dps.set(['cset'],  [self.getcscale()])
+            self.lock.acquire()
+            self.dps.set(['iset'],  [self.getcscale()])
+            self.lock.release()
 
     def butcmdselwve (self):
         self.svarwave.set(tkFileDialog.askopenfilename(initialdir = ".", title = "Select dps file", filetypes = (("dps files","*.dps"), ("all files","*.*"))))
