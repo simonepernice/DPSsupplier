@@ -6,7 +6,7 @@ class Scopetube(Canvas):
     GRIDDASH=(1, 6)
     GRIDCOL='black'
     VCOL='red'
-    CCOL='blue'
+    CCOL='green'
     MINSAMPLETIME=1.
     
     def __init__(self, root):
