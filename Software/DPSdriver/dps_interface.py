@@ -49,7 +49,7 @@ class DPSinterface:
         colspan=2
         self.ivarconctd=IntVar()
         self.ivarconctd.set(0)
-        Checkbutton(root, variable=self.ivarconctd, text='Connect', command=self.buttonconnectaction).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
+        Checkbutton(root, variable=self.ivarconctd, text='Connect', command=self.butcmdconnect).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         
         row+=rowspan
         col=0
@@ -157,14 +157,14 @@ class DPSinterface:
         Label(root, text="Rate [s/Sa]: ").grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarsecsmp=DoubleVar()
-        self.dvarsecsmp.set(self.scopetube.sampletime())
+        self.dvarsecsmp.set(round(self.scopetube.sampletime(), 1))
         e=Entry(root, textvariable=self.dvarsecsmp, width=ENTRYWIDTH)
         e.bind('<FocusOut>', self.scopeupdate)
         e.grid(row=row, column=col, sticky=W)        
         col+=colspan
         self.ivaracquire=IntVar()
         self.ivaracquire.set(0)        
-        Checkbutton(root, variable=self.ivaracquire, text='Acquire', command=self.buttonacqaction).grid(row=row, column=col, columnspan=2, sticky=E+W)         
+        Checkbutton(root, variable=self.ivaracquire, text='Acquire', command=self.butcmdacquire).grid(row=row, column=col, columnspan=2, sticky=E+W)         
         
         row+=rowspan
         col=0
@@ -185,12 +185,12 @@ class DPSinterface:
         col=0
         self.dvarvscale=DoubleVar()
         self.voltscale=Scale(root, variable=self.dvarvscale, from_=0, to=50, resolution=1, orient="horizontal")
-        self.voltscale.bind("<ButtonRelease-1>", self.scalevoltaction)
+        self.voltscale.bind("<ButtonRelease-1>", self.sclcmdvolt)
         self.voltscale.grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         col+=colspan
         self.dvarcscale=DoubleVar()
         self.curntscale=Scale(root, variable=self.dvarcscale, from_=0, to=15, resolution=1, orient="horizontal")
-        self.curntscale.bind("<ButtonRelease-1>", self.scalecurntaction)
+        self.curntscale.bind("<ButtonRelease-1>", self.sclcmdcurrent)
         self.curntscale.grid(row=row, column=col, columnspan=colspan, sticky=E+W)
 
         row+=rowspan
@@ -199,12 +199,12 @@ class DPSinterface:
         col=0
         self.dvarvscalef=DoubleVar()
         sc=Scale(root, variable=self.dvarvscalef, from_=0, to=0.99, resolution=0.01, orient="horizontal")
-        sc.bind("<ButtonRelease-1>", self.scalevoltaction)
+        sc.bind("<ButtonRelease-1>", self.sclcmdvolt)
         sc.grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         col+=colspan
         self.dvarcscalef=DoubleVar()
         sc=Scale(root, variable=self.dvarcscalef, from_=0, to=0.99, resolution=0.01, orient="horizontal")
-        sc.bind("<ButtonRelease-1>", self.scalecurntaction)
+        sc.bind("<ButtonRelease-1>", self.sclcmdcurrent)
         sc.grid(row=row, column=col, columnspan=colspan, sticky=E+W)
 
         colspan=1
@@ -230,7 +230,7 @@ class DPSinterface:
         colspan=2
         self.ivaroutenab=IntVar()
         self.ivaroutenab.set(0)
-        Checkbutton(root, variable=self.ivaroutenab, text="Out Enable", command=self.buttonoutenable).grid(row=row, column=col, sticky=E+W, columnspan=colspan)
+        Checkbutton(root, variable=self.ivaroutenab, text="Out Enable", command=self.butcmdoutenable).grid(row=row, column=col, sticky=E+W, columnspan=colspan)
 
         row+=rowspan
         colspan=1
@@ -240,9 +240,9 @@ class DPSinterface:
         self.ivarbrght=IntVar()
         Entry(root, textvariable=self.ivarbrght, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
         col+=colspan
-        Button(root, text='Store', command=self.storememory).grid(row=row, column=col, sticky=E+W, padx=8)                        
+        Button(root, text='Store', command=self.butcmdstoremem).grid(row=row, column=col, sticky=E+W, padx=8)                        
         col+=colspan
-        Button(root, text='Recall', command=self.recallmemory).grid(row=row, column=col, sticky=E+W, padx=8)
+        Button(root, text='Recall', command=self.butcmdrecallmem).grid(row=row, column=col, sticky=E+W, padx=8)
 
         row+=rowspan
         colspan=1
@@ -253,7 +253,7 @@ class DPSinterface:
         Entry(root, textvariable=self.ivarmem, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
         col+=colspan
         colspan=2
-        Button(root, text="Activate Memory", command=self.activatememory).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)
+        Button(root, text="Activate Memory", command=self.butcmdactivemem).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)
         
         row+=rowspan
         col=0
@@ -263,7 +263,7 @@ class DPSinterface:
         row+=rowspan
         col=0
         colspan=1
-        Button(root, text='Select wave', command=self.buttonselwveaction).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)
+        Button(root, text='Select wave', command=self.butcmdselwve).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)
         col+=colspan
         Label(root, text="Waveform: ").grid(row=row, column=col, sticky=E)
         col+=colspan
@@ -276,18 +276,18 @@ class DPSinterface:
         colspan=2
         self.ivarkeylock=IntVar()
         self.ivarkeylock.set(0)
-        Checkbutton(root, variable=self.ivarkeylock, text="Key lock", command=self.buttonkeylock).grid(row=row, column=col, sticky=E+W, columnspan=colspan)         
+        Checkbutton(root, variable=self.ivarkeylock, text="Key lock", command=self.butcmdkeylock).grid(row=row, column=col, sticky=E+W, columnspan=colspan)         
         col+=colspan
         colspan=1
         self.ivarplaywv=IntVar()
         self.ivarplaywv.set(0)        
-        Checkbutton(root, variable=self.ivarplaywv, text='Play', command=self.buttonplaywave).grid(row=row, column=col, sticky=E+W)                        
+        Checkbutton(root, variable=self.ivarplaywv, text='Play', command=self.butcmdplaywave).grid(row=row, column=col, sticky=E+W)                        
         col+=colspan
         self.ivarpausewv=IntVar()
         self.ivarpausewv.set(0)        
-        Checkbutton(root, variable=self.ivarpausewv, text='Pause', command=self.buttonpausewave).grid(row=row, column=col, sticky=E+W)
+        Checkbutton(root, variable=self.ivarpausewv, text='Pause', command=self.butcmdpausewave).grid(row=row, column=col, sticky=E+W)
                 
-    def buttonconnectaction(self):
+    def butcmdconnect(self):
         if self.ivarconctd.get():
             try:
                 self.dps=DPSdriver(self.svardpsport.get(), self.ivardpsaddr.get())
@@ -302,8 +302,10 @@ class DPSinterface:
             self.voltscale.config(to=m/100)
             self.curntscale.config(t0=m%100)
             self.updatefields()
+            self.ivarkeylock.set(1)
+            self.butcmdkeylock()
             self.ivarmem.set(0)
-            self.recallmemory()
+            self.butcmdrecallmem()
             self.entryserport.config(state=DISABLED)
             self.entrydpsadd.config(state=DISABLED)
         else:
@@ -314,8 +316,7 @@ class DPSinterface:
     def polling(self):
         while self.ivaracquire.get() and self.dps is not None:
             t=time()
-            data=self.updatefields()
-            vi=data[0:2]+data[-1]
+            vi=self.updatefields()
             self.scopetube.addpoint(vi)
             self.dvarvout.set(vi[0])
             self.dvarcout.set(vi[1])
@@ -338,6 +339,21 @@ class DPSinterface:
         self.dvarcscalef.set(round(c-int(c), 2))
         
     def updatefields(self):
+        if self.ivarkeylock.get():
+            self.lock.acquire()
+            data=self.dps.get(['vout', 'iout', 'pout', 'vinp', 'lock', 'prot', 'cvcc'])
+            self.lock.release()
+            if data[4]:#user unlocked the device all fields need to be read
+                self.ivarkeylock.set(1)
+                return self.updatefields()                            
+            self.dvarvout.set(data[0])
+            self.dvarcout.set(data[1])
+            self.dvarpout.set(data[2])
+            self.dvarvinp.set(data[3])
+            self.svarprot.set({0: 'ok', 1: 'ovp', 2: 'ocp', 3: 'opp'}[data[5]])
+            self.svarwrmde.set({0: 'cv', 1: 'cc'}[data[6]])
+            return data[0:2]+[time()]
+
         self.lock.acquire()
         data=self.dps.get(['vset', 'iset',  'vout', 'iout', 'pout', 'vinp', 'lock', 'prot', 'cvcc', 'onoff', 'bled'])
         data.append(time())
@@ -352,7 +368,8 @@ class DPSinterface:
         self.svarprot.set({0: 'ok', 1: 'ovp', 2: 'ocp', 3: 'opp'}[data[7]])
         self.svarwrmde.set({0: 'cv', 1: 'cc'}[data[8]])
         self.ivaroutenab.set(data[9])
-        return data
+        return data[2:4]+[time()]
+
 
     def getmem(self):
         m=self.ivarmem.get()
@@ -365,7 +382,7 @@ class DPSinterface:
         mem='m'+str(self.getmem())
         return [mem+a for a in ['vset', 'iset',  'ovp', 'ocp', 'opp', 'bled', 'pre', 'onoff']]
 
-    def recallmemory(self):
+    def butcmdrecallmem(self):
         if self.isconnected():
             mr=self.memregs()
             self.lock.acquire()
@@ -379,7 +396,7 @@ class DPSinterface:
             self.ivarbrght.set(data[5])
             self.ivaroutenab.set(data[7])
     
-    def storememory(self):
+    def butcmdstoremem(self):
         if self.isconnected():
             mr=self.memregs()
             mv=[
@@ -396,16 +413,16 @@ class DPSinterface:
             self.dps.set(mr, mv)
             self.lock.release()
     
-    def activatememory(self):
+    def butcmdactivemem(self):
         if self.isconnected():
             m=self.getmem()
             self.lock.acquire()
             self.dps.set(['mset'], [m])
             self.lock.release()
             self.ivarmem.set(0)
-            self.recallmemory()
+            self.butcmdrecallmem()
 
-    def buttonacqaction(self):
+    def butcmdacquire(self):
         if self.ivaracquire.get():
             if not self.isconnected():
                 self.ivaracquire.set(0)
@@ -424,18 +441,18 @@ class DPSinterface:
         self.scopetube.setratios(self.dvarvdiv.get(), self.dvaradiv.get(), self.dvarsdiv.get(), self.dvarst0.get())
         self.scopetube.redraw()
 
-    def scalevoltaction(self, event):
+    def sclcmdvolt(self, event):
         if self.isconnected():
             self.dps.set(['vset'],  [self.getvscale()])
 
-    def scalecurntaction(self, event):
+    def sclcmdcurrent(self, event):
         if self.isconnected():
-            self.dps.set(['cset'],  [self.getcscale])
+            self.dps.set(['cset'],  [self.getcscale()])
 
-    def buttonselwveaction (self):
+    def butcmdselwve (self):
         self.svarwave.set(tkFileDialog.askopenfilename(initialdir = ".", title = "Select dps file", filetypes = (("dps files","*.dps"), ("all files","*.*"))))
 
-    def buttonkeylock(self):
+    def butcmdkeylock(self):
         if self.isconnected():
             self.lock.acquire()
             self.dps.set(['lock'], [self.ivarkeylock.get()])
@@ -443,13 +460,13 @@ class DPSinterface:
         else:
             self.ivarkeylock.set(0)
 
-    def buttonoutenable(self):
+    def butcmdoutenable(self):
         if self.isconnected():
             self.lock.acquire()
             self.dps.set(['onoff'], [self.ivaroutenab.get()])
             self.lock.release()
         else:
-            self.ivarkeylock.set(0)
+            self.ivaroutenab.set(0)
 
     def isconnected(self):
         if self.dps is None:
@@ -457,10 +474,10 @@ class DPSinterface:
             return False
         return True
 
-    def buttonplaywave(self):
+    def butcmdplaywave(self):
         pass
         
-    def buttonpausewave(self):
+    def butcmdpausewave(self):
         pass
     
 root=Tk()
