@@ -39,13 +39,6 @@ class DPSinterface:
         self.ivardpsaddr.set(1)
         self.entrydpsadd=Entry(root, textvariable=self.ivardpsaddr, width=ENTRYWIDTH)
         self.entrydpsadd.grid(row=row, column=col, sticky=W)
-
-        row+=rowspan
-        col=0
-        Label(root, text="Model: ").grid(row=row, column=col, sticky=E)        
-        col+=colspan
-        self.ivarmodel=IntVar()
-        Entry(root, textvariable=self.ivarmodel, state="readonly", width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
         col+=colspan
         colspan=2
         self.ivarconctd=IntVar()
@@ -55,9 +48,10 @@ class DPSinterface:
         row+=rowspan
         col=0
         colspan=1
-        Separator(root, orient='horizontal').grid(row=row, columnspan=8, sticky=E+W, pady=8)               
+        Separator(root, orient='horizontal').grid(row=row, columnspan=8, sticky=E+W, pady=8)
 
         rowspan=1
+        colspan=1
         col=0
         row+=rowspan        
         Label(root, text="Vinp [V]: ").grid(row=row, column=col, sticky=E)
@@ -65,10 +59,52 @@ class DPSinterface:
         self.dvarvinp=DoubleVar()
         Entry(root, textvariable=self.dvarvinp, state=DISABLED, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
         col+=colspan
-        Label(root, text="Pout [W]: ").grid(row=row, column=col, sticky=E)
+        colspan=2
+        self.ivarkeylock=IntVar()
+        self.ivarkeylock.set(0)
+        Checkbutton(root, variable=self.ivarkeylock, text="KeyLock", command=self.butcmdkeylock).grid(row=row, column=col, sticky=E+W, columnspan=colspan)         
+        col+=colspan        
+        self.ivaroutenab=IntVar()
+        self.ivaroutenab.set(0)
+        Checkbutton(root, variable=self.ivaroutenab, text="OutEnab", command=self.butcmdoutenable).grid(row=row, column=col, sticky=E+W, columnspan=colspan)    
+
+        row+=rowspan
+        colspan=1
+        col=0
+        Label(root, text="Model: ").grid(row=row, column=col, sticky=E)        
         col+=colspan
-        self.dvarpout=DoubleVar()
-        Entry(root, textvariable=self.dvarpout, state=DISABLED, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
+        self.ivarmodel=IntVar()
+        Entry(root, textvariable=self.ivarmodel, state="readonly", width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)        
+        col+=colspan
+        Label(root, text="Work mode: ").grid(row=row, column=col, sticky=E)
+        col+=colspan
+        self.svarwrmde=StringVar()
+        self.svarwrmde.set('cv')
+        Entry(root, textvariable=self.svarwrmde, state=DISABLED, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
+        col+=colspan
+        Label(root, text="Protection: ").grid(row=row, column=col, sticky=E)        
+        col+=1
+        self.svarprot=StringVar()
+        self.svarprot.set('ok')
+        Entry(root, textvariable=self.svarprot, state=DISABLED, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
+
+        colspan=1
+        row+=rowspan
+        col=0
+        Label(root, text="Vmax [V]: ", foreground=Scopetube.VCOL).grid(row=row, column=col, sticky=E)
+        col+=colspan
+        self.dvarvmaxm0=DoubleVar()
+        Entry(root, textvariable=self.dvarvmaxm0, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
+        col+=colspan
+        Label(root, text="Cmax [A]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
+        col+=1
+        self.dvarcmaxm0=DoubleVar()
+        Entry(root, textvariable=self.dvarcmaxm0, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
+        col+=colspan
+        Label(root, text="Pmax [W]: ").grid(row=row, column=col, sticky=E)
+        col+=colspan
+        self.dvarpmaxm0=DoubleVar()
+        Entry(root, textvariable=self.dvarpmaxm0, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)           
 
         row+=rowspan
         col=0
@@ -81,39 +117,18 @@ class DPSinterface:
         col+=colspan
         self.dvarcout=DoubleVar()
         Entry(root, textvariable=self.dvarcout, state=DISABLED, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
-
-        colspan=1
-        row+=rowspan
-        col=0
-        Label(root, text="Work mode: ").grid(row=row, column=col, sticky=E)
         col+=colspan
-        self.svarwrmde=StringVar()
-        self.svarwrmde.set('cv')
-        Entry(root, textvariable=self.svarwrmde, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
+        Label(root, text="Pout [W]: ").grid(row=row, column=col, sticky=E)
         col+=colspan
-        Label(root, text="Protection: ").grid(row=row, column=col, sticky=E)
-        col+=1
-        self.svarprot=StringVar()
-        self.svarprot.set('ok')
-        Entry(root, textvariable=self.svarprot, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
+        self.dvarpout=DoubleVar()
+        Entry(root, textvariable=self.dvarpout, state=DISABLED, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)        
 
         row+=rowspan
         col=0
-        rowspan=4
-        colspan=5        
+        rowspan=6
+        colspan=6        
         self.scopetube=Scopetube(root)
         self.scopetube.grid(row=row, column=col, columnspan=colspan, rowspan=rowspan, sticky=E+W)
-        self.scopetube.update()
-        self.dvarvdiv=DoubleVar()
-        self.dvarvdiv.set(1.0)        
-        self.dvaradiv=DoubleVar()
-        self.dvaradiv.set(1.0)
-        self.dvarsdiv=DoubleVar()
-        self.dvarsdiv.set(60.)
-        self.dvarst0=DoubleVar()
-        self.dvarst0.set(0.)
-        self.scopetube.setratios(self.dvarvdiv.get(), self.dvaradiv.get(), self.dvarsdiv.get(), self.dvarst0.get())
-        self.scopetube.drawgrid()
         
         row+=rowspan
         rowspan=1
@@ -121,6 +136,8 @@ class DPSinterface:
         col=0 
         Label(root, text="Y [V/div]: ", foreground=Scopetube.VCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
+        self.dvarvdiv=DoubleVar()
+        self.dvarvdiv.set(1.)          
         e=Entry(root, textvariable=self.dvarvdiv, width=ENTRYWIDTH)
         e.bind('<FocusOut>', self.scopeupdate)
         e.bind('<Return>', self.scopeupdate)
@@ -128,84 +145,166 @@ class DPSinterface:
         col+=colspan
         Label(root, text="Y [A/div]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
+        self.dvaradiv=DoubleVar()
+        self.dvaradiv.set(1.)        
         e=Entry(root, textvariable=self.dvaradiv, width=ENTRYWIDTH)
         e.bind('<FocusOut>', self.scopeupdate)
         e.bind('<Return>', self.scopeupdate)
         e.grid(row=row, column=col, sticky=W)
-        row+=rowspan
-
-        col=0
-        row+=rowspan
-        Label(root, text="X0 [s]: ").grid(row=row, column=col, sticky=E)
         col+=colspan
-        e=Entry(root, textvariable=self.dvarst0, width=ENTRYWIDTH)
-        e.bind('<FocusOut>', self.scopeupdate)
-        e.bind('<Return>', self.scopeupdate)
-        e.grid(row=row, column=col, sticky=W)        
+        Label(root, text="Y [W/div]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
-        Label(root, text="X [s/div]: ").grid(row=row, column=col, sticky=E)
-        col+=colspan
-        e=Entry(root, textvariable=self.dvarsdiv, width=ENTRYWIDTH)
+        self.dvarwdiv=DoubleVar()
+        self.dvarwdiv.set(1.)          
+        e=Entry(root, textvariable=self.dvarwdiv, width=ENTRYWIDTH)
         e.bind('<FocusOut>', self.scopeupdate)
         e.bind('<Return>', self.scopeupdate)
         e.grid(row=row, column=col, sticky=W)
 
-        col=0
         row+=rowspan
-        Label(root, text="Rate [s/Sa]: ").grid(row=row, column=col, sticky=E)
+        rowspan=1
+        colspan=1
+        col=0 
+        Label(root, text="Y0 [V]: ", foreground=Scopetube.VCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
-        self.dvarsecsmp=DoubleVar()
-        self.dvarsecsmp.set(round(self.scopetube.sampletime(), 1))
-        e=Entry(root, textvariable=self.dvarsecsmp, width=ENTRYWIDTH)
+        self.dvarv0=DoubleVar()
+        self.dvarv0.set(0.)          
+        e=Entry(root, textvariable=self.dvarv0, width=ENTRYWIDTH)
+        e.bind('<FocusOut>', self.scopeupdate)
+        e.bind('<Return>', self.scopeupdate)
+        e.grid(row=row, column=col, sticky=W)
+        col+=colspan
+        Label(root, text="Y0 [A]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
+        col+=colspan
+        self.dvara0=DoubleVar()
+        self.dvara0.set(0.)        
+        e=Entry(root, textvariable=self.dvara0, width=ENTRYWIDTH)
+        e.bind('<FocusOut>', self.scopeupdate)
+        e.bind('<Return>', self.scopeupdate)
+        e.grid(row=row, column=col, sticky=W)
+        col+=colspan
+        Label(root, text="Y0 [W]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
+        col+=colspan
+        self.dvarw0=DoubleVar()
+        self.dvarw0.set(0.)          
+        e=Entry(root, textvariable=self.dvarw0, width=ENTRYWIDTH)
+        e.bind('<FocusOut>', self.scopeupdate)
+        e.bind('<Return>', self.scopeupdate)
+        e.grid(row=row, column=col, sticky=W)
+
+        row+=rowspan
+        rowspan=1
+        colspan=2
+        col=0
+        self.ivarvena=IntVar()
+        self.ivarvena.set(1)        
+        Checkbutton(root, variable=self.ivarconctd, text='V show', foreground=Scopetube.VCOL, command=self.butcmdconnect).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
+        col+=colspan
+        self.ivarcena=IntVar()
+        self.ivarcena.set(1)        
+        Checkbutton(root, variable=self.ivarconctd, text='C show', foreground=Scopetube.CCOL, command=self.butcmdconnect).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
+        col+=colspan
+        self.ivarpena=IntVar()
+        self.ivarpena.set(1)        
+        Checkbutton(root, variable=self.ivarconctd, text='P show', foreground=Scopetube.CCOL, command=self.butcmdconnect).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
+
+        row+=rowspan
+        col=0
+        colspan=1
+        rowspan=1
+        Label(root, text="X [s/div]: ").grid(row=row, column=col, sticky=E)
+        col+=colspan
+        self.dvarsdiv=DoubleVar()
+        self.dvarsdiv.set(60.)        
+        e=Entry(root, textvariable=self.dvarsdiv, width=ENTRYWIDTH)
+        e.bind('<FocusOut>', self.scopeupdate)
+        e.bind('<Return>', self.scopeupdate)
+        e.grid(row=row, column=col, sticky=W)
+        col+=colspan        
+        Label(root, text="X0 [s]: ").grid(row=row, column=col, sticky=E)
+        col+=colspan
+        self.dvars0=DoubleVar()
+        self.dvars0.set(0.)        
+        e=Entry(root, textvariable=self.dvars0, width=ENTRYWIDTH)
         e.bind('<FocusOut>', self.scopeupdate)
         e.bind('<Return>', self.scopeupdate)
         e.grid(row=row, column=col, sticky=W)        
         col+=colspan
-        self.ivaracquire=IntVar()
-        self.ivaracquire.set(0)        
-        Checkbutton(root, variable=self.ivaracquire, text='Acquire', command=self.butcmdacquire).grid(row=row, column=col, columnspan=2, sticky=E+W)         
-        
-        row+=rowspan
-        col=0
-        Separator(root, orient='horizontal').grid(row=row, columnspan=4, sticky=E+W, pady=8)        
+        Label(root, text="Rate [s/Sa]: ").grid(row=row, column=col, sticky=E)
+        col+=colspan
+        self.dvarsecsmp=DoubleVar()        
+        e=Entry(root, textvariable=self.dvarsecsmp, width=ENTRYWIDTH)
+        e.bind('<FocusOut>', self.scopeupdate)
+        e.bind('<Return>', self.scopeupdate)
+        e.grid(row=row, column=col, sticky=W)
 
         row+=rowspan
         col=0
-        rowspan=1
-        colspan=2        
-        Label(root, text="Vset [V]", foreground=Scopetube.VCOL).grid(row=row, column=col, columnspan=colspan)
+        colspan=2
+        Button(root, text='Load', command=self.butcmdselwve).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)        
         col+=colspan
-        Label(root, text="Cset [A]", foreground=Scopetube.CCOL).grid(row=row, column=col, columnspan=colspan)
+        Button(root, text='Save', command=self.butcmdselwve).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)        
         col+=colspan
+        self.ivaracquire=IntVar()
+        self.ivaracquire.set(0)        
+        Checkbutton(root, variable=self.ivaracquire, text='Acquire', command=self.butcmdacquire).grid(row=row, column=col, columnspan=2, sticky=E+W)               
 
         row+=rowspan
         rowspan=1        
-        colspan=2
+        colspan=3
         col=0
         self.dvarvscale=DoubleVar()
-        self.voltscale=Scale(root, variable=self.dvarvscale, from_=0, to=15, resolution=1, orient="horizontal")
+        self.voltscale=Scale(root, label='Vset[V]', foreground=Scopetube.VCOL, variable=self.dvarvscale, from_=0, to=15, resolution=1, orient="horizontal")
         self.voltscale.bind("<ButtonRelease-1>", self.sclcmdvolt)
         self.voltscale.grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         col+=colspan
         self.dvarcscale=DoubleVar()
-        self.curntscale=Scale(root, variable=self.dvarcscale, from_=0, to=5, resolution=1, orient="horizontal")
+        self.curntscale=Scale(root,label='Cset[A]', foreground=Scopetube.CCOL, variable=self.dvarcscale, from_=0, to=5, resolution=1, orient="horizontal")
         self.curntscale.bind("<ButtonRelease-1>", self.sclcmdcurrent)
         self.curntscale.grid(row=row, column=col, columnspan=colspan, sticky=E+W)
 
         row+=rowspan
         rowspan=1        
-        colspan=2
         col=0
         self.dvarvscalef=DoubleVar()
-        sc=Scale(root, variable=self.dvarvscalef, from_=0, to=0.99, resolution=0.01, orient="horizontal")
+        sc=Scale(root, foreground=Scopetube.VCOL, variable=self.dvarvscalef, from_=0, to=0.99, resolution=0.01, orient="horizontal")
         sc.bind("<ButtonRelease-1>", self.sclcmdvolt)
         sc.grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         col+=colspan
         self.dvarcscalef=DoubleVar()
-        sc=Scale(root, variable=self.dvarcscalef, from_=0, to=0.99, resolution=0.01, orient="horizontal")
+        sc=Scale(root, foreground=Scopetube.CCOL, variable=self.dvarcscalef, from_=0, to=0.99, resolution=0.01, orient="horizontal")
         sc.bind("<ButtonRelease-1>", self.sclcmdcurrent)
         sc.grid(row=row, column=col, columnspan=colspan, sticky=E+W)
 
+        row+=rowspan
+        col=0
+        Separator(root, orient='horizontal').grid(row=row, columnspan=6, sticky=E+W, pady=8) 
+
+        row+=rowspan
+        colspan=2
+        col=0
+        self.ivarmem=IntVar()
+        sc=Scale(root, label='Memory', variable=self.ivarmem, from_=0, to=9, resolution=1, orient="horizontal")
+        sc.bind("<ButtonRelease-1>", self.sclcmdrecallmem)
+        sc.grid(row=row, column=col, sticky=W+E, columnspan=colspan)
+        col+=colspan
+        Button(root, text="Active", command=self.butcmdactivemem).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)
+        col+=colspan
+        Button(root, text='Store', command=self.butcmdstoremem).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)
+
+        colspan=1
+        row+=rowspan
+        col=0
+        Label(root, text="Vset [V]: ", foreground=Scopetube.VCOL).grid(row=row, column=col, sticky=E)
+        col+=colspan
+        self.dvarvsetm=DoubleVar()
+        Entry(root, textvariable=self.dvarvsetm, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
+        col+=colspan
+        Label(root, text="Cset [A]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
+        col+=1
+        self.dvarcsetm=DoubleVar()
+        Entry(root, textvariable=self.dvarcsetm, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
+        
         colspan=1
         row+=rowspan
         col=0
@@ -215,21 +314,14 @@ class DPSinterface:
         Entry(root, textvariable=self.dvarvmax, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
         col+=colspan
         Label(root, text="Cmax [A]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
-        col+=1
+        col+=colspan
         self.dvarcmax=DoubleVar()
         Entry(root, textvariable=self.dvarcmax, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
-        
-        row+=rowspan
-        col=0
+        col+=colspan
         Label(root, text="Pmax [W]: ").grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarpmax=DoubleVar()
-        Entry(root, textvariable=self.dvarpmax, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)       
-        col+=colspan
-        colspan=2
-        self.ivaroutenab=IntVar()
-        self.ivaroutenab.set(0)
-        Checkbutton(root, variable=self.ivaroutenab, text="Out Enable", command=self.butcmdoutenable).grid(row=row, column=col, sticky=E+W, columnspan=colspan)
+        Entry(root, textvariable=self.dvarpmax, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
 
         row+=rowspan
         colspan=1
@@ -237,45 +329,32 @@ class DPSinterface:
         Label(root, text="Brightness: ").grid(row=row, column=col, sticky=E)
         col+=colspan
         self.ivarbrght=IntVar()
-        Entry(root, textvariable=self.ivarbrght, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
-        col+=colspan
-        Button(root, text='Store', command=self.butcmdstoremem).grid(row=row, column=col, sticky=E+W, padx=8)                        
-        col+=colspan
-        Button(root, text='Recall', command=self.butcmdrecallmem).grid(row=row, column=col, sticky=E+W, padx=8)
-
-        row+=rowspan
-        colspan=1
-        col=0
-        Label(root, text="Memory: ").grid(row=row, column=col, sticky=E)
-        col+=colspan
-        self.ivarmem=IntVar()
-        Entry(root, textvariable=self.ivarmem, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
+        Entry(root, textvariable=self.ivarbrght, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)        
         col+=colspan
         colspan=2
-        Button(root, text="Activate Memory", command=self.butcmdactivemem).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)
+        self.ivaroutmset=IntVar()
+        self.ivaroutmset.set(0)
+        Checkbutton(root, variable=self.ivaroutmset, text="Out@MSet", command=self.butcmdoutenable).grid(row=row, column=col, sticky=E+W, columnspan=colspan)
+        col+=colspan
+        self.ivaroutpwron=IntVar()
+        self.ivaroutpwron.set(0)
+        Checkbutton(root, variable=self.ivaroutpwron, text="Out@PwOn", command=self.butcmdoutenable).grid(row=row, column=col, sticky=E+W, columnspan=colspan)
         
         row+=rowspan
         col=0
         colspan=1
-        Separator(root, orient='horizontal').grid(row=row, columnspan=4, sticky=E+W, pady=8)
+        Separator(root, orient='horizontal').grid(row=row, columnspan=6, sticky=E+W, pady=8)
 
         row+=rowspan
         col=0
         colspan=1
-        Button(root, text='Select', command=self.butcmdselwve).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)
+        Button(root, text='Load', command=self.butcmdselwve).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)
         col+=colspan
         Label(root, text="Waveform: ").grid(row=row, column=col, sticky=E)
         col+=colspan
         colspan=2
         self.svarwave=StringVar()
-        Entry(root, textvariable=self.svarwave, state=DISABLED).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
-
-        row+=rowspan
-        col=0
-        colspan=2
-        self.ivarkeylock=IntVar()
-        self.ivarkeylock.set(0)
-        Checkbutton(root, variable=self.ivarkeylock, text="Key lock", command=self.butcmdkeylock).grid(row=row, column=col, sticky=E+W, columnspan=colspan)         
+        Entry(root, textvariable=self.svarwave, width=ENTRYWIDTH, state=DISABLED).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         col+=colspan
         colspan=1
         self.ivarplaywv=IntVar()
@@ -285,6 +364,11 @@ class DPSinterface:
         self.ivarpausewv=IntVar()
         self.ivarpausewv.set(0)        
         Checkbutton(root, variable=self.ivarpausewv, text='Pause', command=self.butcmdpausewave).grid(row=row, column=col, sticky=E+W)
+
+        self.scopetube.update()
+        self.scopetube.setratios(self.dvarvdiv.get(), self.dvaradiv.get(), self.dvarsdiv.get(), self.dvars0.get())
+        self.scopetube.drawgrid()
+        self.dvarsecsmp.set(round(self.scopetube.sampletime(), 1))
                 
     def butcmdconnect(self):
         if self.ivarconctd.get():
@@ -302,7 +386,7 @@ class DPSinterface:
             self.curntscale.config(to=m%100)
             
             self.ivarmem.set(0)
-            self.butcmdrecallmem()
+            self.sclcmdrecallmem()
             
             self.ivarkeylock.set(0) #otherwise update fields does not read all
             self.updatefields()
@@ -385,7 +469,7 @@ class DPSinterface:
         mem='m'+str(self.getmem())
         return [mem+a for a in ['vset', 'iset',  'ovp', 'ocp', 'opp', 'bled', 'pre', 'onoff']]
 
-    def butcmdrecallmem(self):
+    def sclcmdrecallmem(self, event):
         if self.isconnected():
             mr=self.memregs()
             self.lock.acquire()
@@ -423,7 +507,7 @@ class DPSinterface:
             self.dps.set(['mset'], [m])
             self.lock.release()
             self.ivarmem.set(0)
-            self.butcmdrecallmem()
+            self.sclcmdrecallmem()
 
     def butcmdacquire(self):
         if self.ivaracquire.get():
@@ -443,7 +527,7 @@ class DPSinterface:
                 tkMessageBox.showinfo('Still acquiring',  'Current acquisition session will complete after the next sample') 
 
     def scopeupdate(self,  event):
-        self.scopetube.setratios(self.dvarvdiv.get(), self.dvaradiv.get(), self.dvarsdiv.get(), self.dvarst0.get())
+        self.scopetube.setratios(self.dvarvdiv.get(), self.dvaradiv.get(), self.dvarsdiv.get(), self.dvars0.get())
         self.scopetube.redraw()
 
     def sclcmdvolt(self, event):
