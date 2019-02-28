@@ -94,14 +94,17 @@ class DPSinterface:
         Label(root, text="Vmax [V]: ", foreground=Scopetube.VCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarvmaxm0=DoubleVar()
-        Entry(root, textvariable=self.dvarvmaxm0, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
+        e=Entry(root, textvariable=self.dvarvmaxm0, width=ENTRYWIDTH)
+        e.bind('<FocusOut>', self.wrtdvarvmaxm0)
+        e.bind('<Return>', self.wrtdvarvmaxm0)
+        e.grid(row=row, column=col, sticky=W)
         col+=colspan
         Label(root, text="Cmax [A]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
         col+=1
         self.dvarcmaxm0=DoubleVar()
         Entry(root, textvariable=self.dvarcmaxm0, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
         col+=colspan
-        Label(root, text="Pmax [W]: ").grid(row=row, column=col, sticky=E)
+        Label(root, text="Pmax [W]: ", foreground=Scopetube.PCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarpmaxm0=DoubleVar()
         Entry(root, textvariable=self.dvarpmaxm0, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)           
@@ -118,7 +121,7 @@ class DPSinterface:
         self.dvarcout=DoubleVar()
         Entry(root, textvariable=self.dvarcout, state=DISABLED, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
         col+=colspan
-        Label(root, text="Pout [W]: ").grid(row=row, column=col, sticky=E)
+        Label(root, text="Pout [W]: ", foreground=Scopetube.PCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarpout=DoubleVar()
         Entry(root, textvariable=self.dvarpout, state=DISABLED, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)        
@@ -152,7 +155,7 @@ class DPSinterface:
         e.bind('<Return>', self.scopeupdate)
         e.grid(row=row, column=col, sticky=W)
         col+=colspan
-        Label(root, text="Y [W/div]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
+        Label(root, text="Y [W/div]: ", foreground=Scopetube.PCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarwdiv=DoubleVar()
         self.dvarwdiv.set(1.)          
@@ -183,7 +186,7 @@ class DPSinterface:
         e.bind('<Return>', self.scopeupdate)
         e.grid(row=row, column=col, sticky=W)
         col+=colspan
-        Label(root, text="Y0 [W]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
+        Label(root, text="Y0 [W]: ", foreground=Scopetube.PCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarw0=DoubleVar()
         self.dvarw0.set(0.)          
@@ -206,7 +209,7 @@ class DPSinterface:
         col+=colspan
         self.ivarpena=IntVar()
         self.ivarpena.set(1)        
-        Checkbutton(root, variable=self.ivarconctd, text='P show', foreground=Scopetube.CCOL, command=self.butcmdconnect).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
+        Checkbutton(root, variable=self.ivarconctd, text='P show', foreground=Scopetube.PCOL, command=self.butcmdconnect).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
 
         row+=rowspan
         col=0
@@ -318,7 +321,7 @@ class DPSinterface:
         self.dvarcmax=DoubleVar()
         Entry(root, textvariable=self.dvarcmax, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
         col+=colspan
-        Label(root, text="Pmax [W]: ").grid(row=row, column=col, sticky=E)
+        Label(root, text="Pmax [W]: ", foreground=Scopetube.PCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarpmax=DoubleVar()
         Entry(root, textvariable=self.dvarpmax, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
@@ -443,7 +446,7 @@ class DPSinterface:
             return data[0:2]+[time()-self.strtme]
 
         self.lock.acquire()
-        data=self.dps.get(['vset', 'iset',  'vout', 'iout', 'pout', 'vinp', 'lock', 'prot', 'cvcc', 'onoff', 'bled'])
+        data=self.dps.get(['vset', 'cset',  'vout', 'iout', 'pout', 'vinp', 'lock', 'prot', 'cvcc', 'onoff', 'bled'])
         self.lock.release()
         self.setvscale(data[0])
         self.setcscale(data[1])
@@ -467,7 +470,7 @@ class DPSinterface:
 
     def memregs(self):
         mem='m'+str(self.getmem())
-        return [mem+a for a in ['vset', 'iset',  'ovp', 'ocp', 'opp', 'bled', 'pre', 'onoff']]
+        return [mem+a for a in ['vset', 'cset',  'ovp', 'ocp', 'opp', 'bled', 'pre', 'onoff']]
 
     def sclcmdrecallmem(self, event):
         if self.isconnected():
@@ -539,7 +542,7 @@ class DPSinterface:
     def sclcmdcurrent(self, event):
         if self.isconnected():
             self.lock.acquire()
-            self.dps.set(['iset'],  [self.getcscale()])
+            self.dps.set(['cset'],  [self.getcscale()])
             self.lock.release()
 
     def butcmdselwve (self):
@@ -572,6 +575,9 @@ class DPSinterface:
         
     def butcmdpausewave(self):
         pass
+        
+    def wrtdvarvmaxm0 (self,  a):
+        print 'vmax is changed '+str(a)
     
 root=Tk()
 my_gui=DPSinterface(root)

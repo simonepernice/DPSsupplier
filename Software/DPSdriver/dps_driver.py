@@ -19,7 +19,7 @@ def initialize_registers():
     """
     reg = {
         'vset'   : (0x00, 'rw', 2, 'Voltage setting'),
-        'iset'   : (0x01, 'rw', 2, 'Current setting'),
+        'cset'   : (0x01, 'rw', 2, 'Current setting'),
         'vout'   : (0x02, 'r', 2, 'Output voltage'),
         'iout'   : (0x03, 'r', 2, 'Output current'),
         'pout'   : (0x04, 'r', 2, 'Output power'),
@@ -36,7 +36,7 @@ def initialize_registers():
 
     memreg = {
         'vset'  : (0x50, 'rw', 2, ' voltage setting'),
-        'iset'  : (0x51, 'rw', 2, ' current setting'),
+        'cset'  : (0x51, 'rw', 2, ' current setting'),
         'ovp'    : (0x52, 'rw', 2, ' over voltage protection'),
         'ocp'    : (0x53, 'rw', 2, ' over current protection'),
         'opp'    : (0x54, 'rw', 1, ' over power protection'),
@@ -275,10 +275,10 @@ if __name__ == "__main__":
     print DPS.get(['vinp'])
     print time.time() - t
     t = time.time()
-    print DPS.get(['iset', 'vset'])    
+    print DPS.get(['cset', 'vset'])    
     print time.time() - t
     t = time.time()
-    print DPS.get(['vset', 'iset'])    
+    print DPS.get(['vset', 'cset'])    
     print time.time() - t
 #    print DPS.get(['model'])
 #    print DPS.get(['fware'])
@@ -290,14 +290,14 @@ if __name__ == "__main__":
 #    print DPS.get(['vset'])
 #    print DPS.set(['vset'], [4.57])
 #    print DPS.get(['vset'])
-#    print DPS.set(['iset', 'vset'],  [1.23,  5.67])
-#    print DPS.set(['iset', 'vset', 'lock'],  [15.80,  22.78, 0])
-    print DPS.set(['iset'],  [14.80])
+#    print DPS.set(['cset', 'vset'],  [1.23,  5.67])
+#    print DPS.set(['cset', 'vset', 'lock'],  [15.80,  22.78, 0])
+    print DPS.set(['cset'],  [14.80])
 #    print DPS.get(['m0pre',  'm1pre',  'm2pre', 'm3pre',  'm4pre',  'm5pre',  'm6pre',  'm7pre',  'm8pre',  'm9pre'])
 #    print DPS.set(['mset'], [5])
 #    print DPS.get(['m0pre',  'm1pre',  'm2pre', 'm3pre',  'm4pre',  'm5pre',  'm6pre',  'm7pre',  'm8pre',  'm9pre'])
 #    print DPS.set('vset',  10.04)
-#    print DPS.set('iset',  0.12)
+#    print DPS.set('cset',  0.12)
 #    print DPS.set('onoff',  0)
 #    print DPS.get('lock')
 #    print DPS.set('lock',  1)
