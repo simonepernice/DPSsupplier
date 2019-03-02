@@ -148,18 +148,18 @@ class DPSinterface:
         col+=colspan
         Label(root, text="Y [A/div]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
-        self.dvaradiv=DoubleVar()
-        self.dvaradiv.set(1.)        
-        e=Entry(root, textvariable=self.dvaradiv, width=ENTRYWIDTH)
+        self.dvarcdiv=DoubleVar()
+        self.dvarcdiv.set(1.)        
+        e=Entry(root, textvariable=self.dvarcdiv, width=ENTRYWIDTH)
         e.bind('<FocusOut>', self.scopeupdate)
         e.bind('<Return>', self.scopeupdate)
         e.grid(row=row, column=col, sticky=W)
         col+=colspan
         Label(root, text="Y [W/div]: ", foreground=Scopetube.PCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
-        self.dvarwdiv=DoubleVar()
-        self.dvarwdiv.set(1.)          
-        e=Entry(root, textvariable=self.dvarwdiv, width=ENTRYWIDTH)
+        self.dvarpdiv=DoubleVar()
+        self.dvarpdiv.set(1.)          
+        e=Entry(root, textvariable=self.dvarpdiv, width=ENTRYWIDTH)
         e.bind('<FocusOut>', self.scopeupdate)
         e.bind('<Return>', self.scopeupdate)
         e.grid(row=row, column=col, sticky=W)
@@ -179,18 +179,18 @@ class DPSinterface:
         col+=colspan
         Label(root, text="Y0 [A]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
-        self.dvara0=DoubleVar()
-        self.dvara0.set(0.)        
-        e=Entry(root, textvariable=self.dvara0, width=ENTRYWIDTH)
+        self.dvarc0=DoubleVar()
+        self.dvarc0.set(0.)        
+        e=Entry(root, textvariable=self.dvarc0, width=ENTRYWIDTH)
         e.bind('<FocusOut>', self.scopeupdate)
         e.bind('<Return>', self.scopeupdate)
         e.grid(row=row, column=col, sticky=W)
         col+=colspan
         Label(root, text="Y0 [W]: ", foreground=Scopetube.PCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
-        self.dvarw0=DoubleVar()
-        self.dvarw0.set(0.)          
-        e=Entry(root, textvariable=self.dvarw0, width=ENTRYWIDTH)
+        self.dvarp0=DoubleVar()
+        self.dvarp0.set(0.)          
+        e=Entry(root, textvariable=self.dvarp0, width=ENTRYWIDTH)
         e.bind('<FocusOut>', self.scopeupdate)
         e.bind('<Return>', self.scopeupdate)
         e.grid(row=row, column=col, sticky=W)
@@ -201,15 +201,15 @@ class DPSinterface:
         col=0
         self.ivarvena=IntVar()
         self.ivarvena.set(1)        
-        Checkbutton(root, variable=self.ivarconctd, text='V show', foreground=Scopetube.VCOL, command=self.butcmdconnect).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
+        Checkbutton(root, variable=self.ivarvena, text='V show', foreground=Scopetube.VCOL, command=self.scopeupdate).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         col+=colspan
         self.ivarcena=IntVar()
         self.ivarcena.set(1)        
-        Checkbutton(root, variable=self.ivarconctd, text='C show', foreground=Scopetube.CCOL, command=self.butcmdconnect).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
+        Checkbutton(root, variable=self.ivarcena, text='C show', foreground=Scopetube.CCOL, command=self.scopeupdate).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         col+=colspan
         self.ivarpena=IntVar()
         self.ivarpena.set(1)        
-        Checkbutton(root, variable=self.ivarconctd, text='P show', foreground=Scopetube.PCOL, command=self.butcmdconnect).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
+        Checkbutton(root, variable=self.ivarpena, text='P show', foreground=Scopetube.PCOL, command=self.scopeupdate).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
 
         row+=rowspan
         col=0
@@ -244,9 +244,9 @@ class DPSinterface:
         row+=rowspan
         col=0
         colspan=2
-        Button(root, text='Load', command=self.butcmdselwve).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)        
+        Button(root, text='Load', command=self.butcmdload).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)        
         col+=colspan
-        Button(root, text='Save', command=self.butcmdselwve).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)        
+        Button(root, text='Save', command=self.butcmdsave).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)        
         col+=colspan
         self.ivaracquire=IntVar()
         self.ivaracquire.set(0)        
@@ -369,10 +369,16 @@ class DPSinterface:
         Checkbutton(root, variable=self.ivarpausewv, text='Pause', command=self.butcmdpausewave).grid(row=row, column=col, sticky=E+W)
 
         self.scopetube.update()
-        self.scopetube.setratios(self.dvarvdiv.get(), self.dvaradiv.get(), self.dvarsdiv.get(), self.dvars0.get())
-        self.scopetube.drawgrid()
+        self.scopeupdate(None) 
         self.dvarsecsmp.set(round(self.scopetube.sampletime(), 1))
-                
+        self.scopetube.addpoint((5, 0., 0., 0.))
+        self.scopetube.addpoint((4.5, 0.5, 2.25, 1.))
+        self.scopetube.addpoint((4.0, 1.0, 4.0, 2.))
+        self.scopetube.addpoint((3.9, 1.5, 5.35, 3.))
+        self.scopetube.addpoint((3.0, 2.0, 6., 4.))
+        self.scopetube.addpoint((3.5, 1.8, 3.5*1.8, 5.))
+        self.scopetube.addpoint((3.8, 1.7, 3.8*1.7, 6.))
+        
     def butcmdconnect(self):
         if self.ivarconctd.get():
             try:
@@ -404,18 +410,18 @@ class DPSinterface:
             self.entrydpsadd.config(state=NORMAL)
 
     def polling(self):
-        print ('entering polling')
+#        print ('entering polling')
         while self.ivaracquire.get() and self.dps is not None:
-            print ('i am polling')
+#            print ('i am polling')
             t=time()
-            vi=self.updatefields()
-            print 'read point '+str(vi)
-            self.scopetube.addpoint(vi)
+            vip=self.updatefields()
+#            print 'read point '+str(vi)
+            self.scopetube.addpoint(vip)
             t=self.dvarsecsmp.get()-(time()-t)
-            print 'sleep for '+str(t)
+#            print 'sleep for '+str(t)
             if t>0:
                 sleep(t)
-        print ('exiting polling')
+#        print ('exiting polling')
 
     def setvscale(self, v):
         self.dvarvscale.set(int(v))
@@ -443,7 +449,7 @@ class DPSinterface:
             self.ivarkeylock.set(data[4])
             self.svarprot.set({0: 'ok', 1: 'ovp', 2: 'ocp', 3: 'opp'}[data[5]])
             self.svarwrmde.set({0: 'cv', 1: 'cc'}[data[6]])
-            return data[0:2]+[time()-self.strtme]
+            return data[0:3]+[time()-self.strtme]
 
         self.lock.acquire()
         data=self.dps.get(['vset', 'cset',  'vout', 'iout', 'pout', 'vinp', 'lock', 'prot', 'cvcc', 'onoff', 'bled'])
@@ -458,7 +464,7 @@ class DPSinterface:
         self.svarprot.set({0: 'ok', 1: 'ovp', 2: 'ocp', 3: 'opp'}[data[7]])
         self.svarwrmde.set({0: 'cv', 1: 'cc'}[data[8]])
         self.ivaroutenab.set(data[9])
-        return data[2:4]+[time()-self.strtme]
+        return data[2:5]+[time()-self.strtme]
 
 
     def getmem(self):
@@ -529,8 +535,13 @@ class DPSinterface:
             if self.threadacquire is not None and self.threadacquire.isAlive():
                 tkMessageBox.showinfo('Still acquiring',  'Current acquisition session will complete after the next sample') 
 
-    def scopeupdate(self,  event):
-        self.scopetube.setratios(self.dvarvdiv.get(), self.dvaradiv.get(), self.dvarsdiv.get(), self.dvars0.get())
+    def scopeupdate(self,  *event):
+        self.scopetube.setratios(
+            self.dvarvdiv.get(), self.dvarv0.get(), self.ivarvena.get(),
+            self.dvarcdiv.get(), self.dvarc0.get(), self.ivarcena.get(),  
+            self.dvarpdiv.get(), self.dvarp0.get(), self.ivarpena.get(),  
+            self.dvarsdiv.get(), self.dvars0.get()
+        )
         self.scopetube.redraw()
 
     def sclcmdvolt(self, event):
@@ -547,6 +558,12 @@ class DPSinterface:
 
     def butcmdselwve (self):
         self.svarwave.set(tkFileDialog.askopenfilename(initialdir = ".", title = "Select dps file", filetypes = (("dps files","*.dps"), ("all files","*.*"))))
+
+    def butcmdload (self):
+        self.scopetube.load(tkFileDialog.askopenfilename(initialdir = ".", title = "Select point file", filetypes = (("csv files","*.csv"), ("all files","*.*"))))
+
+    def butcmdsave(self):
+        self.scopetube.save(tkFileDialog.asksaveasfilename(initialdir = ".", title = "Select dps file", filetypes = (("csv files","*.csv"), ("all files","*.*"))))
 
     def butcmdkeylock(self):
         if self.isconnected():

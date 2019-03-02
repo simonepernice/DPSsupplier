@@ -15,24 +15,36 @@ class Scopetube(Canvas):
         
         self.points=[]
                 
-    def setratios(self, vdiv,  cdiv,  tdiv, t0):
-        self.vm=-self.winfo_height()/Scopetube.YDIV/vdiv
-        self.vq=self.winfo_height()
+    def setratios(self, vdiv, v0, vena, cdiv, c0, cena, pdiv, p0, pena, tdiv, t0):
+        self.yq=self.winfo_height()
+        self.ena=(vena, cena, pena)
+        
+        self.vm=-self.yq/Scopetube.YDIV/vdiv        
         self.vdiv=vdiv
-        self.cm=-self.winfo_height()/Scopetube.YDIV/cdiv
-        self.cq=self.winfo_height()      
+        self.v0=v0
+
+        self.cm=-self.yq/Scopetube.YDIV/cdiv
+        self.c0=c0
+
+        self.pm=-self.yq/Scopetube.YDIV/pdiv
+        self.p0=p0
+
         self.tm=self.winfo_width()/Scopetube.XDIV/tdiv
         self.t0=t0
         self.tdiv=tdiv
+
         self.smpt=1./self.tm
         if self.smpt<Scopetube.MINSAMPLETIME:
             self.smpt=Scopetube.MINSAMPLETIME        
 
     def getyv(self,  v):
-        return v*self.vm+self.vq
+        return (v-self.v0)*self.vm+self.yq
 
     def getyc(self,  c):
-        return c*self.cm+self.cq
+        return (c-self.c0)*self.cm+self.yq
+
+    def getyp(self,  p):
+        return (p-self.p0)*self.pm+self.yq
 
     def getxt(self,  t):
         return (t-self.t0)*self.tm
@@ -41,7 +53,7 @@ class Scopetube(Canvas):
         self.points=[]
         self.redraw()
     
-    #a point is made by: (voltage, current, time)
+    #a point is made by: (voltage, current, power, time)
     def addpoint(self, p):
         self.points.append(p)
         if len(self.points)>1:
@@ -74,14 +86,34 @@ class Scopetube(Canvas):
             if p0 is None:
                 p0=p1
                 continue
-            if p1[2]<self.t0:
+            if p1[-1]<self.t0:
                 p0=p1
                 continue
             self.drawseg(p0, p1)
             p0=p1
     
     def drawseg(self, p0, p1):
-        x0=self.getxt(p0[2])
-        x1=self.getxt(p1[2])
-        self.create_line(x0, self.getyv(p0[0]), x1, self.getyv(p1[0]), fill=Scopetube.VCOL)
-        self.create_line(x0, self.getyc(p0[1]), x1, self.getyc(p1[1]), fill=Scopetube.CCOL)
+        x0=self.getxt(p0[-1])
+        x1=self.getxt(p1[-1])
+        for i, c, gety, en in zip(range(3), (Scopetube.VCOL, Scopetube.CCOL, Scopetube.PCOL), (self.getyv, self.getyc, self.getyp), self.ena):
+            if en: self.create_line(x0, gety(p0[i]), x1, gety(p1[i]), fill=c)
+
+    def load(self,  fname):
+        self.resetpoints()
+        with open(fname) as f:
+            self.points=[]
+            l=f.readline()
+            while l:
+                self.addpoint(tuple([float(v) for v in l.split(',')]))
+                l=f.readline()
+        print str(self.points)
+
+    def save(self, fname):
+        with open(fname, 'w') as f:
+            for p in self.points:
+                comma=''
+                for v in p:
+                    f.write(comma)
+                    f.write(str(v))
+                    comma=','
+                f.write('\n')
