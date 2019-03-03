@@ -1,4 +1,4 @@
-from Tkinter import Tk, Label, Button, Checkbutton, Entry, Scale, IntVar, StringVar, DoubleVar, E, W, NORMAL, DISABLED
+from Tkinter import Label, Button, Checkbutton, Entry, Scale, IntVar, StringVar, DoubleVar, E, W, NORMAL, DISABLED, Menu, Toplevel
 import tkMessageBox
 import tkFileDialog
 from ttk import Separator
@@ -9,6 +9,7 @@ from time import time, sleep
 
 from scopetube import Scopetube
 from dps_driver import DPSdriver
+from mem_interface import Meminterface
 
 class DPSinterface:        
     def __init__(self, root):        
@@ -19,6 +20,34 @@ class DPSinterface:
         self.lock=Lock()
         self.threadacquire=None
         self.strtme=time()
+        
+        menubar=Menu(root)
+        
+        filemenu=Menu(menubar, tearoff=0)
+        filemenu.add_command(label="Exit", command=root.quit)
+        menubar.add_cascade(label="File", menu=filemenu)
+        
+        scopemenu=Menu(menubar, tearoff=0)
+        scopemenu .add_command(label="Load sampled points...", command=self.butcmdload)
+        scopemenu .add_command(label="Save sampled points as...", command=self.butcmdsave)
+        menubar.add_cascade(label="Scope", menu=scopemenu)
+        
+        wavemenu=Menu(menubar, tearoff=0)
+        wavemenu.add_command(label="Load wave...", command=self.butcmdselwve)
+        wavemenu.add_command(label="Edit wave...", command=self.toimplement)
+        wavemenu.add_command(label="Save wave as...", command=self.toimplement)
+        menubar.add_cascade(label="Wave", menu=wavemenu)
+ 
+        memmenu=Menu(menubar, tearoff=0)
+        memmenu .add_command(label="Edit...", command=self.mnucmdedtmem)
+        menubar.add_cascade(label="Memory", menu=memmenu)
+  
+        helpmenu=Menu(menubar, tearoff=0)
+        helpmenu.add_command(label="Help", command=self.toimplement)
+        helpmenu.add_command(label="About...", command=self.toimplement)
+        menubar.add_cascade(label="Help", menu=helpmenu)
+
+        root.config(menu=menubar)
 
         ENTRYWIDTH=10
 
@@ -281,70 +310,6 @@ class DPSinterface:
 
         row+=rowspan
         col=0
-        Separator(root, orient='horizontal').grid(row=row, columnspan=6, sticky=E+W, pady=8) 
-
-        row+=rowspan
-        colspan=2
-        col=0
-        self.ivarmem=IntVar()
-        sc=Scale(root, label='Memory', variable=self.ivarmem, from_=0, to=9, resolution=1, orient="horizontal")
-        sc.bind("<ButtonRelease-1>", self.sclcmdrecallmem)
-        sc.grid(row=row, column=col, sticky=W+E, columnspan=colspan)
-        col+=colspan
-        Button(root, text="Active", command=self.butcmdactivemem).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)
-        col+=colspan
-        Button(root, text='Store', command=self.butcmdstoremem).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)
-
-        colspan=1
-        row+=rowspan
-        col=0
-        Label(root, text="Vset [V]: ", foreground=Scopetube.VCOL).grid(row=row, column=col, sticky=E)
-        col+=colspan
-        self.dvarvsetm=DoubleVar()
-        Entry(root, textvariable=self.dvarvsetm, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
-        col+=colspan
-        Label(root, text="Cset [A]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
-        col+=1
-        self.dvarcsetm=DoubleVar()
-        Entry(root, textvariable=self.dvarcsetm, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
-        
-        colspan=1
-        row+=rowspan
-        col=0
-        Label(root, text="Vmax [V]: ", foreground=Scopetube.VCOL).grid(row=row, column=col, sticky=E)
-        col+=colspan
-        self.dvarvmax=DoubleVar()
-        Entry(root, textvariable=self.dvarvmax, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
-        col+=colspan
-        Label(root, text="Cmax [A]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
-        col+=colspan
-        self.dvarcmax=DoubleVar()
-        Entry(root, textvariable=self.dvarcmax, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
-        col+=colspan
-        Label(root, text="Pmax [W]: ", foreground=Scopetube.PCOL).grid(row=row, column=col, sticky=E)
-        col+=colspan
-        self.dvarpmax=DoubleVar()
-        Entry(root, textvariable=self.dvarpmax, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
-
-        row+=rowspan
-        colspan=1
-        col=0
-        Label(root, text="Brightness: ").grid(row=row, column=col, sticky=E)
-        col+=colspan
-        self.ivarbrght=IntVar()
-        Entry(root, textvariable=self.ivarbrght, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)        
-        col+=colspan
-        colspan=2
-        self.ivaroutmset=IntVar()
-        self.ivaroutmset.set(0)
-        Checkbutton(root, variable=self.ivaroutmset, text="Out@MSet", command=self.butcmdoutenable).grid(row=row, column=col, sticky=E+W, columnspan=colspan)
-        col+=colspan
-        self.ivaroutpwron=IntVar()
-        self.ivaroutpwron.set(0)
-        Checkbutton(root, variable=self.ivaroutpwron, text="Out@PwOn", command=self.butcmdoutenable).grid(row=row, column=col, sticky=E+W, columnspan=colspan)
-        
-        row+=rowspan
-        col=0
         colspan=1
         Separator(root, orient='horizontal').grid(row=row, columnspan=6, sticky=E+W, pady=8)
 
@@ -392,11 +357,8 @@ class DPSinterface:
             m=self.dps.get(['model'])[0]
             self.ivarmodel.set(m)
             self.voltscale.config(to=m/100)
-            self.curntscale.config(to=m%100)
-            
-            self.ivarmem.set(0)
-            self.sclcmdrecallmem()
-            
+            self.curntscale.config(to=m%100)            
+
             self.ivarkeylock.set(0) #otherwise update fields does not read all
             self.updatefields()
             self.ivarkeylock.set(1)
@@ -466,58 +428,6 @@ class DPSinterface:
         self.ivaroutenab.set(data[9])
         return data[2:5]+[time()-self.strtme]
 
-
-    def getmem(self):
-        m=self.ivarmem.get()
-        if m<0 or m>9:
-            tkMessageBox.error('Memory location not available', 'Memory location goes from 0 to 9')
-            raise ValueError('Memory location not available')        
-        return m
-
-    def memregs(self):
-        mem='m'+str(self.getmem())
-        return [mem+a for a in ['vset', 'cset',  'ovp', 'ocp', 'opp', 'bled', 'pre', 'onoff']]
-
-    def sclcmdrecallmem(self, event):
-        if self.isconnected():
-            mr=self.memregs()
-            self.lock.acquire()
-            data=self.dps.get(mr)
-            self.lock.release()
-            self.setvscale(data[0])
-            self.setcscale(data[1])
-            self.dvarvmax.set(data[2])
-            self.dvarcmax.set(data[3])
-            self.dvarpmax.set(data[4])
-            self.ivarbrght.set(data[5])
-            self.ivaroutenab.set(data[7])
-    
-    def butcmdstoremem(self):
-        if self.isconnected():
-            mr=self.memregs()
-            mv=[
-                self.getvscale(), 
-                self.getcscale(), 
-                self.dvarvmax.get(), 
-                self.dvarcmax.get(), 
-                self.dvarpmax.get(), 
-                self.ivarbrght.get(), 
-                0, 
-                self.ivaroutenab.get()
-            ]
-            self.lock.acquire()
-            self.dps.set(mr, mv)
-            self.lock.release()
-    
-    def butcmdactivemem(self):
-        if self.isconnected():
-            m=self.getmem()
-            self.lock.acquire()
-            self.dps.set(['mset'], [m])
-            self.lock.release()
-            self.ivarmem.set(0)
-            self.sclcmdrecallmem()
-
     def butcmdacquire(self):
         if self.ivaracquire.get():
             if not self.isconnected():
@@ -557,13 +467,13 @@ class DPSinterface:
             self.lock.release()
 
     def butcmdselwve (self):
-        self.svarwave.set(tkFileDialog.askopenfilename(initialdir = ".", title = "Select dps file", filetypes = (("dps files","*.dps"), ("all files","*.*"))))
+        self.svarwave.set(tkFileDialog.askopenfilename(initialdir=".", title="Select dps file", filetypes=(("dps files","*.dps"), ("all files","*.*"))))
 
     def butcmdload (self):
-        self.scopetube.load(tkFileDialog.askopenfilename(initialdir = ".", title = "Select point file", filetypes = (("csv files","*.csv"), ("all files","*.*"))))
+        self.scopetube.load(tkFileDialog.askopenfilename(initialdir=".", title="Select point file", filetypes=(("csv files","*.csv"), ("all files","*.*"))))
 
     def butcmdsave(self):
-        self.scopetube.save(tkFileDialog.asksaveasfilename(initialdir = ".", title = "Select dps file", filetypes = (("csv files","*.csv"), ("all files","*.*"))))
+        self.scopetube.save(tkFileDialog.asksaveasfilename(initialdir=".", title="Select dps file", filetypes=(("csv files","*.csv"), ("all files","*.*"))))
 
     def butcmdkeylock(self):
         if self.isconnected():
@@ -593,9 +503,14 @@ class DPSinterface:
     def butcmdpausewave(self):
         pass
         
-    def wrtdvarvmaxm0 (self,  a):
+    def wrtdvarvmaxm0(self,  a):
         print 'vmax is changed '+str(a)
-    
-root=Tk()
-my_gui=DPSinterface(root)
-root.mainloop()
+
+    def toimplement(self):
+        pass
+        
+    def mnucmdedtmem(self):
+        tl=Toplevel(self.root)
+        tl.focus_force()
+        tl.grab_set()
+        Meminterface(tl, self.dps, self.lock)
