@@ -21,14 +21,14 @@ def initialize_registers():
         'vset'   : (0x00, 'rw', 2, 'Voltage setting'),
         'cset'   : (0x01, 'rw', 2, 'Current setting'),
         'vout'   : (0x02, 'r', 2, 'Output voltage'),
-        'iout'   : (0x03, 'r', 2, 'Output current'),
+        'cout'   : (0x03, 'r', 2, 'Output current'),
         'pout'   : (0x04, 'r', 2, 'Output power'),
         'vinp'   : (0x05, 'r', 2, 'Input voltage'),
         'lock'   : (0x06, 'rw', 0, 'Key lock: 0 is not lock, 1 is locked'),
         'prot'   : (0x07, 'r', 0, 'Protection status: 0 OK, 1 is over voltage protection, 2 over current protection, 3 over power protection'),
         'cvcc'   : (0x08, 'r', 0, 'Constant voltage or current status: 0 constant voltage, 1 constant current'),
         'onoff' : (0x09, 'rw', 0, 'Switch output status: 0 off , 1 on'),
-        'bled'   : (0x0A, 'rw', 0, 'Backlight brightness level: 0 darkest, 5 brightest'),
+        'brght'   : (0x0A, 'rw', 0, 'Backlight brightness level: 0 darkest, 5 brightest'),
         'model' : (0x0B, 'r', 0, 'Product model'),
         'fware' : (0x0C, 'r', 0, 'Firmware version'),
         'mset'   : (0x23, 'rw', 0, 'Set the required meomory as active data group')
@@ -40,9 +40,9 @@ def initialize_registers():
         'ovp'    : (0x52, 'rw', 2, ' over voltage protection'),
         'ocp'    : (0x53, 'rw', 2, ' over current protection'),
         'opp'    : (0x54, 'rw', 1, ' over power protection'),
-        'bled'  : (0x55, 'rw', 0, ' backlight brightness level: 0 darkest, 5 brightest'),
-        'pre'  : (0x56, 'rw', 0, ' preset number'),
-        'onoff': (0x57, 'rw', 0, ' switch output status: 0 off , 1 on'),
+        'brght'  : (0x55, 'rw', 0, ' backlight brightness level: 0 darkest, 5 brightest'),
+        'pre'  : (0x56, 'rw', 0, ' memory set output status: 1 the output does not change when set, 0 the output is turned of when set'),
+        'onoff': (0x57, 'rw', 0, ' power on output status: 1 the output is on while 0 is off (at power on)'),
     }
 
     for i in range(10):
@@ -63,20 +63,18 @@ class DPSdriver():
     """
     REGISTERS = initialize_registers()
 
-    #port is the serial port where the converter is linked to
-    #address is the supplier address as far as I know they are all address 0x01
-    def __init__(self, port, address=0x01):
+    def __init__(self, port, address=0x01,  baud=9600):
         """
         Create a DSP driver instance to read and write the DSP registers.
 
         :param port: is the string with the prot name i.e. /dev/ttyUSB0 or COM5 for Windows
-        :param address: is the address of DPS supplier usually they all have address 1
+        :param address: is the address of DPS supplier by default the address is 1 and the baud rate is 9600 but that can be changed turning on the unit while the up arrow is pressed
         :raises ValueError: if it cannot open the serial port or link to the supplier
         """
         self.address = address
 
         try:
-            s = serial.Serial(port, baudrate=9600, bytesize=8, parity='N', stopbits=1, xonxoff=0)
+            s = serial.Serial(port, baudrate=baud, bytesize=8, parity='N', stopbits=1, xonxoff=0)
         except Exception as e:
             raise ValueError('It was not possible to open the serial port '+str(e))
 
@@ -302,5 +300,5 @@ if __name__ == "__main__":
 #    print DPS.get('lock')
 #    print DPS.set('lock',  1)
 #    print DPS.get('vout')
-#    print DPS.get('iout')
-#    print DPS.set('bled', 0)
+#    print DPS.get('cout')
+#    print DPS.set('brght', 0)

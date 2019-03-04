@@ -81,16 +81,8 @@ class Scopetube(Canvas):
         return self.smpt
         
     def drawsignals(self):
-        p0=None
-        for p1 in self.points:
-            if p0 is None:
-                p0=p1
-                continue
-            if p1[-1]<self.t0:
-                p0=p1
-                continue
+        for p0, p1 in zip(self.points[0:-1], self.points[1:]):
             self.drawseg(p0, p1)
-            p0=p1
     
     def drawseg(self, p0, p1):
         x0=self.getxt(p0[-1])
@@ -106,7 +98,6 @@ class Scopetube(Canvas):
             while l:
                 self.addpoint(tuple([float(v) for v in l.split(',')]))
                 l=f.readline()
-#        print str(self.points)
 
     def save(self, fname):
         with open(fname, 'w') as f:
