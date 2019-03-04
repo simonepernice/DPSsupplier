@@ -1,4 +1,4 @@
-from Tkinter import Label, Button, Checkbutton, Entry, Scale, IntVar, StringVar, DoubleVar, E, W, NORMAL, DISABLED, Menu, Toplevel
+from Tkinter import Label, Checkbutton, Entry, Scale, IntVar, StringVar, DoubleVar, E, W, NORMAL, DISABLED, Menu, Toplevel, PhotoImage
 import tkMessageBox
 import tkFileDialog
 from ttk import Separator
@@ -28,12 +28,12 @@ class DPSinterface:
         menubar.add_cascade(label="File", menu=filemenu)
         
         scopemenu=Menu(menubar, tearoff=0)
-        scopemenu .add_command(label="Load sampled points...", command=self.butcmdload)
-        scopemenu .add_command(label="Save sampled points as...", command=self.butcmdsave)
+        scopemenu .add_command(label="Load sampled points...", command=self.mnucmdload)
+        scopemenu .add_command(label="Save sampled points as...", command=self.mnucmdsave)
         menubar.add_cascade(label="Scope", menu=scopemenu)
         
         wavemenu=Menu(menubar, tearoff=0)
-        wavemenu.add_command(label="Load wave...", command=self.butcmdselwve)
+        wavemenu.add_command(label="Load wave...", command=self.mnucmdselwve)
         wavemenu.add_command(label="Edit wave...", command=self.toimplement)
         wavemenu.add_command(label="Save wave as...", command=self.toimplement)
         menubar.add_cascade(label="Wave", menu=wavemenu)
@@ -230,15 +230,15 @@ class DPSinterface:
         col=0
         self.ivarvena=IntVar()
         self.ivarvena.set(1)        
-        Checkbutton(root, variable=self.ivarvena, text='V show', foreground=Scopetube.VCOL, command=self.scopeupdate).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
+        Checkbutton(root, variable=self.ivarvena, text='Voltage show', foreground=Scopetube.VCOL, command=self.scopeupdate).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         col+=colspan
         self.ivarcena=IntVar()
         self.ivarcena.set(1)        
-        Checkbutton(root, variable=self.ivarcena, text='C show', foreground=Scopetube.CCOL, command=self.scopeupdate).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
+        Checkbutton(root, variable=self.ivarcena, text='Current show', foreground=Scopetube.CCOL, command=self.scopeupdate).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         col+=colspan
         self.ivarpena=IntVar()
         self.ivarpena.set(1)        
-        Checkbutton(root, variable=self.ivarpena, text='P show', foreground=Scopetube.PCOL, command=self.scopeupdate).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
+        Checkbutton(root, variable=self.ivarpena, text='Power show', foreground=Scopetube.PCOL, command=self.scopeupdate).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
 
         row+=rowspan
         col=0
@@ -273,13 +273,19 @@ class DPSinterface:
         row+=rowspan
         col=0
         colspan=2
-        Button(root, text='Load', command=self.butcmdload).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)        
+        self.ivarmem=IntVar()
+        sc=Scale(root, label='Recall memory', variable=self.ivarmem, from_=0, to=9, resolution=1, orient="horizontal")
+        sc.bind("<ButtonRelease-1>", self.sclcmdrecallmem)
+        sc.grid(row=row, column=col, columnspan=colspan)#, sticky=W+E
         col+=colspan
-        Button(root, text='Save', command=self.butcmdsave).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)        
+        self.ivarbrghtness=IntVar()
+        sc=Scale(root, label='Brightness', variable=self.ivarbrghtness, from_=0, to=5, resolution=1, orient="horizontal")
+        sc.bind("<ButtonRelease-1>", self.sclcmdrecallmem)
+        sc.grid(row=row, column=col, columnspan=colspan)#, sticky=W+E        
         col+=colspan
         self.ivaracquire=IntVar()
         self.ivaracquire.set(0)        
-        Checkbutton(root, variable=self.ivaracquire, text='Acquire', command=self.butcmdacquire).grid(row=row, column=col, columnspan=2, sticky=E+W)               
+        Checkbutton(root, variable=self.ivaracquire, text='Run acquisition', command=self.butcmdacquire).grid(row=row, column=col, columnspan=2, sticky=E+W)               
 
         row+=rowspan
         rowspan=1        
@@ -314,13 +320,11 @@ class DPSinterface:
         Separator(root, orient='horizontal').grid(row=row, columnspan=6, sticky=E+W, pady=8)
 
         row+=rowspan
-        col=0
         colspan=1
-        Button(root, text='Load', command=self.butcmdselwve).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)
-        col+=colspan
+        col=0
         Label(root, text="Waveform: ").grid(row=row, column=col, sticky=E)
         col+=colspan
-        colspan=2
+        colspan=3
         self.svarwave=StringVar()
         Entry(root, textvariable=self.svarwave, width=ENTRYWIDTH, state=DISABLED).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         col+=colspan
@@ -466,13 +470,13 @@ class DPSinterface:
             self.dps.set(['cset'],  [self.getcscale()])
             self.lock.release()
 
-    def butcmdselwve (self):
+    def mnucmdselwve (self):
         self.svarwave.set(tkFileDialog.askopenfilename(initialdir=".", title="Select dps file", filetypes=(("dps files","*.dps"), ("all files","*.*"))))
 
-    def butcmdload (self):
+    def mnucmdload (self):
         self.scopetube.load(tkFileDialog.askopenfilename(initialdir=".", title="Select point file", filetypes=(("csv files","*.csv"), ("all files","*.*"))))
 
-    def butcmdsave(self):
+    def mnucmdsave(self):
         self.scopetube.save(tkFileDialog.asksaveasfilename(initialdir=".", title="Select dps file", filetypes=(("csv files","*.csv"), ("all files","*.*"))))
 
     def butcmdkeylock(self):
@@ -511,6 +515,21 @@ class DPSinterface:
         
     def mnucmdedtmem(self):
         tl=Toplevel(self.root)
+        tl.tk.call('wm', 'iconphoto', tl._w, PhotoImage(file='./pwrsup.png'))        
         tl.focus_force()
         tl.grab_set()
         Meminterface(tl, self.dps, self.lock)
+    
+    def sclcmdrecallmem(self, event):
+        if self.isconnected():
+            mr=self.memregs()
+            self.lock.acquire()
+            data=self.dps.get(mr)
+            self.lock.release()
+            self.setvscale(data[0])
+            self.setcscale(data[1])
+            self.dvarvmax.set(data[2])
+            self.dvarcmax.set(data[3])
+            self.dvarpmax.set(data[4])
+            self.ivarbrght.set(data[5])
+            self.ivaroutenab.set(data[7])

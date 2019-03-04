@@ -106,7 +106,7 @@ class Scopetube(Canvas):
             while l:
                 self.addpoint(tuple([float(v) for v in l.split(',')]))
                 l=f.readline()
-        print str(self.points)
+#        print str(self.points)
 
     def save(self, fname):
         with open(fname, 'w') as f:
