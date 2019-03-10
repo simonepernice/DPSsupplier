@@ -1,6 +1,6 @@
 from Tkinter import Label, Button, Checkbutton, Entry, Scale, IntVar, DoubleVar, E, W
 
-from scopetube import Scopetube
+from constants import ENTRYWIDTH, VCOL, CCOL, PCOL
 
 class Meminterface:        
     def __init__(self, root,  dps,  lock, upfields):    
@@ -10,8 +10,6 @@ class Meminterface:
         self.dps=dps
         self.upfields=upfields
         self.lock=lock
-
-        ENTRYWIDTH=10
 
         row=0
         col=0
@@ -27,7 +25,7 @@ class Meminterface:
         row+=rowspan
         col=0
         self.ivarmem=IntVar()
-        sc=Scale(root, variable=self.ivarmem, from_=0, to=9, resolution=1, orient="horizontal")#label='Memory', 
+        sc=Scale(root, variable=self.ivarmem, from_=0, to=9, resolution=1, orient="horizontal")
         sc.grid(row=row, column=col, sticky=W+E, columnspan=colspan)
         col+=colspan
         colspan=4
@@ -36,12 +34,12 @@ class Meminterface:
         colspan=1
         row+=rowspan        
         col=0
-        Label(root, text="Vset [V]: ", foreground=Scopetube.VCOL).grid(row=row, column=col, sticky=E)
+        Label(root, text="Vset [V]: ", foreground=VCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarvset=DoubleVar()
         Entry(root, textvariable=self.dvarvset, width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
         col+=colspan
-        Label(root, text="Cset [A]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
+        Label(root, text="Cset [A]: ", foreground=CCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarcset=DoubleVar()
         Entry(root, textvariable=self.dvarcset, width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
@@ -49,17 +47,17 @@ class Meminterface:
         colspan=1
         row+=rowspan
         col=0
-        Label(root, text="Vmax [V]: ", foreground=Scopetube.VCOL).grid(row=row, column=col, sticky=E)
+        Label(root, text="Vmax [V]: ", foreground=VCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarvmax=DoubleVar()
         Entry(root, textvariable=self.dvarvmax, width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
         col+=colspan
-        Label(root, text="Cmax [A]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
+        Label(root, text="Cmax [A]: ", foreground=CCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarcmax=DoubleVar()
         Entry(root, textvariable=self.dvarcmax, width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
         col+=colspan
-        Label(root, text="Pmax [W]: ", foreground=Scopetube.PCOL).grid(row=row, column=col, sticky=E)
+        Label(root, text="Pmax [W]: ", foreground=PCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarpmax=DoubleVar()
         Entry(root, textvariable=self.dvarpmax, width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
@@ -85,6 +83,8 @@ class Meminterface:
         colspan=2
         col=4
         Button(root, text="Done", command=self.btncmddone).grid(row=row, column=col, sticky=E+W, columnspan=colspan)
+        
+        self.butcmdrecall()
 
     def memregs(self):
         mem='m'+str(self.ivarmem.get())
@@ -95,14 +95,14 @@ class Meminterface:
         self.lock.acquire()
         data=self.dps.get(mr)
         self.lock.release()
-        self.dvarvset(data[0])
-        self.dvarcset(data[1])
+        self.dvarvset.set(data[0])
+        self.dvarcset.set(data[1])
         self.dvarvmax.set(data[2])
         self.dvarcmax.set(data[3])
         self.dvarpmax.set(data[4])
         self.ivarbrght.set(data[5])
         self.ivaroutmset.set(data[6])
-        self.ivaroutenab.set(data[7])
+        self.ivaroutpwron.set(data[7])
     
     def butcmdstore(self):
         mr=self.memregs()
@@ -114,7 +114,7 @@ class Meminterface:
             self.dvarpmax.get(), 
             self.ivarbrght.get(), 
             self.ivaroutmset.get(), 
-            self.ivaroutenab.get()
+            self.ivaroutpwron.get()
         ]
         self.lock.acquire()
         self.dps.set(mr, mv)
@@ -132,3 +132,9 @@ class Meminterface:
 
     def btncmddone(self):
         self.root.destroy()
+
+if __name__=='__main__':
+    from Tkinter import Tk
+    root=Tk()
+    my_gui=Meminterface(root,  None,  None, None)
+    root.mainloop()

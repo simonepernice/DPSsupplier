@@ -10,6 +10,9 @@ from time import time, sleep
 from scopetube import Scopetube
 from dps_driver import DPSdriver
 from mem_interface import Meminterface
+from wve_interface import Wveinterface
+from constants import ENTRYWIDTH, VCOL, CCOL, PCOL, TPOS
+from dpsfile import Dpsfile
 
 class DPSinterface:        
     def __init__(self, root):        
@@ -34,7 +37,7 @@ class DPSinterface:
         
         wavemenu=Menu(menubar, tearoff=0)
         wavemenu.add_command(label="Load wave...", command=self.mnucmdselwve)
-        wavemenu.add_command(label="Edit wave...", command=self.toimplement)
+        wavemenu.add_command(label="Edit wave...", command=self.mnucmdedtwve)
         wavemenu.add_command(label="Save wave as...", command=self.toimplement)
         menubar.add_cascade(label="Wave", menu=wavemenu)
  
@@ -48,8 +51,6 @@ class DPSinterface:
         menubar.add_cascade(label="Help", menu=helpmenu)
 
         root.config(menu=menubar)
-
-        ENTRYWIDTH=10
 
         row=0
         col=0
@@ -124,7 +125,7 @@ class DPSinterface:
         colspan=1
         row+=rowspan
         col=0
-        Label(root, text="Vmax [V]: ", foreground=Scopetube.VCOL).grid(row=row, column=col, sticky=E)
+        Label(root, text="Vmax [V]: ", foreground=VCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarvmaxm0=DoubleVar()
         e=Entry(root, textvariable=self.dvarvmaxm0, width=ENTRYWIDTH, justify='right')
@@ -132,7 +133,7 @@ class DPSinterface:
 #        e.bind('<Return>', self.entbndvmax)
         e.grid(row=row, column=col, sticky=W)
         col+=colspan
-        Label(root, text="Cmax [A]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
+        Label(root, text="Cmax [A]: ", foreground=CCOL).grid(row=row, column=col, sticky=E)
         col+=1
         self.dvarcmaxm0=DoubleVar()
         e=Entry(root, textvariable=self.dvarcmaxm0, width=ENTRYWIDTH, justify='right')
@@ -140,7 +141,7 @@ class DPSinterface:
 #        e.bind('<Return>', self.entbndcmax)        
         e.grid(row=row, column=col, sticky=W)
         col+=colspan
-        Label(root, text="Pmax [W]: ", foreground=Scopetube.PCOL).grid(row=row, column=col, sticky=E)
+        Label(root, text="Pmax [W]: ", foreground=PCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarpmaxm0=DoubleVar()
         e=Entry(root, textvariable=self.dvarpmaxm0, width=ENTRYWIDTH, justify='right')
@@ -150,17 +151,17 @@ class DPSinterface:
 
         row+=rowspan
         col=0
-        Label(root, text="Vout [V]: ", foreground=Scopetube.VCOL).grid(row=row, column=col, sticky=E)
+        Label(root, text="Vout [V]: ", foreground=VCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarvout=DoubleVar()
         Entry(root, textvariable=self.dvarvout, state='readonly', width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
         col+=colspan
-        Label(root, text="Cout [A]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
+        Label(root, text="Cout [A]: ", foreground=CCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarcout=DoubleVar()
         Entry(root, textvariable=self.dvarcout, state='readonly', width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
         col+=colspan
-        Label(root, text="Pout [W]: ", foreground=Scopetube.PCOL).grid(row=row, column=col, sticky=E)
+        Label(root, text="Pout [W]: ", foreground=PCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarpout=DoubleVar()
         Entry(root, textvariable=self.dvarpout, state='readonly', width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)        
@@ -176,7 +177,7 @@ class DPSinterface:
         rowspan=1
         colspan=1
         col=0 
-        Label(root, text="Y [V/div]: ", foreground=Scopetube.VCOL).grid(row=row, column=col, sticky=E)
+        Label(root, text="Y [V/div]: ", foreground=VCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarvdiv=DoubleVar()
         self.dvarvdiv.set(1.)          
@@ -185,7 +186,7 @@ class DPSinterface:
 #        e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)
         col+=colspan
-        Label(root, text="Y [A/div]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
+        Label(root, text="Y [A/div]: ", foreground=CCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarcdiv=DoubleVar()
         self.dvarcdiv.set(1.)        
@@ -194,7 +195,7 @@ class DPSinterface:
 #        e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)
         col+=colspan
-        Label(root, text="Y [W/div]: ", foreground=Scopetube.PCOL).grid(row=row, column=col, sticky=E)
+        Label(root, text="Y [W/div]: ", foreground=PCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarpdiv=DoubleVar()
         self.dvarpdiv.set(1.)          
@@ -207,7 +208,7 @@ class DPSinterface:
         rowspan=1
         colspan=1
         col=0 
-        Label(root, text="Y0 [V]: ", foreground=Scopetube.VCOL).grid(row=row, column=col, sticky=E)
+        Label(root, text="Y0 [V]: ", foreground=VCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarv0=DoubleVar()
         self.dvarv0.set(0.)          
@@ -216,7 +217,7 @@ class DPSinterface:
 #        e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)
         col+=colspan
-        Label(root, text="Y0 [A]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
+        Label(root, text="Y0 [A]: ", foreground=CCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarc0=DoubleVar()
         self.dvarc0.set(0.)        
@@ -225,7 +226,7 @@ class DPSinterface:
 #        e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)
         col+=colspan
-        Label(root, text="Y0 [W]: ", foreground=Scopetube.PCOL).grid(row=row, column=col, sticky=E)
+        Label(root, text="Y0 [W]: ", foreground=PCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarp0=DoubleVar()
         self.dvarp0.set(0.)          
@@ -240,15 +241,15 @@ class DPSinterface:
         col=0
         self.ivarvena=IntVar()
         self.ivarvena.set(1)        
-        Checkbutton(root, variable=self.ivarvena, text='Voltage show', foreground=Scopetube.VCOL, command=self.entbndcmdbutscpupdt).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
+        Checkbutton(root, variable=self.ivarvena, text='Voltage show', foreground=VCOL, command=self.entbndcmdbutscpupdt).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         col+=colspan
         self.ivarcena=IntVar()
         self.ivarcena.set(1)        
-        Checkbutton(root, variable=self.ivarcena, text='Current show', foreground=Scopetube.CCOL, command=self.entbndcmdbutscpupdt).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
+        Checkbutton(root, variable=self.ivarcena, text='Current show', foreground=CCOL, command=self.entbndcmdbutscpupdt).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         col+=colspan
         self.ivarpena=IntVar()
         self.ivarpena.set(1)        
-        Checkbutton(root, variable=self.ivarpena, text='Power show', foreground=Scopetube.PCOL, command=self.entbndcmdbutscpupdt).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
+        Checkbutton(root, variable=self.ivarpena, text='Power show', foreground=PCOL, command=self.entbndcmdbutscpupdt).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
 
         row+=rowspan
         col=0
@@ -300,24 +301,24 @@ class DPSinterface:
         rowspan=1        
         colspan=3
         self.dvarvscale=DoubleVar()
-        self.voltscale=Scale(root, label='Vset [V]', foreground=Scopetube.VCOL, variable=self.dvarvscale, from_=0, to=15, resolution=1, orient="horizontal")#, label='Vset[V]'
+        self.voltscale=Scale(root, label='Vset [V]', foreground=VCOL, variable=self.dvarvscale, from_=0, to=15, resolution=1, orient="horizontal")#, label='Vset[V]'
         self.voltscale.bind("<ButtonRelease-1>", self.sclbndvolt)
         self.voltscale.grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         col+=colspan
         self.dvarcscale=DoubleVar()
-        self.curntscale=Scale(root, label='Cset[A]', foreground=Scopetube.CCOL, variable=self.dvarcscale, from_=0, to=5, resolution=1, orient="horizontal")#,label='Cset[A]'
+        self.curntscale=Scale(root, label='Cset[A]', foreground=CCOL, variable=self.dvarcscale, from_=0, to=5, resolution=1, orient="horizontal")#,label='Cset[A]'
         self.curntscale.bind("<ButtonRelease-1>", self.sclbndcrnt)
         self.curntscale.grid(row=row, column=col, columnspan=colspan, sticky=E+W)
 
         row+=rowspan 
         col=0
         self.dvarvscalef=DoubleVar()
-        sc=Scale(root, foreground=Scopetube.VCOL, variable=self.dvarvscalef, from_=0, to=0.99, resolution=0.01, orient="horizontal")
+        sc=Scale(root, foreground=VCOL, variable=self.dvarvscalef, from_=0, to=0.99, resolution=0.01, orient="horizontal")
         sc.bind("<ButtonRelease-1>", self.sclbndvolt)
         sc.grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         col+=colspan
         self.dvarcscalef=DoubleVar()
-        sc=Scale(root, foreground=Scopetube.CCOL, variable=self.dvarcscalef, from_=0, to=0.99, resolution=0.01, orient="horizontal")
+        sc=Scale(root, foreground=CCOL, variable=self.dvarcscalef, from_=0, to=0.99, resolution=0.01, orient="horizontal")
         sc.bind("<ButtonRelease-1>", self.sclbndcrnt)
         sc.grid(row=row, column=col, columnspan=colspan, sticky=E+W)
 
@@ -412,7 +413,9 @@ class DPSinterface:
             self.ivarkeylock.set(data[4])
             self.setprotection(data[5])
             self.setworkmode(data[6])
-            return data[0:3]+[time()-self.strtme]
+            vcp=data[0:3]
+            vcp.insert(TPOS, time()-self.strtme)
+            return vcp
 
         self.lock.acquire()
         data=self.dps.get(['vset', 'cset',  'vout', 'cout', 'pout', 'vinp', 'lock', 'prot', 'cvcc', 'onoff', 'brght'])
@@ -428,7 +431,9 @@ class DPSinterface:
         self.setworkmode(data[8])
         self.ivaroutenab.set(data[9])
         self.ivarbrghtnes.set(data[10])
-        return data[2:5]+[time()-self.strtme]
+        vcp=data[2:5]
+        vcp.insert(TPOS, time()-self.strtme)
+        return vcp        
 
     def setprotection(self, p):
         self.svarprot.set({0: 'none', 1: 'ovp', 2: 'ocp', 3: 'opp'}[p])
@@ -454,12 +459,13 @@ class DPSinterface:
                 tkMessageBox.showinfo('Still acquiring',  'Current acquisition session will complete after the next sample') 
 
     def entbndcmdbutscpupdt(self,  *event):
-        self.scopetube.setratios(
+        vcp0=self.scopetube.setratios(
             self.dvarvdiv.get(), self.dvarv0.get(), self.ivarvena.get(),
             self.dvarcdiv.get(), self.dvarc0.get(), self.ivarcena.get(),  
             self.dvarpdiv.get(), self.dvarp0.get(), self.ivarpena.get(),  
             self.dvarsdiv.get(), self.dvars0.get()
         )
+        self.dvarv0.set(vcp0[0])
         self.scopetube.redraw()
 
     def sclbndvolt(self, event):
@@ -475,13 +481,21 @@ class DPSinterface:
             self.lock.release()
 
     def mnucmdselwve (self):
-        self.svarwave.set(tkFileDialog.askopenfilename(initialdir=".", title="Select dps file", filetypes=(("dps files","*.dps"), ("all files","*.*"))))
+        fname=tkFileDialog.askopenfilename(initialdir=".", title="Select dps file", filetypes=(("dps files","*.dps"), ("all files","*.*")))
+        if fname:
+            self.svarwave.set(fname)
+            self.dpsfwave=Dpsfile()
+            self.dpsfwave.load(fname)
 
     def mnucmdload (self):
-        self.scopetube.load(tkFileDialog.askopenfilename(initialdir=".", title="Select point file", filetypes=(("csv files","*.csv"), ("all files","*.*"))))
+        fname=tkFileDialog.askopenfilename(initialdir=".", title="Select point file", filetypes=(("dps files","*.dps"), ("all files","*.*")))
+        if fname:
+            self.scopetube.load(fname)
 
     def mnucmdsave(self):
-        self.scopetube.save(tkFileDialog.asksaveasfilename(initialdir=".", title="Select dps file", filetypes=(("csv files","*.csv"), ("all files","*.*"))))
+        fname=tkFileDialog.asksaveasfilename(initialdir=".", title="Select dps file", filetypes=(("dps files","*.dps"), ("all files","*.*")))
+        if fname:
+            self.scopetube.save(fname)
 
     def butcmdkeylock(self):
         if self.isconnected():
@@ -520,6 +534,14 @@ class DPSinterface:
         tl.focus_force()
         tl.grab_set()
         Meminterface(tl, self.dps, self.lock, self.updatefields)
+
+    def mnucmdedtwve(self):
+        if self.dpsfwave is not None:
+            tl=Toplevel(self.root)
+            tl.tk.call('wm', 'iconphoto', tl._w, PhotoImage(file='./pwrsup.png'))        
+            tl.focus_force()
+            tl.grab_set()
+            Wveinterface(tl, self.dpsfwave)
     
     def entbndbrghtnss(self, event):
         if self.isconnected():            

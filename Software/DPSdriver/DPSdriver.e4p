@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project DPSdriver -->
-<!-- Saved: 2019-03-10, 14:55:14 -->
+<!-- Saved: 2019-03-10, 20:42:07 -->
 <!-- Copyright (C) 2019 Simone Pernice, pernice@libero.it -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -15,11 +15,14 @@
   <Eol index="0"/>
   <Sources>
     <Source>__init__.py</Source>
+    <Source>constants.py</Source>
     <Source>dps.py</Source>
     <Source>dps_driver.py</Source>
     <Source>dps_interface.py</Source>
+    <Source>dpsfile.py</Source>
     <Source>mem_interface.py</Source>
     <Source>scopetube.py</Source>
+    <Source>table.py</Source>
     <Source>wve_interface.py</Source>
   </Sources>
   <Forms/>
