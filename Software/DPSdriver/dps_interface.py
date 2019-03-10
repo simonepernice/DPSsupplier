@@ -59,14 +59,14 @@ class DPSinterface:
         col+=colspan
         self.svardpsport=StringVar()
         self.svardpsport.set('/dev/ttyUSB0')        
-        self.entryserport=Entry(root, textvariable=self.svardpsport, width=ENTRYWIDTH)
+        self.entryserport=Entry(root, textvariable=self.svardpsport, width=ENTRYWIDTH, justify='right')
         self.entryserport.grid(row=row, column=col, sticky=W)                
         col+=colspan
         Label(root, text="DPS address: ").grid(row=row, column=col, sticky=E)
         col+=colspan
         self.ivardpsaddr=IntVar()
         self.ivardpsaddr.set(1)
-        self.entrydpsadd=Entry(root, textvariable=self.ivardpsaddr, width=ENTRYWIDTH)
+        self.entrydpsadd=Entry(root, textvariable=self.ivardpsaddr, width=ENTRYWIDTH, justify='right')
         self.entrydpsadd.grid(row=row, column=col, sticky=W)
         col+=colspan
         colspan=2
@@ -86,17 +86,17 @@ class DPSinterface:
         Label(root, text="Model: ").grid(row=row, column=col, sticky=E)        
         col+=colspan
         self.ivarmodel=IntVar()
-        Entry(root, textvariable=self.ivarmodel, state="readonly", width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)        
+        Entry(root, textvariable=self.ivarmodel, state="readonly", width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)        
         col+=colspan
         Label(root, text='SW ver:').grid(row=row, column=col, columnspan=colspan, sticky=E)
         col+=colspan
         self.ivarfwver=IntVar()
-        Entry(root, textvariable=self.ivarfwver, state='readonly', width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)            
+        Entry(root, textvariable=self.ivarfwver, state='readonly', width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)            
         col+=colspan
         Label(root, text='Brightness:').grid(row=row, column=col, columnspan=colspan, sticky=E)
         col+=colspan
         self.ivarbrghtnes=IntVar()
-        e=Entry(root, textvariable=self.ivarbrghtnes, width=ENTRYWIDTH)
+        e=Entry(root, textvariable=self.ivarbrghtnes, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndbrghtnss)
 #        e.bind('<Return>', self.entbndbrghtnss)
         e.grid(row=row, column=col, sticky=W)    
@@ -107,19 +107,19 @@ class DPSinterface:
         Label(root, text="Vinp [V]: ").grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarvinp=DoubleVar()
-        Entry(root, textvariable=self.dvarvinp, state='readonly', width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)       
+        Entry(root, textvariable=self.dvarvinp, state='readonly', width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)       
         col+=colspan
         Label(root, text="Work mode: ").grid(row=row, column=col, sticky=E)
         col+=colspan
         self.svarwrmde=StringVar()
         self.setworkmode(0)
-        Entry(root, textvariable=self.svarwrmde, state='readonly', width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
+        Entry(root, textvariable=self.svarwrmde, state='readonly', width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
         col+=colspan
         Label(root, text="Protection: ").grid(row=row, column=col, sticky=E)        
         col+=1
         self.svarprot=StringVar()
         self.setprotection(0)
-        Entry(root, textvariable=self.svarprot, state='readonly', width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
+        Entry(root, textvariable=self.svarprot, state='readonly', width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
 
         colspan=1
         row+=rowspan
@@ -127,7 +127,7 @@ class DPSinterface:
         Label(root, text="Vmax [V]: ", foreground=Scopetube.VCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarvmaxm0=DoubleVar()
-        e=Entry(root, textvariable=self.dvarvmaxm0, width=ENTRYWIDTH)
+        e=Entry(root, textvariable=self.dvarvmaxm0, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndvmax)
 #        e.bind('<Return>', self.entbndvmax)
         e.grid(row=row, column=col, sticky=W)
@@ -135,7 +135,7 @@ class DPSinterface:
         Label(root, text="Cmax [A]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
         col+=1
         self.dvarcmaxm0=DoubleVar()
-        e=Entry(root, textvariable=self.dvarcmaxm0, width=ENTRYWIDTH)
+        e=Entry(root, textvariable=self.dvarcmaxm0, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndcmax)
 #        e.bind('<Return>', self.entbndcmax)        
         e.grid(row=row, column=col, sticky=W)
@@ -143,7 +143,7 @@ class DPSinterface:
         Label(root, text="Pmax [W]: ", foreground=Scopetube.PCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarpmaxm0=DoubleVar()
-        e=Entry(root, textvariable=self.dvarpmaxm0, width=ENTRYWIDTH)
+        e=Entry(root, textvariable=self.dvarpmaxm0, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndpmax)
 #        e.bind('<Return>', self.entbndpmax)
         e.grid(row=row, column=col, sticky=W)           
@@ -153,17 +153,17 @@ class DPSinterface:
         Label(root, text="Vout [V]: ", foreground=Scopetube.VCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarvout=DoubleVar()
-        Entry(root, textvariable=self.dvarvout, state='readonly', width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
+        Entry(root, textvariable=self.dvarvout, state='readonly', width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
         col+=colspan
         Label(root, text="Cout [A]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarcout=DoubleVar()
-        Entry(root, textvariable=self.dvarcout, state='readonly', width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
+        Entry(root, textvariable=self.dvarcout, state='readonly', width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
         col+=colspan
         Label(root, text="Pout [W]: ", foreground=Scopetube.PCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarpout=DoubleVar()
-        Entry(root, textvariable=self.dvarpout, state='readonly', width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)        
+        Entry(root, textvariable=self.dvarpout, state='readonly', width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)        
 
         row+=rowspan
         col=0
@@ -180,7 +180,7 @@ class DPSinterface:
         col+=colspan
         self.dvarvdiv=DoubleVar()
         self.dvarvdiv.set(1.)          
-        e=Entry(root, textvariable=self.dvarvdiv, width=ENTRYWIDTH)
+        e=Entry(root, textvariable=self.dvarvdiv, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
 #        e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)
@@ -189,7 +189,7 @@ class DPSinterface:
         col+=colspan
         self.dvarcdiv=DoubleVar()
         self.dvarcdiv.set(1.)        
-        e=Entry(root, textvariable=self.dvarcdiv, width=ENTRYWIDTH)
+        e=Entry(root, textvariable=self.dvarcdiv, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
 #        e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)
@@ -198,7 +198,7 @@ class DPSinterface:
         col+=colspan
         self.dvarpdiv=DoubleVar()
         self.dvarpdiv.set(1.)          
-        e=Entry(root, textvariable=self.dvarpdiv, width=ENTRYWIDTH)
+        e=Entry(root, textvariable=self.dvarpdiv, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
 #        e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)
@@ -211,7 +211,7 @@ class DPSinterface:
         col+=colspan
         self.dvarv0=DoubleVar()
         self.dvarv0.set(0.)          
-        e=Entry(root, textvariable=self.dvarv0, width=ENTRYWIDTH)
+        e=Entry(root, textvariable=self.dvarv0, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
 #        e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)
@@ -220,7 +220,7 @@ class DPSinterface:
         col+=colspan
         self.dvarc0=DoubleVar()
         self.dvarc0.set(0.)        
-        e=Entry(root, textvariable=self.dvarc0, width=ENTRYWIDTH)
+        e=Entry(root, textvariable=self.dvarc0, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
 #        e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)
@@ -229,7 +229,7 @@ class DPSinterface:
         col+=colspan
         self.dvarp0=DoubleVar()
         self.dvarp0.set(0.)          
-        e=Entry(root, textvariable=self.dvarp0, width=ENTRYWIDTH)
+        e=Entry(root, textvariable=self.dvarp0, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
 #        e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)
@@ -258,7 +258,7 @@ class DPSinterface:
         col+=colspan
         self.dvarsdiv=DoubleVar()
         self.dvarsdiv.set(60.)        
-        e=Entry(root, textvariable=self.dvarsdiv, width=ENTRYWIDTH)
+        e=Entry(root, textvariable=self.dvarsdiv, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
 #        e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)
@@ -267,7 +267,7 @@ class DPSinterface:
         col+=colspan
         self.dvars0=DoubleVar()
         self.dvars0.set(0.)        
-        e=Entry(root, textvariable=self.dvars0, width=ENTRYWIDTH)
+        e=Entry(root, textvariable=self.dvars0, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
 #        e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)        
@@ -275,7 +275,7 @@ class DPSinterface:
         Label(root, text="S.Rate[s/Sa]: ").grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarsecsmp=DoubleVar()        
-        e=Entry(root, textvariable=self.dvarsecsmp, width=ENTRYWIDTH)
+        e=Entry(root, textvariable=self.dvarsecsmp, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
 #        e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)
@@ -333,7 +333,7 @@ class DPSinterface:
         col+=colspan
         colspan=3
         self.svarwave=StringVar()
-        Entry(root, textvariable=self.svarwave, width=ENTRYWIDTH, state='readonly').grid(row=row, column=col, columnspan=colspan, sticky=E+W)
+        Entry(root, textvariable=self.svarwave, width=ENTRYWIDTH, justify='right', state='readonly').grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         col+=colspan
         colspan=1
         self.ivarplaywv=IntVar()

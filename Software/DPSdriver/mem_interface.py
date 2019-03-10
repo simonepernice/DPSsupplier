@@ -39,12 +39,12 @@ class Meminterface:
         Label(root, text="Vset [V]: ", foreground=Scopetube.VCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarvset=DoubleVar()
-        Entry(root, textvariable=self.dvarvset, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
+        Entry(root, textvariable=self.dvarvset, width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
         col+=colspan
         Label(root, text="Cset [A]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarcset=DoubleVar()
-        Entry(root, textvariable=self.dvarcset, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
+        Entry(root, textvariable=self.dvarcset, width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
 
         colspan=1
         row+=rowspan
@@ -52,17 +52,17 @@ class Meminterface:
         Label(root, text="Vmax [V]: ", foreground=Scopetube.VCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarvmax=DoubleVar()
-        Entry(root, textvariable=self.dvarvmax, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
+        Entry(root, textvariable=self.dvarvmax, width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
         col+=colspan
         Label(root, text="Cmax [A]: ", foreground=Scopetube.CCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarcmax=DoubleVar()
-        Entry(root, textvariable=self.dvarcmax, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
+        Entry(root, textvariable=self.dvarcmax, width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
         col+=colspan
         Label(root, text="Pmax [W]: ", foreground=Scopetube.PCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarpmax=DoubleVar()
-        Entry(root, textvariable=self.dvarpmax, width=ENTRYWIDTH).grid(row=row, column=col, sticky=W)
+        Entry(root, textvariable=self.dvarpmax, width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
 
         row+=rowspan
         colspan=1
