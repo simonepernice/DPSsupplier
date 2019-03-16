@@ -80,27 +80,26 @@ class DPSinterface:
         colspan=1
         Separator(root, orient='horizontal').grid(row=row, columnspan=8, sticky=E+W, pady=8)
 
+        row+=rowspan
         rowspan=1
-        colspan=1
+        colspan=2
         col=0
-        row+=rowspan        
+        self.ivarbrghtnes=IntVar()
+        s=Scale(root, label='Brightness', variable=self.ivarbrghtnes, from_=0, to=5, resolution=1, orient="horizontal")
+        s.bind("<ButtonRelease-1>", self.entbndbrghtnss)
+        s.grid(row=row, column=col, columnspan=colspan, sticky=E+W)                
+        col+=colspan
+        colspan=1
         Label(root, text="Model: ").grid(row=row, column=col, sticky=E)        
         col+=colspan
         self.ivarmodel=IntVar()
         Entry(root, textvariable=self.ivarmodel, state="readonly", width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)        
         col+=colspan
-        Label(root, text='SW ver:').grid(row=row, column=col, columnspan=colspan, sticky=E)
-        col+=colspan
-        self.ivarfwver=IntVar()
-        Entry(root, textvariable=self.ivarfwver, state='readonly', width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)            
-        col+=colspan
-        Label(root, text='Brightness:').grid(row=row, column=col, columnspan=colspan, sticky=E)
-        col+=colspan
-        self.ivarbrghtnes=IntVar()
-        e=Entry(root, textvariable=self.ivarbrghtnes, width=ENTRYWIDTH, justify='right')
-        e.bind('<FocusOut>', self.entbndbrghtnss)
-#        e.bind('<Return>', self.entbndbrghtnss)
-        e.grid(row=row, column=col, sticky=W)    
+        colspan=2
+        self.ivarsetmem=IntVar()
+        s=Scale(root, label='Mem Recall', variable=self.ivarsetmem, from_=0, to=9, resolution=1, orient="horizontal")
+        s.bind("<ButtonRelease-1>", self.entbndmemory)
+        s.grid(row=row, column=col, columnspan=colspan, sticky=E+W)
   
         row+=rowspan
         colspan=1
@@ -110,7 +109,7 @@ class DPSinterface:
         self.dvarvinp=DoubleVar()
         Entry(root, textvariable=self.dvarvinp, state='readonly', width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)       
         col+=colspan
-        Label(root, text="Work mode: ").grid(row=row, column=col, sticky=E)
+        Label(root, text="Out Mode: ").grid(row=row, column=col, sticky=E)
         col+=colspan
         self.svarwrmde=StringVar()
         self.setworkmode(0)
@@ -130,7 +129,7 @@ class DPSinterface:
         self.dvarvmaxm0=DoubleVar()
         e=Entry(root, textvariable=self.dvarvmaxm0, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndvmax)
-#        e.bind('<Return>', self.entbndvmax)
+        e.bind('<Return>', self.entbndvmax)
         e.grid(row=row, column=col, sticky=W)
         col+=colspan
         Label(root, text="Cmax [A]: ", foreground=CCOL).grid(row=row, column=col, sticky=E)
@@ -138,7 +137,7 @@ class DPSinterface:
         self.dvarcmaxm0=DoubleVar()
         e=Entry(root, textvariable=self.dvarcmaxm0, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndcmax)
-#        e.bind('<Return>', self.entbndcmax)        
+        e.bind('<Return>', self.entbndcmax)        
         e.grid(row=row, column=col, sticky=W)
         col+=colspan
         Label(root, text="Pmax [W]: ", foreground=PCOL).grid(row=row, column=col, sticky=E)
@@ -146,7 +145,7 @@ class DPSinterface:
         self.dvarpmaxm0=DoubleVar()
         e=Entry(root, textvariable=self.dvarpmaxm0, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndpmax)
-#        e.bind('<Return>', self.entbndpmax)
+        e.bind('<Return>', self.entbndpmax)
         e.grid(row=row, column=col, sticky=W)           
 
         row+=rowspan
@@ -183,7 +182,7 @@ class DPSinterface:
         self.dvarvdiv.set(1.)          
         e=Entry(root, textvariable=self.dvarvdiv, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-#        e.bind('<Return>', self.entbndcmdbutscpupdt)
+        e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)
         col+=colspan
         Label(root, text="Y [A/div]: ", foreground=CCOL).grid(row=row, column=col, sticky=E)
@@ -192,7 +191,7 @@ class DPSinterface:
         self.dvarcdiv.set(1.)        
         e=Entry(root, textvariable=self.dvarcdiv, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-#        e.bind('<Return>', self.entbndcmdbutscpupdt)
+        e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)
         col+=colspan
         Label(root, text="Y [W/div]: ", foreground=PCOL).grid(row=row, column=col, sticky=E)
@@ -201,7 +200,7 @@ class DPSinterface:
         self.dvarpdiv.set(1.)          
         e=Entry(root, textvariable=self.dvarpdiv, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-#        e.bind('<Return>', self.entbndcmdbutscpupdt)
+        e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)
 
         row+=rowspan
@@ -214,7 +213,7 @@ class DPSinterface:
         self.dvarv0.set(0.)          
         e=Entry(root, textvariable=self.dvarv0, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-#        e.bind('<Return>', self.entbndcmdbutscpupdt)
+        e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)
         col+=colspan
         Label(root, text="Y0 [A]: ", foreground=CCOL).grid(row=row, column=col, sticky=E)
@@ -223,7 +222,7 @@ class DPSinterface:
         self.dvarc0.set(0.)        
         e=Entry(root, textvariable=self.dvarc0, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-#        e.bind('<Return>', self.entbndcmdbutscpupdt)
+        e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)
         col+=colspan
         Label(root, text="Y0 [W]: ", foreground=PCOL).grid(row=row, column=col, sticky=E)
@@ -232,7 +231,7 @@ class DPSinterface:
         self.dvarp0.set(0.)          
         e=Entry(root, textvariable=self.dvarp0, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-#        e.bind('<Return>', self.entbndcmdbutscpupdt)
+        e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)
 
         row+=rowspan
@@ -261,7 +260,7 @@ class DPSinterface:
         self.dvarsdiv.set(60.)        
         e=Entry(root, textvariable=self.dvarsdiv, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-#        e.bind('<Return>', self.entbndcmdbutscpupdt)
+        e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)
         col+=colspan        
         Label(root, text="X0 [s]: ").grid(row=row, column=col, sticky=E)
@@ -270,7 +269,7 @@ class DPSinterface:
         self.dvars0.set(0.)        
         e=Entry(root, textvariable=self.dvars0, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-#        e.bind('<Return>', self.entbndcmdbutscpupdt)
+        e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)        
         col+=colspan
         Label(root, text="S.Rate[s/Sa]: ").grid(row=row, column=col, sticky=E)
@@ -278,7 +277,7 @@ class DPSinterface:
         self.dvarsecsmp=DoubleVar()        
         e=Entry(root, textvariable=self.dvarsecsmp, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-#        e.bind('<Return>', self.entbndcmdbutscpupdt)
+        e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)
 
         row+=rowspan
@@ -418,7 +417,7 @@ class DPSinterface:
             return vcp
 
         self.lock.acquire()
-        data=self.dps.get(['vset', 'cset',  'vout', 'cout', 'pout', 'vinp', 'lock', 'prot', 'cvcc', 'onoff', 'brght'])
+        data=self.dps.get(['vset', 'cset',  'vout', 'cout', 'pout', 'vinp', 'lock', 'prot', 'cvcc', 'onoff', 'brght', 'mset'])
         self.lock.release()
         self.setvscale(data[0])
         self.setcscale(data[1])
@@ -431,6 +430,7 @@ class DPSinterface:
         self.setworkmode(data[8])
         self.ivaroutenab.set(data[9])
         self.ivarbrghtnes.set(data[10])
+        self.ivarsetmem.set(data[11])
         vcp=data[2:5]
         vcp.insert(TPOS, time()-self.strtme)
         return vcp        
@@ -439,7 +439,7 @@ class DPSinterface:
         self.svarprot.set({0: 'none', 1: 'ovp', 2: 'ocp', 3: 'opp'}[p])
 
     def setworkmode(self, wm):
-            self.svarwrmde.set({0: 'cv', 1: 'cc'}[wm])
+        self.svarwrmde.set({0: 'cv', 1: 'cc'}[wm])
 
     def butcmdacquire(self):
         if self.ivaracquire.get():
@@ -459,13 +459,12 @@ class DPSinterface:
                 tkMessageBox.showinfo('Still acquiring',  'Current acquisition session will complete after the next sample') 
 
     def entbndcmdbutscpupdt(self,  *event):
-        vcp0=self.scopetube.setratios(
+        self.scopetube.setratios(
             self.dvarvdiv.get(), self.dvarv0.get(), self.ivarvena.get(),
             self.dvarcdiv.get(), self.dvarc0.get(), self.ivarcena.get(),  
             self.dvarpdiv.get(), self.dvarp0.get(), self.ivarpena.get(),  
             self.dvarsdiv.get(), self.dvars0.get()
         )
-        self.dvarv0.set(vcp0[0])
         self.scopetube.redraw()
 
     def sclbndvolt(self, event):
@@ -533,7 +532,7 @@ class DPSinterface:
         tl.tk.call('wm', 'iconphoto', tl._w, PhotoImage(file='./pwrsup.png'))        
         tl.focus_force()
         tl.grab_set()
-        Meminterface(tl, self.dps, self.lock, self.updatefields)
+        Meminterface(tl, self.dps, self.lock)
 
     def mnucmdedtwve(self):
         if self.dpsfwave is not None:
@@ -542,15 +541,19 @@ class DPSinterface:
             tl.focus_force()
             tl.grab_set()
             Wveinterface(tl, self.dpsfwave)
-    
+
+    def entbndmemory(self, event):
+        if self.isconnected():            
+            m=self.ivarsetmem.get()
+            self.lock.acquire()
+            self.dps.set(['mset'], [m])
+            self.lock.release()
+            self.updatefields(True)
+            #self.ivarsetmem.set(0) #not sure that is required because the active memory is always 0, when a different is set, it is actually copied on 0
+
     def entbndbrghtnss(self, event):
         if self.isconnected():            
             b=self.ivarbrghtnes.get()
-            if b<0:
-                b=0
-            elif b>5:
-                b=5
-            self.ivarbrghtnes.set(b)
             self.lock.acquire()
             self.dps.set(['brght'], [b])
             self.lock.release()
@@ -572,3 +575,12 @@ class DPSinterface:
             self.lock.acquire()
             self.dps.set(['m0pmax'], [self.dvarpmaxm0.get()])
             self.lock.release()  
+
+if __name__=='__main__':
+    from Tkinter import Tk
+    root=Tk()
+
+    root.tk.call('wm', 'iconphoto', root._w, PhotoImage(file='.\\pwrsup.png'))
+
+    my_gui=DPSinterface(root)
+    root.mainloop()

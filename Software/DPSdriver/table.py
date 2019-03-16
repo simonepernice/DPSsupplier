@@ -2,12 +2,10 @@ from Tkinter import Label, DoubleVar
 
 from constants import ENTRYWIDTH
 
-class Table:        
-#    ENTRYWIDTH=10
-
+class Table:
+    
     def __init__(self, root,  data,  row0,  col0, tablerows, tablecols):    
         self.root=root
-#        self.rowview=-1
         self.data=data
         self.rows=tablerows
         
@@ -23,8 +21,6 @@ class Table:
         self.updateview(0)
             
     def updateview(self, row):
-#        if self.rowview==row: return
-#        self.rowview=row
         rows=0
         for orow, drow in zip(self.dvararoutput, self.data[row:row+self.rows]):
             orow[0].set(row)
@@ -37,8 +33,6 @@ class Table:
             for ocol in self.dvararoutput[rows]:
                 ocol.set(0)
             rows+=1
-                
-
 
 if __name__=='__main__':
     from Tkinter import Tk

@@ -18,13 +18,9 @@ class Scopetube(Canvas):
     def setratios(self, vdiv, v0, vena, cdiv, c0, cena, pdiv, p0, pena, tdiv, t0):
         self.yq=self.winfo_height()
         self.ena=(vena, cena, pena)
-        
-        m=-self.yq/YDIV/vdiv
-        if self.v0==v0:
-            self.v0=self.v0/self.vm*m
-        else:
-            self.v0=v0
-        self.vm=m        
+
+        self.vm=-self.yq/YDIV/vdiv        
+        self.v0=v0
 
         self.cm=-self.yq/YDIV/cdiv
         self.c0=c0
@@ -38,10 +34,7 @@ class Scopetube(Canvas):
 
         self.smpt=1./self.tm
         if self.smpt<MINSAMPLETIME:
-            self.smpt=MINSAMPLETIME
-        
-        return (self.v0, self.c0, self.p0)
-            
+            self.smpt=MINSAMPLETIME            
 
     def getyv(self,  v):
         return (v-self.v0)*self.vm+self.yq

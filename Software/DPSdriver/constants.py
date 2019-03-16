@@ -9,11 +9,13 @@ GRIDCOL='black'
 VCOL='red'
 CCOL='green'
 PCOL='blue'
+BCOL='black'
 MINSAMPLETIME=1.
 
 #wve editor table size
 TABLEROW=8
-TABLECOL=5
+TABLECOL=4
+CLIPROW=4
 
 #position of values on dps files
 TPOS=0

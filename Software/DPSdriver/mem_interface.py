@@ -3,33 +3,23 @@ from Tkinter import Label, Button, Checkbutton, Entry, Scale, IntVar, DoubleVar,
 from constants import ENTRYWIDTH, VCOL, CCOL, PCOL
 
 class Meminterface:        
-    def __init__(self, root,  dps,  lock, upfields):    
+    def __init__(self, root,  dps,  lock):    
         root.title("DPS memory setup")
         
         self.root=root
         self.dps=dps
-        self.upfields=upfields
         self.lock=lock
 
         row=0
         col=0
-        rowspan=1
         colspan=2
-        Label(root, text='Memory:').grid(row=row, column=col, columnspan=colspan)
+        rowspan=1
+        self.ivarmem=IntVar()
+        Scale(root, label='Memory', variable=self.ivarmem, from_=0, to=9, resolution=1, orient="horizontal").grid(row=row, column=col, sticky=W+E, columnspan=colspan)
         col+=colspan
         Button(root, text="Recall", command=self.butcmdrecall).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)
         col+=colspan
-        Button(root, text='Store', command=self.butcmdstore).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)
-
-        colspan=2
-        row+=rowspan
-        col=0
-        self.ivarmem=IntVar()
-        sc=Scale(root, variable=self.ivarmem, from_=0, to=9, resolution=1, orient="horizontal")
-        sc.grid(row=row, column=col, sticky=W+E, columnspan=colspan)
-        col+=colspan
-        colspan=4
-        Button(root, text='Active', command=self.butcmdactive).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)        
+        Button(root, text='Store', command=self.butcmdstore).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)     
 
         colspan=1
         row+=rowspan        
@@ -84,7 +74,7 @@ class Meminterface:
         col=4
         Button(root, text="Done", command=self.btncmddone).grid(row=row, column=col, sticky=E+W, columnspan=colspan)
         
-        self.butcmdrecall()
+        #self.butcmdrecall()
 
     def memregs(self):
         mem='m'+str(self.ivarmem.get())
@@ -119,13 +109,6 @@ class Meminterface:
         self.lock.acquire()
         self.dps.set(mr, mv)
         self.lock.release()
- 
-    def butcmdactive(self):
-        self.butcmdrecall()
-        self.lock.acquire()
-        self.dps.set(['mset'], [self.ivarmem.get()])
-        self.lock.release()
-        self.upfields()
         
     def toimplement(self):
         pass
@@ -136,5 +119,5 @@ class Meminterface:
 if __name__=='__main__':
     from Tkinter import Tk
     root=Tk()
-    my_gui=Meminterface(root,  None,  None, None)
+    my_gui=Meminterface(root,  None,  None)
     root.mainloop()

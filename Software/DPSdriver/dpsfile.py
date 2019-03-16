@@ -14,7 +14,6 @@ class Dpsfile():
         with open(fname) as f:
             l=f.readline()
             while l:
-#                print l
                 i=0
                 p=[]
                 for v in l.split(','):
