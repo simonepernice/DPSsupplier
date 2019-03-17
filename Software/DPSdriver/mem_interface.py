@@ -15,7 +15,7 @@ class Meminterface:
         colspan=2
         rowspan=1
         self.ivarmem=IntVar()
-        Scale(root, label='Memory', variable=self.ivarmem, from_=0, to=9, resolution=1, orient="horizontal").grid(row=row, column=col, sticky=W+E, columnspan=colspan)
+        Scale(root, label='Memory', variable=self.ivarmem, from_=1, to=9, resolution=1, orient="horizontal").grid(row=row, column=col, sticky=W+E, columnspan=colspan)
         col+=colspan
         Button(root, text="Recall", command=self.butcmdrecall).grid(row=row, column=col, columnspan=colspan, sticky=E+W, padx=8)
         col+=colspan

@@ -7,7 +7,9 @@ from threading import Thread, Lock
 
 from time import time, sleep
 
-from scopetube import Scopetube
+#from scopetube import Scopetube
+from scope import Scope
+
 from dps_driver import DPSdriver
 from mem_interface import Meminterface
 from wve_interface import Wveinterface
@@ -97,7 +99,7 @@ class DPSinterface:
         col+=colspan
         colspan=2
         self.ivarsetmem=IntVar()
-        s=Scale(root, label='Mem Recall', variable=self.ivarsetmem, from_=0, to=9, resolution=1, orient="horizontal")
+        s=Scale(root, label='Mem Recall', variable=self.ivarsetmem, from_=1, to=9, resolution=1, orient="horizontal")
         s.bind("<ButtonRelease-1>", self.entbndmemory)
         s.grid(row=row, column=col, columnspan=colspan, sticky=E+W)
   
@@ -146,8 +148,8 @@ class DPSinterface:
         e=Entry(root, textvariable=self.dvarpmaxm0, width=ENTRYWIDTH, justify='right')
         e.bind('<FocusOut>', self.entbndpmax)
         e.bind('<Return>', self.entbndpmax)
-        e.grid(row=row, column=col, sticky=W)           
-
+        e.grid(row=row, column=col, sticky=W)        
+        
         row+=rowspan
         col=0
         Label(root, text="Vout [V]: ", foreground=VCOL).grid(row=row, column=col, sticky=E)
@@ -163,122 +165,127 @@ class DPSinterface:
         Label(root, text="Pout [W]: ", foreground=PCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarpout=DoubleVar()
-        Entry(root, textvariable=self.dvarpout, state='readonly', width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)        
+        Entry(root, textvariable=self.dvarpout, state='readonly', width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)                
 
         row+=rowspan
         col=0
-        rowspan=6
-        colspan=6        
-        self.scopetube=Scopetube(root)
-        self.scopetube.grid(row=row, column=col, columnspan=colspan, rowspan=rowspan, sticky=E+W)
+        self.scopetube=Scope(root, row, col)
+        row+=10
         
-        row+=rowspan
-        rowspan=1
-        colspan=1
-        col=0 
-        Label(root, text="Y [V/div]: ", foreground=VCOL).grid(row=row, column=col, sticky=E)
-        col+=colspan
-        self.dvarvdiv=DoubleVar()
-        self.dvarvdiv.set(1.)          
-        e=Entry(root, textvariable=self.dvarvdiv, width=ENTRYWIDTH, justify='right')
-        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-        e.bind('<Return>', self.entbndcmdbutscpupdt)
-        e.grid(row=row, column=col, sticky=W)
-        col+=colspan
-        Label(root, text="Y [A/div]: ", foreground=CCOL).grid(row=row, column=col, sticky=E)
-        col+=colspan
-        self.dvarcdiv=DoubleVar()
-        self.dvarcdiv.set(1.)        
-        e=Entry(root, textvariable=self.dvarcdiv, width=ENTRYWIDTH, justify='right')
-        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-        e.bind('<Return>', self.entbndcmdbutscpupdt)
-        e.grid(row=row, column=col, sticky=W)
-        col+=colspan
-        Label(root, text="Y [W/div]: ", foreground=PCOL).grid(row=row, column=col, sticky=E)
-        col+=colspan
-        self.dvarpdiv=DoubleVar()
-        self.dvarpdiv.set(1.)          
-        e=Entry(root, textvariable=self.dvarpdiv, width=ENTRYWIDTH, justify='right')
-        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-        e.bind('<Return>', self.entbndcmdbutscpupdt)
-        e.grid(row=row, column=col, sticky=W)
-
-        row+=rowspan
-        rowspan=1
-        colspan=1
-        col=0 
-        Label(root, text="Y0 [V]: ", foreground=VCOL).grid(row=row, column=col, sticky=E)
-        col+=colspan
-        self.dvarv0=DoubleVar()
-        self.dvarv0.set(0.)          
-        e=Entry(root, textvariable=self.dvarv0, width=ENTRYWIDTH, justify='right')
-        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-        e.bind('<Return>', self.entbndcmdbutscpupdt)
-        e.grid(row=row, column=col, sticky=W)
-        col+=colspan
-        Label(root, text="Y0 [A]: ", foreground=CCOL).grid(row=row, column=col, sticky=E)
-        col+=colspan
-        self.dvarc0=DoubleVar()
-        self.dvarc0.set(0.)        
-        e=Entry(root, textvariable=self.dvarc0, width=ENTRYWIDTH, justify='right')
-        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-        e.bind('<Return>', self.entbndcmdbutscpupdt)
-        e.grid(row=row, column=col, sticky=W)
-        col+=colspan
-        Label(root, text="Y0 [W]: ", foreground=PCOL).grid(row=row, column=col, sticky=E)
-        col+=colspan
-        self.dvarp0=DoubleVar()
-        self.dvarp0.set(0.)          
-        e=Entry(root, textvariable=self.dvarp0, width=ENTRYWIDTH, justify='right')
-        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-        e.bind('<Return>', self.entbndcmdbutscpupdt)
-        e.grid(row=row, column=col, sticky=W)
-
-        row+=rowspan
-        rowspan=1
-        colspan=2
-        col=0
-        self.ivarvena=IntVar()
-        self.ivarvena.set(1)        
-        Checkbutton(root, variable=self.ivarvena, text='Voltage show', foreground=VCOL, command=self.entbndcmdbutscpupdt).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
-        col+=colspan
-        self.ivarcena=IntVar()
-        self.ivarcena.set(1)        
-        Checkbutton(root, variable=self.ivarcena, text='Current show', foreground=CCOL, command=self.entbndcmdbutscpupdt).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
-        col+=colspan
-        self.ivarpena=IntVar()
-        self.ivarpena.set(1)        
-        Checkbutton(root, variable=self.ivarpena, text='Power show', foreground=PCOL, command=self.entbndcmdbutscpupdt).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
-
-        row+=rowspan
-        col=0
-        colspan=1
-        rowspan=1
-        Label(root, text="X [s/div]: ").grid(row=row, column=col, sticky=E)
-        col+=colspan
-        self.dvarsdiv=DoubleVar()
-        self.dvarsdiv.set(60.)        
-        e=Entry(root, textvariable=self.dvarsdiv, width=ENTRYWIDTH, justify='right')
-        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-        e.bind('<Return>', self.entbndcmdbutscpupdt)
-        e.grid(row=row, column=col, sticky=W)
-        col+=colspan        
-        Label(root, text="X0 [s]: ").grid(row=row, column=col, sticky=E)
-        col+=colspan
-        self.dvars0=DoubleVar()
-        self.dvars0.set(0.)        
-        e=Entry(root, textvariable=self.dvars0, width=ENTRYWIDTH, justify='right')
-        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-        e.bind('<Return>', self.entbndcmdbutscpupdt)
-        e.grid(row=row, column=col, sticky=W)        
-        col+=colspan
-        Label(root, text="S.Rate[s/Sa]: ").grid(row=row, column=col, sticky=E)
-        col+=colspan
-        self.dvarsecsmp=DoubleVar()        
-        e=Entry(root, textvariable=self.dvarsecsmp, width=ENTRYWIDTH, justify='right')
-        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-        e.bind('<Return>', self.entbndcmdbutscpupdt)
-        e.grid(row=row, column=col, sticky=W)
+#        row+=rowspan
+#        col=0
+#        rowspan=6
+#        colspan=6        
+#        self.scopetube=Scopetube(root)
+#        self.scopetube.grid(row=row, column=col, columnspan=colspan, rowspan=rowspan, sticky=E+W)
+#        
+#        row+=rowspan
+#        rowspan=1
+#        colspan=1
+#        col=0 
+#        Label(root, text="Y [V/div]: ", foreground=VCOL).grid(row=row, column=col, sticky=E)
+#        col+=colspan
+#        self.dvarvdiv=DoubleVar()
+#        self.dvarvdiv.set(1.)          
+#        e=Entry(root, textvariable=self.dvarvdiv, width=ENTRYWIDTH, justify='right')
+#        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
+#        e.bind('<Return>', self.entbndcmdbutscpupdt)
+#        e.grid(row=row, column=col, sticky=W)
+#        col+=colspan
+#        Label(root, text="Y [A/div]: ", foreground=CCOL).grid(row=row, column=col, sticky=E)
+#        col+=colspan
+#        self.dvarcdiv=DoubleVar()
+#        self.dvarcdiv.set(1.)        
+#        e=Entry(root, textvariable=self.dvarcdiv, width=ENTRYWIDTH, justify='right')
+#        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
+#        e.bind('<Return>', self.entbndcmdbutscpupdt)
+#        e.grid(row=row, column=col, sticky=W)
+#        col+=colspan
+#        Label(root, text="Y [W/div]: ", foreground=PCOL).grid(row=row, column=col, sticky=E)
+#        col+=colspan
+#        self.dvarpdiv=DoubleVar()
+#        self.dvarpdiv.set(1.)          
+#        e=Entry(root, textvariable=self.dvarpdiv, width=ENTRYWIDTH, justify='right')
+#        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
+#        e.bind('<Return>', self.entbndcmdbutscpupdt)
+#        e.grid(row=row, column=col, sticky=W)
+#
+#        row+=rowspan
+#        rowspan=1
+#        colspan=1
+#        col=0 
+#        Label(root, text="Y0 [V]: ", foreground=VCOL).grid(row=row, column=col, sticky=E)
+#        col+=colspan
+#        self.dvarv0=DoubleVar()
+#        self.dvarv0.set(0.)          
+#        e=Entry(root, textvariable=self.dvarv0, width=ENTRYWIDTH, justify='right')
+#        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
+#        e.bind('<Return>', self.entbndcmdbutscpupdt)
+#        e.grid(row=row, column=col, sticky=W)
+#        col+=colspan
+#        Label(root, text="Y0 [A]: ", foreground=CCOL).grid(row=row, column=col, sticky=E)
+#        col+=colspan
+#        self.dvarc0=DoubleVar()
+#        self.dvarc0.set(0.)        
+#        e=Entry(root, textvariable=self.dvarc0, width=ENTRYWIDTH, justify='right')
+#        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
+#        e.bind('<Return>', self.entbndcmdbutscpupdt)
+#        e.grid(row=row, column=col, sticky=W)
+#        col+=colspan
+#        Label(root, text="Y0 [W]: ", foreground=PCOL).grid(row=row, column=col, sticky=E)
+#        col+=colspan
+#        self.dvarp0=DoubleVar()
+#        self.dvarp0.set(0.)          
+#        e=Entry(root, textvariable=self.dvarp0, width=ENTRYWIDTH, justify='right')
+#        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
+#        e.bind('<Return>', self.entbndcmdbutscpupdt)
+#        e.grid(row=row, column=col, sticky=W)
+#
+#        row+=rowspan
+#        rowspan=1
+#        colspan=2
+#        col=0
+#        self.ivarvena=IntVar()
+#        self.ivarvena.set(1)        
+#        Checkbutton(root, variable=self.ivarvena, text='Voltage show', foreground=VCOL, command=self.entbndcmdbutscpupdt).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
+#        col+=colspan
+#        self.ivarcena=IntVar()
+#        self.ivarcena.set(1)        
+#        Checkbutton(root, variable=self.ivarcena, text='Current show', foreground=CCOL, command=self.entbndcmdbutscpupdt).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
+#        col+=colspan
+#        self.ivarpena=IntVar()
+#        self.ivarpena.set(1)        
+#        Checkbutton(root, variable=self.ivarpena, text='Power show', foreground=PCOL, command=self.entbndcmdbutscpupdt).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
+#
+#        row+=rowspan
+#        col=0
+#        colspan=1
+#        rowspan=1
+#        Label(root, text="X [s/div]: ").grid(row=row, column=col, sticky=E)
+#        col+=colspan
+#        self.dvarsdiv=DoubleVar()
+#        self.dvarsdiv.set(60.)        
+#        e=Entry(root, textvariable=self.dvarsdiv, width=ENTRYWIDTH, justify='right')
+#        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
+#        e.bind('<Return>', self.entbndcmdbutscpupdt)
+#        e.grid(row=row, column=col, sticky=W)
+#        col+=colspan        
+#        Label(root, text="X0 [s]: ").grid(row=row, column=col, sticky=E)
+#        col+=colspan
+#        self.dvars0=DoubleVar()
+#        self.dvars0.set(0.)        
+#        e=Entry(root, textvariable=self.dvars0, width=ENTRYWIDTH, justify='right')
+#        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
+#        e.bind('<Return>', self.entbndcmdbutscpupdt)
+#        e.grid(row=row, column=col, sticky=W)        
+#        col+=colspan
+#        Label(root, text="S.Rate[s/Sa]: ").grid(row=row, column=col, sticky=E)
+#        col+=colspan
+#        self.dvarsecsmp=DoubleVar()        
+#        e=Entry(root, textvariable=self.dvarsecsmp, width=ENTRYWIDTH, justify='right')
+#        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
+#        e.bind('<Return>', self.entbndcmdbutscpupdt)
+#        e.grid(row=row, column=col, sticky=W)
 
         row+=rowspan
         col=0
@@ -344,9 +351,9 @@ class DPSinterface:
         self.ivarpausewv.set(0)        
         Checkbutton(root, variable=self.ivarpausewv, text='Pause', command=self.butcmdpausewave).grid(row=row, column=col, sticky=E+W)
 
-        self.scopetube.update()
-        self.entbndcmdbutscpupdt(None) 
-        self.dvarsecsmp.set(round(self.scopetube.sampletime(), 1))
+#        self.scopetube.update()
+#        self.entbndcmdbutscpupdt(None) 
+#        self.dvarsecsmp.set(round(self.scopetube.sampletime(), 1))
         
     def butcmdconnect(self):
         if self.ivarconctd.get():
@@ -358,8 +365,7 @@ class DPSinterface:
                 self.dps=None
                 return
             
-            m=self.dps.get(['model', 'fware'])
-            self.ivarfwver.set(m[1])
+            m=self.dps.get(['model'])
             m=m[0]
             self.ivarmodel.set(m)
             self.voltscale.config(to=m/100)
@@ -382,7 +388,7 @@ class DPSinterface:
             t=time()
             vip=self.updatefields()
             self.scopetube.addpoint(vip)
-            t=self.dvarsecsmp.get()-(time()-t)
+            t=self.scopetube.getsecsmp()-(time()-t)
             if t>0:
                 sleep(t)
 
@@ -458,14 +464,14 @@ class DPSinterface:
             if self.threadacquire is not None and self.threadacquire.isAlive():
                 tkMessageBox.showinfo('Still acquiring',  'Current acquisition session will complete after the next sample') 
 
-    def entbndcmdbutscpupdt(self,  *event):
-        self.scopetube.setratios(
-            self.dvarvdiv.get(), self.dvarv0.get(), self.ivarvena.get(),
-            self.dvarcdiv.get(), self.dvarc0.get(), self.ivarcena.get(),  
-            self.dvarpdiv.get(), self.dvarp0.get(), self.ivarpena.get(),  
-            self.dvarsdiv.get(), self.dvars0.get()
-        )
-        self.scopetube.redraw()
+#    def entbndcmdbutscpupdt(self,  *event):
+#        self.scopetube.setratios(
+#            self.dvarvdiv.get(), self.dvarv0.get(), self.ivarvena.get(),
+#            self.dvarcdiv.get(), self.dvarc0.get(), self.ivarcena.get(),  
+#            self.dvarpdiv.get(), self.dvarp0.get(), self.ivarpena.get(),  
+#            self.dvarsdiv.get(), self.dvars0.get()
+#        )
+#        self.scopetube.redraw()
 
     def sclbndvolt(self, event):
         if self.isconnected():
@@ -580,7 +586,7 @@ if __name__=='__main__':
     from Tkinter import Tk
     root=Tk()
 
-    root.tk.call('wm', 'iconphoto', root._w, PhotoImage(file='.\\pwrsup.png'))
+    root.tk.call('wm', 'iconphoto', root._w, PhotoImage(file='pwrsup.png'))
 
     my_gui=DPSinterface(root)
     root.mainloop()

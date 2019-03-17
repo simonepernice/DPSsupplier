@@ -11,61 +11,30 @@ class Wveinterface:
         
         self.root=root
         self.fwave=fwave
+        self.datawve=self.fwave.getpoints()
 
-        self.clipboard=[]
+        self.dataclpbrd=[]
         self.clipboardtime=0
 
         row=0
-        col=0
-        rowspan=1
-        colspan=1
-        self.insertlabelrow(root, row, (('step', BCOL), ('time [s]', BCOL), ('voltage [V]', VCOL), ('current [A]', CCOL)))
-
-        row+=rowspan
-        col=0
-        self.viewrowwve=0
-        self.datawve=self.fwave.getpoints()
-        self.tablewve=Table(root, self.datawve, row, col, TABLEROW, TABLECOL)
+        col=0        
+        self.tablewve=Table(root, self.datawve, (('step', BCOL), ('time [s]', BCOL), ('voltage [V]', VCOL), ('current [A]', CCOL)), row, col, TABLEROW, TABLECOL)
         
         row=1
         rowspan=1
-        col=TABLECOL
-        Button(root, text="Line up", command=self.butcmdlneup).grid(row=row, column=col, sticky=E+W, padx=8)
-        col+=colspan        
+        colspan=1
+        col=TABLECOL+colspan
         Button(root, text="Pick beg", command=self.btncmdpckbeg).grid(row=row, column=col, sticky=E+W, padx=8)
-        col=TABLECOL
+        col=TABLECOL+colspan        
         row+=rowspan
-        Button(root, text="Page up", command=self.butcmdpgeup).grid(row=row, column=col, sticky=E+W, padx=8)
-        col+=colspan        
         Button(root, text="Pick end", command=self.btncmdpckend).grid(row=row, column=col, sticky=E+W, padx=8)
-        col=TABLECOL
-        row+=rowspan
-        Button(root, text="Top", command=self.butcmdtop).grid(row=row, column=col, sticky=E+W, padx=8)        
-        row+=rowspan
-        Button(root, text="Goto Time", command=self.butcmdgototime).grid(row=row, column=col, sticky=E+W, padx=8)        
-        col+=colspan
-        self.dvargototime=DoubleVar()
-        Entry(root, textvariable=self.dvargototime, width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
-        row+=rowspan
-        col=TABLECOL
-        Button(root, text="Goto Step", command=self.butcmdgotostep).grid(row=row, column=col, sticky=E+W, padx=8)        
-        col+=colspan
-        self.ivargotostep=IntVar()
-        Entry(root, textvariable=self.ivargotostep, width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
-        row+=rowspan
-        col=TABLECOL
-        Button(root, text="Bottom", command=self.butcmdbottom).grid(row=row, column=col, sticky=E+W, padx=8)
-        row+=rowspan
-        Button(root, text="Page down", command=self.butcmdpgedwn).grid(row=row, column=col, sticky=E+W, padx=8)
-        row+=rowspan
-        Button(root, text="Line down", command=self.butcmdlnedwn).grid(row=row, column=col, sticky=E+W, padx=8)      
 
-        row+=rowspan
+        row=TABLEROW+1
         col=0
         colspan=TABLECOL+2
         Separator(root, orient='horizontal').grid(row=row, columnspan=colspan, sticky=E+W, pady=8)
 
-        row+=CLIPROW
+        row+=rowspan
         colspan=1
         self.insertlabelrow(root, row, (None, None, ('voltage [V]', VCOL), ('current [A]', CCOL))) 
 
@@ -100,23 +69,10 @@ class Wveinterface:
         Separator(root, orient='horizontal').grid(row=row, columnspan=colspan, sticky=E+W, pady=8)
 
         row+=rowspan
-        self.insertlabelrow(root, row, (('step', BCOL), ('dt [s]', BCOL), ('voltage [V]', VCOL), ('current [A]', CCOL)))
-
-        row+=rowspan
         col=0
-        self.viewrowclp=0
-        self.tableclipboard=Table(root, self.clipboard, row, col, CLIPROW, TABLECOL)
-        
-        col=TABLECOL
-        Button(root, text="Line up", command=self.butcmdlneupcp).grid(row=row, column=col, sticky=E+W, padx=8)
-        row+=rowspan
-        Button(root, text="Page up", command=self.butcmdpgeupcp).grid(row=row, column=col, sticky=E+W, padx=8)
-        row+=rowspan
-        Button(root, text="Page down", command=self.butcmdpgedwncp).grid(row=row, column=col, sticky=E+W, padx=8)
-        row+=rowspan
-        Button(root, text="Line down", command=self.butcmdlnedwncp).grid(row=row, column=col, sticky=E+W, padx=8)               
+        self.tableclipboard=Table(root, self.dataclpbrd,  (('step', BCOL), ('dt [s]', BCOL), ('voltage [V]', VCOL), ('current [A]', CCOL)), row, col, CLIPROW, TABLECOL) 
 
-        row+=rowspan
+        row+=CLIPROW+1
         col=0
         colspan=1
         self.insertlabelrow(root, row, (('beg step', BCOL), None, ('end step', BCOL)))        
@@ -159,9 +115,7 @@ class Wveinterface:
         self.ivarrampsteps.set(10)
         self.insertentryrow(root, row, (None, self.ivarrampsteps))
         col=TABLECOL
-        Button(root, text="Ramp Clipb", command=self.toimplement).grid(row=row, column=col, sticky=E+W, padx=8)
-#        col+=colspan
-#        Button(root, text="Trans Clipb", command=self.toimplement).grid(row=row, column=col, sticky=E+W, padx=8)
+        Button(root, text="Ramp Clipb", command=self.butcmdramp).grid(row=row, column=col, sticky=E+W, padx=8)
 
         row+=rowspan
         col=0
@@ -175,70 +129,22 @@ class Wveinterface:
 
     def butcmdmodify(self):
         self.datawve[self.ivarstep.get()]=[self.datawve[self.ivarstep.get()][0], self.dvarvoltage.get(), self.dvarcurrent.get()]
-        self.updateview()
+        self.tablewve.updateview()
 
     def butcmddelete(self):
         del self.datawve[self.ivarstep.get()]
-        self.updateview()
+        self.tablewve.updateview()
 
     def butcmdinsert(self):
         self.datawve.insert(self.findtime(self.dvartime.get()),[self.dvartime.get(), self.dvarvoltage.get(), self.dvarcurrent.get()])
-        self.updateview()
+        self.tablewve.updateview()
 
     def butcmdappend(self):
         self.datawve.append([self.dvarpause.get()+self.datawve[-1][0], self.dvarvoltage.get(), self.dvarcurrent.get()])
-        self.updateview()
-    
-    def butcmdgototime(self):
-        self.viewrowwve=self.findtime(self.dvargototime.get())-1
-        self.updateview()
-
-    def butcmdgotostep(self):
-        self.viewrowwve=self.ivargotostep.get()
-        self.updateview()
-
-    def butcmdlneupcp(self):
-        self.viewrowclp-=1
-        self.updateviewclp()
-
-    def butcmdpgeupcp(self):
-        self.viewrowclp-=(CLIPROW-1)
-        self.updateviewclp()
-
-    def butcmdlneup(self):
-        self.viewrowwve-=1
-        self.updateview()
-
-    def butcmdpgeup(self):
-        self.viewrowwve-=(TABLEROW-1)
-        self.updateview()
-
-    def butcmdtop(self):
-        self.viewrowwve=0
-        self.updateview()
-
-    def butcmdlnedwncp(self):
-        self.viewrowclp+=1
-        self.updateviewclp()
-
-    def butcmdpgedwncp(self):
-        self.viewrowclp+=(CLIPROW-1)
-        self.updateviewclp()
-
-    def butcmdlnedwn(self):
-        self.viewrowwve+=1
-        self.updateview()
-
-    def butcmdpgedwn(self):
-        self.viewrowwve+=(TABLEROW-1)
-        self.updateview()
-
-    def butcmdbottom(self):
-        self.viewrowwve=len(self.datawve)-1
-        self.updateview()
+        self.tablewve.updateview()
         
     def btncmdpckbeg(self):
-        r=self.viewrowwve
+        r=self.tablewve.getfistvisiblerow()
         self.ivarstep.set(r)
         self.dvartime.set(self.datawve[r][0])
         self.dvarvoltage.set(self.datawve[r][1])
@@ -249,7 +155,7 @@ class Wveinterface:
         self.ivarstepend.set(r)
 
     def btncmdpckend(self):
-        r=self.viewrowwve+1
+        r=self.tablewve.getfistvisiblerow()+1
         self.ivarstep.set(r)
         self.dvartime.set(self.datawve[r][0])
         self.dvarvoltage.set(self.datawve[r][1])
@@ -258,7 +164,7 @@ class Wveinterface:
         self.ivarstepend.set(r)
 
     def butcmdcopy(self):
-        del self.clipboard[:]
+        del self.dataclpbrd[:]
         self.clipboardtime=0
         
         sb=self.ivarstepbeg.get()
@@ -271,11 +177,11 @@ class Wveinterface:
         for i in range(sb, self.ivarstepend.get()+1):
             lne=self.datawve[i]
             t1=lne[0]
-            self.clipboard.append([t1-t0]+lne[1:])
+            self.dataclpbrd.append([t1-t0]+lne[1:])
             t0=t1
         
         self.clipboardtime=t0-t00
-        self.tableclipboard.updateview(self.viewrowclp)
+        self.tableclipboard.updateview()
 
     def butcmdcut(self):
         self.butcmdcopy()
@@ -287,7 +193,7 @@ class Wveinterface:
         for i in range(self.ivarstepend.get()-sb+1, len(self.datawve)):
             self.datawve[i][0]-=self.clipboardtime
 
-        self.updateview()
+        self.tablewve.updateview()
 
     def paste(self):
         i=self.ivarpastestep.get()
@@ -297,7 +203,7 @@ class Wveinterface:
             t0=0
 
         for t in range(self.ivarpastetimes.get()):
-            for lne in self.clipboard:
+            for lne in self.dataclpbrd:
                 t1=lne[0]+t0
                 self.datawve.insert(i, [t1]+lne[1:])
                 i+=1
@@ -312,7 +218,7 @@ class Wveinterface:
         for i in range(i, len(self.datawve)):
             self.datawve[i][0]+=dt
 
-        self.updateview()
+        self.tablewve.updateview()
 
     def butcmdpasteovw(self):
         i=self.paste()
@@ -325,29 +231,30 @@ class Wveinterface:
         while i<len(self.datawve) and self.datawve[i][0]<=t0:
             del self.datawve[i]
 
-        self.updateview()
+        self.tablewve.updateview()
 
     def butcmdampliclip(self):
         coeff=(self.dvartcoeff.get(), self.dvarvcoeff.get(), self.dvarccoeff.get())
         acc=0
-        for l in self.clipboard:
+        for l in self.dataclpbrd:
             for i in range(3):
                 l[i]*=coeff[i]
             acc+=l[0]
         self.clipboardtime=acc
         
-        self.tableclipboard.updateview(self.viewrowclp)
+        self.tableclipboard.updateview()
 
     def butcmdtransclip(self):
-        coeff=(self.dvartcoeff.get(), self.dvarvcoeff.get(), self.dvarccoeff.get())
-        acc=0
-        for l in self.clipboard:
-            for i in range(3):
+        coeff=(0, self.dvarvcoeff.get(), self.dvarccoeff.get()) #time is not traslated because stored as delta on the clipboard
+
+        for l in self.dataclpbrd:
+            for i in range(1, 3):
                 l[i]+=coeff[i]
-            acc+=l[0]
-        self.clipboardtime=acc
+
+        self.dataclpbrd[0][0]+=self.dvartcoeff.get()
+        self.clipboardtime+=self.dvartcoeff.get()
         
-        self.tableclipboard.updateview(self.viewrowclp)
+        self.tableclipboard.updateview()
         
     def butcmddone(self):
         self.root.destroy()
@@ -369,30 +276,20 @@ class Wveinterface:
             c+=1
         return c
         
+    def butcmdramp(self):
+        beg=self.dataclpbrd[0][1:]
+        end=self.dataclpbrd[-1][1:]
+        steps=self.ivarrampsteps.get()-1
+        deltastep=[(e-b)/steps for e, b in zip(end, beg)]
+        tstep=(self.clipboardtime-self.dataclpbrd[0][0])/steps
+        del self.dataclpbrd[1:]
+        for s in range( steps):
+            beg=[a+b for a, b in zip(beg, deltastep)]
+            self.dataclpbrd.append([tstep]+beg)
+        self.tableclipboard.updateview()
+        
     def toimplement(self):
         pass
-
-    def findtime(self, t):
-        for r in range(len(self.datawve)):
-            if self.datawve[r][0]>t :
-                break
-        return r
-
-    def updateviewclp(self):
-        if self.viewrowclp<0:
-            self.viewrowclp=0
-        elif self.viewrowclp>=len(self.clipboard):
-            self.viewrowclp=len(self.clipboard)-1 
-        
-        self.tableclipboard.updateview(self.viewrowclp) 
-    
-    def updateview(self):
-        if self.viewrowwve<0:
-            self.viewrowwve=0
-        elif self.viewrowwve>=len(self.datawve):
-            self.viewrowwve=len(self.datawve)-1        
-        
-        self.tablewve.updateview(self.viewrowwve)        
 
 if __name__=='__main__':
     from Tkinter import Tk

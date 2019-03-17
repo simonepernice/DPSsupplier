@@ -8,9 +8,17 @@ class Scopetube(Canvas):
     def __init__(self, root):
         Canvas.__init__(self, root, background='white')
         
-        self.v0=-1
-        self.c0=-1
-        self.p0=-1
+#        self.v0=0
+#        self.c0=0
+#        self.p0=0
+#        self.t0=0
+#        
+#        self.vm=1
+#        self.cm=1
+#        self.pm=1
+#        self.tm=1
+        
+        self.ena=(True, True, True)
         
         self.points=[]
         self.dpsfile=Dpsfile(self.points)
