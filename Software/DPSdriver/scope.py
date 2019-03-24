@@ -5,13 +5,15 @@ from scopetube import Scopetube
 from constants import ENTRYWIDTH, VCOL, CCOL, PCOL
 
 class Scope:        
-    def __init__(self, root, data, row0, col0):
+    def __init__(self, root, data, row0, col0, rowspan=10, colspan=6):
         self.root=root
         
         row=row0
         col=col0
-        rowspan=1
-        colspan=1
+        rowspan-=4 #those lines are used for inputs
+        
+#        rowspan=1
+#        colspan=1
 #        Label(root, text="Vout [V]: ", foreground=VCOL).grid(row=row, column=col, sticky=E)
 #        col+=colspan
 #        self.dvarvout=DoubleVar()
@@ -28,9 +30,8 @@ class Scope:
 #        Entry(root, textvariable=self.dvarpout, state='readonly', width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)        
 
 #        row+=rowspan
-        col=col0
-        rowspan=6
-        colspan=6        
+#        col=col0
+ 
         self.scopetube=Scopetube(root, data)
         self.scopetube.grid(row=row, column=col, columnspan=colspan, rowspan=rowspan, sticky=E+W)
         
@@ -109,7 +110,7 @@ class Scope:
         Checkbutton(root, variable=self.ivarcena, text='Current show', foreground=CCOL, command=self.entbndcmdbutscpupdt).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         col+=colspan
         self.ivarpena=IntVar()
-        self.ivarpena.set(0)        
+        self.ivarpena.set(1)        
         Checkbutton(root, variable=self.ivarpena, text='Power show', foreground=PCOL, command=self.entbndcmdbutscpupdt).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
 
         row+=rowspan
@@ -133,18 +134,18 @@ class Scope:
         e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
         e.bind('<Return>', self.entbndcmdbutscpupdt)
         e.grid(row=row, column=col, sticky=W)        
-        col+=colspan
-        Label(root, text="S.Rate[s/Sa]: ").grid(row=row, column=col, sticky=E)
-        col+=colspan
-        self.dvarsecsmp=DoubleVar()        
-        e=Entry(root, textvariable=self.dvarsecsmp, width=ENTRYWIDTH, justify='right')
-        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-        e.bind('<Return>', self.entbndcmdbutscpupdt)
-        e.grid(row=row, column=col, sticky=W)            
+#        col+=colspan
+#        Label(root, text="S.Rate[s/Sa]: ").grid(row=row, column=col, sticky=E)
+#        col+=colspan
+#        self.dvarsecsmp=DoubleVar()        
+#        e=Entry(root, textvariable=self.dvarsecsmp, width=ENTRYWIDTH, justify='right')
+#        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
+#        e.bind('<Return>', self.entbndcmdbutscpupdt)
+#        e.grid(row=row, column=col, sticky=W)            
 
         self.scopetube.update()
         self.entbndcmdbutscpupdt(None) 
-        self.dvarsecsmp.set(round(self.scopetube.sampletime(), 1))
+#        self.dvarsecsmp.set(round(self.scopetube.sampletime(), 1))
 
     def entbndcmdbutscpupdt(self,  *event):
         self.scopetube.setratios(
@@ -155,8 +156,8 @@ class Scope:
         )
         self.scopetube.redraw()
         
-    def getsecsmp(self):
-        return self.dvarsecsmp.get()
+#    def getsecsmp(self):
+#        return self.dvarsecsmp.get()
 
     def update(self):
         self.scopetube.update()

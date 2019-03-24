@@ -86,7 +86,7 @@ class Scopetube(Canvas):
             y+=DY
 
     def sampletime(self):
-        return self.smpt
+        return round(self.smpt, 1)
         
     def drawsignals(self):
         for p0, p1 in zip(self.points[0:-1], self.points[1:]):
@@ -97,7 +97,7 @@ class Scopetube(Canvas):
         x0=self.getxt(p0[TPOS])
         x1=self.getxt(p1[TPOS])
         for i, c, gety, en in zip((VPOS, CPOS, PPOS), (VCOL, CCOL, PCOL), (self.getyv, self.getyc, self.getyp), self.ena):
-            if en: self.create_line(x0, gety(p0[i]), x1, gety(p1[i]), fill=c)
+            if en and len(p0)>i: self.create_line(x0, gety(p0[i]), x1, gety(p1[i]), fill=c)
 
     def load(self,  fname):
         del self.points[:]

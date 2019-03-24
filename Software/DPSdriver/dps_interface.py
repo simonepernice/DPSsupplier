@@ -169,15 +169,23 @@ class DPSinterface:
 
         row+=rowspan
         col=0
-        self.scopetube=Scope(root, [], row, col)
-        row+=10
+        self.scope=Scope(root, [], row, col)
+        
+        row+=9
+        col=4
+        Label(root, text="Rte[s/Sa]: ").grid(row=row, column=col, sticky=E)
+        col+=colspan
+        self.dvarsecsmp=DoubleVar()
+        self.dvarsecsmp.set(self.scope.sampletime())
+        e=Entry(root, textvariable=self.dvarsecsmp, width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W) 
+        
         
 #        row+=rowspan
 #        col=0
 #        rowspan=6
 #        colspan=6        
-#        self.scopetube=Scopetube(root)
-#        self.scopetube.grid(row=row, column=col, columnspan=colspan, rowspan=rowspan, sticky=E+W)
+#        self.scope=Scopetube(root)
+#        self.scope.grid(row=row, column=col, columnspan=colspan, rowspan=rowspan, sticky=E+W)
 #        
 #        row+=rowspan
 #        rowspan=1
@@ -351,9 +359,9 @@ class DPSinterface:
         self.ivarpausewv.set(0)        
         Checkbutton(root, variable=self.ivarpausewv, text='Pause', command=self.butcmdpausewave).grid(row=row, column=col, sticky=E+W)
 
-#        self.scopetube.update()
+#        self.scope.update()
 #        self.entbndcmdbutscpupdt(None) 
-#        self.dvarsecsmp.set(round(self.scopetube.sampletime(), 1))
+#        self.dvarsecsmp.set(round(self.scope.sampletime(), 1))
         
     def butcmdconnect(self):
         if self.ivarconctd.get():
@@ -387,8 +395,8 @@ class DPSinterface:
         while self.ivaracquire.get() and self.dps is not None:
             t=time()
             vip=self.updatefields()
-            self.scopetube.addpoint(vip)
-            t=self.scopetube.getsecsmp()-(time()-t)
+            self.scope.addpoint(vip)
+            t=self.dvarsecsmp.get()-(time()-t)
             if t>0:
                 sleep(t)
 
@@ -456,7 +464,7 @@ class DPSinterface:
                 self.ivaracquire.set(0)
                 tkMessageBox.showwarning('Still acquiring',  'Previous acquisition session is still running, it will finish after the next sample acquisition.')
                 return
-            self.scopetube.resetpoints()
+            self.scope.resetpoints()
             self.strtme=time()
             self.threadacquire=Thread(target=self.polling)
             self.threadacquire.start()
@@ -465,13 +473,13 @@ class DPSinterface:
                 tkMessageBox.showinfo('Still acquiring',  'Current acquisition session will complete after the next sample') 
 
 #    def entbndcmdbutscpupdt(self,  *event):
-#        self.scopetube.setratios(
+#        self.scope.setratios(
 #            self.dvarvdiv.get(), self.dvarv0.get(), self.ivarvena.get(),
 #            self.dvarcdiv.get(), self.dvarc0.get(), self.ivarcena.get(),  
 #            self.dvarpdiv.get(), self.dvarp0.get(), self.ivarpena.get(),  
 #            self.dvarsdiv.get(), self.dvars0.get()
 #        )
-#        self.scopetube.redraw()
+#        self.scope.redraw()
 
     def sclbndvolt(self, event):
         if self.isconnected():
@@ -495,12 +503,12 @@ class DPSinterface:
     def mnucmdload (self):
         fname=tkFileDialog.askopenfilename(initialdir=".", title="Select point file", filetypes=(("dps files","*.dps"), ("all files","*.*")))
         if fname:
-            self.scopetube.load(fname)
+            self.scope.load(fname)
 
     def mnucmdsave(self):
         fname=tkFileDialog.asksaveasfilename(initialdir=".", title="Select dps file", filetypes=(("dps files","*.dps"), ("all files","*.*")))
         if fname:
-            self.scopetube.save(fname)
+            self.scope.save(fname)
 
     def butcmdkeylock(self):
         if self.isconnected():

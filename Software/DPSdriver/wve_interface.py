@@ -1,4 +1,4 @@
-from Tkinter import Label, Button, Entry, IntVar, DoubleVar, E, W
+from Tkinter import Label, Button, Entry, IntVar, DoubleVar, E, W, N, S
 from ttk import Separator
 
 from constants import ENTRYWIDTH, TABLEROW, TABLECOL, CLIPROW, VCOL, CCOL, BCOL
@@ -21,7 +21,8 @@ class Wveinterface:
         col=0        
         self.tablewve=Table(root, self.datawve, (('step', BCOL), ('time [s]', BCOL), ('voltage [V]', VCOL), ('current [A]', CCOL)), row, col, TABLEROW, TABLECOL)
         
-        self.scope=Scope(root, self.datawve, 0, TABLECOL+2)
+#        self.scope=Scope(root, self.datawve, 0, TABLECOL+3, rowspan=TABLEROW+1)
+        self.scope=Scope(root, self.datawve, TABLEROW+1+1, 0, rowspan=14)#, rowspan=TABLEROW+1)
         
         row=1
         rowspan=1
@@ -34,101 +35,115 @@ class Wveinterface:
 
         row=TABLEROW+1
         col=0
-        colspan=TABLECOL+2
+        colspan=TABLECOL+2+1+6
         Separator(root, orient='horizontal').grid(row=row, columnspan=colspan, sticky=E+W, pady=8)
+        
 
-        row+=rowspan
+        Separator(root, orient='vertical').grid(row=0, column=6, rowspan=TABLEROW+1+10+1, sticky=N+S, padx=8)        
+
+        row=0
+        col=TABLECOL+2+1
         colspan=1
-        self.insertlabelrow(root, row, (None, None, ('voltage [V]', VCOL), ('current [A]', CCOL))) 
+        self.insertlabelrow(root, row, col, (None, None, ('voltage [V]', VCOL), ('current [A]', CCOL))) 
 
         row+=rowspan
-        self.insertlabelrow(root, row, ( ('time [s]:', BCOL), ))
+        self.insertlabelrow(root, row, col, (('time [s]:', BCOL), ))
         self.dvartime=DoubleVar()
         self.dvarvoltage=DoubleVar()
         self.dvarcurrent=DoubleVar()
-        self.insertentryrow(root, row, (None, self.dvartime, self.dvarvoltage, self.dvarcurrent)) 
-        col=TABLECOL
+        self.insertentryrow(root, row, col, (None, self.dvartime, self.dvarvoltage, self.dvarcurrent)) 
+        col+=TABLECOL
         Button(root, text="Insert", command=self.butcmdinsert).grid(row=row, column=col, sticky=E+W, padx=8)
 
         row+=rowspan
-        self.insertlabelrow(root, row, ( ('step :', BCOL), ))        
+        col=TABLECOL+2+1
+        self.insertlabelrow(root, row, col, (('step :', BCOL), ))        
         self.ivarstep=IntVar()
-        self.insertentryrow(root, row, (None, self.ivarstep, self.dvarvoltage, self.dvarcurrent)) 
-        col=TABLECOL
+        self.insertentryrow(root, row, col, (None, self.ivarstep, self.dvarvoltage, self.dvarcurrent)) 
+        col+=TABLECOL
         Button(root, text="Modify", command=self.butcmdmodify).grid(row=row, column=col, sticky=E+W, padx=8)
         col+=colspan
         Button(root, text="Delete", command=self.butcmddelete).grid(row=row, column=col, sticky=E+W, padx=8)
 
         row+=rowspan
-        self.insertlabelrow(root, row, ( ('pause [s]:', BCOL), ))        
+        col=TABLECOL+2+1
+        self.insertlabelrow(root, row, col, (('pause [s]:', BCOL), ))        
         self.dvarpause=DoubleVar()
-        self.insertentryrow(root, row, (None, self.dvarpause, self.dvarvoltage, self.dvarcurrent)) 
-        col=TABLECOL
+        self.insertentryrow(root, row, col, (None, self.dvarpause, self.dvarvoltage, self.dvarcurrent)) 
+        col+=TABLECOL
         Button(root, text="Append", command=self.butcmdappend).grid(row=row, column=col, sticky=E+W, padx=8)
+        
 
-        row+=rowspan
-        col=0
-        colspan=TABLECOL+2
-        Separator(root, orient='horizontal').grid(row=row, columnspan=colspan, sticky=E+W, pady=8)
 
-        row+=rowspan
-        col=0
+#        row+=rowspan
+#        col=0
+#        colspan=TABLECOL+2
+#        Separator(root, orient='horizontal').grid(row=row, columnspan=colspan, sticky=E+W, pady=8)
+#        
+
+        row=TABLEROW+2
+        col=TABLECOL+3
         self.tableclipboard=Table(root, self.dataclpbrd,  (('step', BCOL), ('dt [s]', BCOL), ('voltage [V]', VCOL), ('current [A]', CCOL)), row, col, CLIPROW, TABLECOL) 
 
         row+=CLIPROW+1
-        col=0
+        col=TABLECOL+3
         colspan=1
-        self.insertlabelrow(root, row, (('beg step', BCOL), None, ('end step', BCOL)))        
+        self.insertlabelrow(root, row, col, (('beg step', BCOL), None, ('end step', BCOL)))        
         self.ivarstepbeg=IntVar()
         self.ivarstepend=IntVar()
-        self.insertentryrow(root, row, (None, self.ivarstepbeg, None, self.ivarstepend))
-        col=TABLECOL
+        col=self.insertentryrow(root, row, col, (None, self.ivarstepbeg, None, self.ivarstepend))
+        print 'copy col'+str(col)
         Button(root, text="Copy", command=self.butcmdcopy).grid(row=row, column=col, sticky=E+W, padx=8)
         col+=colspan
         Button(root, text="Cut", command=self.butcmdcut).grid(row=row, column=col, sticky=E+W, padx=8)
 
         row+=rowspan
-        col=0
-        self.insertlabelrow(root, row, (('paste step', BCOL), None, ('paste times', BCOL))) 
+        col=TABLECOL+3
+        self.insertlabelrow(root, row, col, (('paste step', BCOL), None, ('paste times', BCOL))) 
         self.ivarpastestep=IntVar()
         self.ivarpastetimes=IntVar()
         self.ivarpastetimes.set(1)
-        self.insertentryrow(root, row, (None, self.ivarpastestep, None, self.ivarpastetimes))
-        col=TABLECOL
-        Button(root, text="Paste Insert", command=self.butcmdpasteins).grid(row=row, column=col, sticky=E+W, padx=8)
+        col=self.insertentryrow(root, row, col, (None, self.ivarpastestep, None, self.ivarpastetimes))
+#        col=TABLECOL
+        print 'past insert col'+str(col)
+        Button(root, text="Paste Ins", command=self.butcmdpasteins).grid(row=row, column=col, sticky=E+W, padx=8)
         col+=colspan
-        Button(root, text="Paste Overwrt", command=self.butcmdpasteovw).grid(row=row, column=col, sticky=E+W, padx=8)
+        Button(root, text="Paste Ovw", command=self.butcmdpasteovw).grid(row=row, column=col, sticky=E+W, padx=8)
         
         row+=rowspan
-        col=0
-        self.insertlabelrow(root, row, ( ('t,v,c m|q', BCOL),)) 
+        col=TABLECOL+3
+        self.insertlabelrow(root, row, col, ( ('t,v,c m|q', BCOL),)) 
         self.dvartcoeff=DoubleVar()
         self.dvarvcoeff=DoubleVar()
         self.dvarccoeff=DoubleVar()
-        self.insertentryrow(root, row, (None, self.dvartcoeff, self.dvarvcoeff, self.dvarccoeff))
-        col=TABLECOL
-        Button(root, text="Ampli Clipb", command=self.butcmdampliclip).grid(row=row, column=col, sticky=E+W, padx=8)
+        col=self.insertentryrow(root, row, col, (None, self.dvartcoeff, self.dvarvcoeff, self.dvarccoeff))
+#        col=TABLECOL
+        print 'ampli clipb col '+str(col)
+        Button(root, text="Amp Clipb", command=self.butcmdampliclip).grid(row=row, column=col, sticky=E+W, padx=8)
         col+=colspan
-        Button(root, text="Trans Clipb", command=self.butcmdtransclip).grid(row=row, column=col, sticky=E+W, padx=8)
+        Button(root, text="Trn Clipb", command=self.butcmdtransclip).grid(row=row, column=col, sticky=E+W, padx=8)
         
         row+=rowspan
-        col=0
-        self.insertlabelrow(root, row, (('ramp steps', BCOL), )) 
+        col=TABLECOL+3
+        self.insertlabelrow(root, row, col, (('rmp steps', BCOL), )) 
         self.ivarrampsteps=IntVar()
         self.ivarrampsteps.set(10)
-        self.insertentryrow(root, row, (None, self.ivarrampsteps))
-        col=TABLECOL
-        Button(root, text="Ramp Clipb", command=self.butcmdramp).grid(row=row, column=col, sticky=E+W, padx=8)
+        col=self.insertentryrow(root, row, col, (None, self.ivarrampsteps, None, None))
+#        col=TABLECOL
+        Button(root, text="Rmp Clipb", command=self.butcmdramp).grid(row=row, column=col, sticky=E+W, padx=8)
 
-        row+=rowspan
-        col=0
-        colspan=TABLECOL+2
-        Separator(root, orient='horizontal').grid(row=row, columnspan=colspan, sticky=E+W, pady=8)
+#        row=TABLEROW+1+1+6+4
+#        col=0
+#        colspan=TABLECOL+2+1+6
+#        Separator(root, orient='horizontal').grid(row=row, columnspan=colspan, sticky=E+W, pady=8)
 
-        col=TABLECOL+1
+        col=TABLECOL+2+1+TABLECOL+1
         colspan=1
-        row+=rowspan
+        row+=rowspan    
+        print 'done col '+str(col)
         Button(root, text="Done", command=self.butcmddone).grid(row=row, column=col, sticky=E+W, padx=8)
+        
+        self.scope.redraw()
 
     def butcmdmodify(self):
         self.datawve[self.ivarstep.get()]=[self.datawve[self.ivarstep.get()][0], self.dvarvoltage.get(), self.dvarcurrent.get()]
@@ -272,22 +287,20 @@ class Wveinterface:
     def butcmddone(self):
         self.root.destroy()
         
-    def insertlabelrow(self, root, row, names):
-        c=0
+    def insertlabelrow(self, root, row, col, names):
         for n in names:
             if n is not None:
-                Label(root, text=n[0], foreground=n[1]).grid(row=row, column=c)
-            c+=1
-        return c
+                Label(root, text=n[0], foreground=n[1]).grid(row=row, column=col)
+            col+=1
+        return col
 
-    def insertentryrow(self, root, row, vars):
+    def insertentryrow(self, root, row, col, vars):
         r=row
-        c=0
         for v in vars:
             if v is not None:
-                Entry(root, textvariable=v, width=ENTRYWIDTH, justify='right').grid(row=r, column=c)
-            c+=1
-        return c
+                Entry(root, textvariable=v, width=ENTRYWIDTH, justify='right').grid(row=r, column=col)
+            col+=1
+        return col
         
     def butcmdramp(self):
         beg=self.dataclpbrd[0][1:]

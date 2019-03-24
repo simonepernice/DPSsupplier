@@ -28,7 +28,7 @@ class Table:
         colspan=1
         rowspan=1
         row=row0+1
-        col=NCOLS        
+        col=col0+NCOLS        
         if NROWS>=2:
             Button(root, text="Line up", command=self.butcmdlneup).grid(row=row, column=col, sticky=E+W, padx=8)
             row+=rowspan
