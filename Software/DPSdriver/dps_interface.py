@@ -169,7 +169,7 @@ class DPSinterface:
 
         row+=rowspan
         col=0
-        self.scopetube=Scope(root, row, col)
+        self.scopetube=Scope(root, [], row, col)
         row+=10
         
 #        row+=rowspan
@@ -535,7 +535,10 @@ class DPSinterface:
         
     def mnucmdedtmem(self):
         tl=Toplevel(self.root)
-        tl.tk.call('wm', 'iconphoto', tl._w, PhotoImage(file='./pwrsup.png'))        
+        try:
+            tl.tk.call('wm', 'iconphoto', tl._w, PhotoImage(file='pwrsup.png'))
+        except:
+            print ('It is not possible to load the application icon')            
         tl.focus_force()
         tl.grab_set()
         Meminterface(tl, self.dps, self.lock)
@@ -543,7 +546,10 @@ class DPSinterface:
     def mnucmdedtwve(self):
         if self.dpsfwave is not None:
             tl=Toplevel(self.root)
-            tl.tk.call('wm', 'iconphoto', tl._w, PhotoImage(file='./pwrsup.png'))        
+            try:
+                tl.tk.call('wm', 'iconphoto', tl._w, PhotoImage(file='pwrsup.png'))
+            except:
+                print ('It is not possible to load the application icon')
             tl.focus_force()
             tl.grab_set()
             Wveinterface(tl, self.dpsfwave)
@@ -586,7 +592,10 @@ if __name__=='__main__':
     from Tkinter import Tk
     root=Tk()
 
-    root.tk.call('wm', 'iconphoto', root._w, PhotoImage(file='pwrsup.png'))
+    try:
+        root.tk.call('wm', 'iconphoto', root._w, PhotoImage(file='pwrsup.png'))
+    except:
+        print ('It is not possible to load the application icon')
 
     my_gui=DPSinterface(root)
     root.mainloop()

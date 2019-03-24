@@ -5,7 +5,7 @@ from scopetube import Scopetube
 from constants import ENTRYWIDTH, VCOL, CCOL, PCOL
 
 class Scope:        
-    def __init__(self, root, row0, col0):
+    def __init__(self, root, data, row0, col0):
         self.root=root
         
         row=row0
@@ -27,17 +27,17 @@ class Scope:
 #        self.dvarpout=DoubleVar()
 #        Entry(root, textvariable=self.dvarpout, state='readonly', width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)        
 
-        row+=rowspan
-        col=0
+#        row+=rowspan
+        col=col0
         rowspan=6
         colspan=6        
-        self.scopetube=Scopetube(root)
+        self.scopetube=Scopetube(root, data)
         self.scopetube.grid(row=row, column=col, columnspan=colspan, rowspan=rowspan, sticky=E+W)
         
         row+=rowspan
         rowspan=1
         colspan=1
-        col=0 
+        col=col0
         Label(root, text="Y [V/div]: ", foreground=VCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarvdiv=DoubleVar()
@@ -68,7 +68,7 @@ class Scope:
         row+=rowspan
         rowspan=1
         colspan=1
-        col=0 
+        col=col0 
         Label(root, text="Y0 [V]: ", foreground=VCOL).grid(row=row, column=col, sticky=E)
         col+=colspan
         self.dvarv0=DoubleVar()
@@ -99,7 +99,7 @@ class Scope:
         row+=rowspan
         rowspan=1
         colspan=2
-        col=0
+        col=col0
         self.ivarvena=IntVar()
         self.ivarvena.set(1)        
         Checkbutton(root, variable=self.ivarvena, text='Voltage show', foreground=VCOL, command=self.entbndcmdbutscpupdt).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
@@ -109,11 +109,11 @@ class Scope:
         Checkbutton(root, variable=self.ivarcena, text='Current show', foreground=CCOL, command=self.entbndcmdbutscpupdt).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         col+=colspan
         self.ivarpena=IntVar()
-        self.ivarpena.set(1)        
+        self.ivarpena.set(0)        
         Checkbutton(root, variable=self.ivarpena, text='Power show', foreground=PCOL, command=self.entbndcmdbutscpupdt).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
 
         row+=rowspan
-        col=0
+        col=col0
         colspan=1
         rowspan=1
         Label(root, text="X [s/div]: ").grid(row=row, column=col, sticky=E)
@@ -190,7 +190,7 @@ if __name__=='__main__':
     from Tkinter import Tk
     root=Tk()
 
-    scope=Scope(root, 0, 0)
+    scope=Scope(root, [], 0, 0)
     scope.load('../tests/testpoints.dps')
     root.mainloop()
         

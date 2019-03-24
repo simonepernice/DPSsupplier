@@ -3,6 +3,7 @@ from ttk import Separator
 
 from constants import ENTRYWIDTH, TABLEROW, TABLECOL, CLIPROW, VCOL, CCOL, BCOL
 from table import Table
+from scope import Scope
 
 class Wveinterface:        
 
@@ -19,6 +20,8 @@ class Wveinterface:
         row=0
         col=0        
         self.tablewve=Table(root, self.datawve, (('step', BCOL), ('time [s]', BCOL), ('voltage [V]', VCOL), ('current [A]', CCOL)), row, col, TABLEROW, TABLECOL)
+        
+        self.scope=Scope(root, self.datawve, 0, TABLECOL+2)
         
         row=1
         rowspan=1
@@ -130,18 +133,22 @@ class Wveinterface:
     def butcmdmodify(self):
         self.datawve[self.ivarstep.get()]=[self.datawve[self.ivarstep.get()][0], self.dvarvoltage.get(), self.dvarcurrent.get()]
         self.tablewve.updateview()
+        self.scope.redraw()
 
     def butcmddelete(self):
         del self.datawve[self.ivarstep.get()]
         self.tablewve.updateview()
+        self.scope.redraw()
 
     def butcmdinsert(self):
         self.datawve.insert(self.findtime(self.dvartime.get()),[self.dvartime.get(), self.dvarvoltage.get(), self.dvarcurrent.get()])
         self.tablewve.updateview()
+        self.scope.redraw()
 
     def butcmdappend(self):
         self.datawve.append([self.dvarpause.get()+self.datawve[-1][0], self.dvarvoltage.get(), self.dvarcurrent.get()])
         self.tablewve.updateview()
+        self.scope.redraw()
         
     def btncmdpckbeg(self):
         r=self.tablewve.getfistvisiblerow()
@@ -182,6 +189,7 @@ class Wveinterface:
         
         self.clipboardtime=t0-t00
         self.tableclipboard.updateview()
+        self.scope.redraw()
 
     def butcmdcut(self):
         self.butcmdcopy()
@@ -194,6 +202,7 @@ class Wveinterface:
             self.datawve[i][0]-=self.clipboardtime
 
         self.tablewve.updateview()
+        self.scope.redraw()
 
     def paste(self):
         i=self.ivarpastestep.get()
@@ -219,6 +228,7 @@ class Wveinterface:
             self.datawve[i][0]+=dt
 
         self.tablewve.updateview()
+        self.scope.redraw()
 
     def butcmdpasteovw(self):
         i=self.paste()
@@ -232,6 +242,7 @@ class Wveinterface:
             del self.datawve[i]
 
         self.tablewve.updateview()
+        self.scope.redraw()
 
     def butcmdampliclip(self):
         coeff=(self.dvartcoeff.get(), self.dvarvcoeff.get(), self.dvarccoeff.get())
@@ -243,6 +254,7 @@ class Wveinterface:
         self.clipboardtime=acc
         
         self.tableclipboard.updateview()
+        self.scope.redraw()
 
     def butcmdtransclip(self):
         coeff=(0, self.dvarvcoeff.get(), self.dvarccoeff.get()) #time is not traslated because stored as delta on the clipboard
@@ -255,6 +267,7 @@ class Wveinterface:
         self.clipboardtime+=self.dvartcoeff.get()
         
         self.tableclipboard.updateview()
+        self.scope.redraw()
         
     def butcmddone(self):
         self.root.destroy()
@@ -287,6 +300,7 @@ class Wveinterface:
             beg=[a+b for a, b in zip(beg, deltastep)]
             self.dataclpbrd.append([tstep]+beg)
         self.tableclipboard.updateview()
+        self.scope.redraw()
         
     def toimplement(self):
         pass
@@ -302,5 +316,5 @@ if __name__=='__main__':
             line.append(r*10+1.11*(c+1))
         points.append(line)
             
-    my_gui=Wveinterface(root,  Dpsfile(points))
+    my_gui=Wveinterface(root, Dpsfile(points))
     root.mainloop()

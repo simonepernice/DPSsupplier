@@ -5,7 +5,7 @@ from constants import XDIV, YDIV, GRIDDASH, GRIDCOL, VCOL, CCOL, PCOL, MINSAMPLE
 from dpsfile import Dpsfile
 
 class Scopetube(Canvas):
-    def __init__(self, root):
+    def __init__(self, root, data):
         Canvas.__init__(self, root, background='white')
         
 #        self.v0=0
@@ -20,7 +20,7 @@ class Scopetube(Canvas):
         
         self.ena=(True, True, True)
         
-        self.points=[]
+        self.points=data
         self.dpsfile=Dpsfile(self.points)
                 
     def setratios(self, vdiv, v0, vena, cdiv, c0, cena, pdiv, p0, pena, tdiv, t0):
@@ -59,8 +59,7 @@ class Scopetube(Canvas):
     def resetpoints(self):
         del self.points[:]
         self.redraw()
-    
-    #a point is made by: (voltage, current, power, time)
+
     def addpoint(self, p):
         self.points.append(p)
         if len(self.points)>1:
@@ -92,6 +91,7 @@ class Scopetube(Canvas):
     def drawsignals(self):
         for p0, p1 in zip(self.points[0:-1], self.points[1:]):
             self.drawseg(p0, p1)
+#            print p0[0], p1[0]
     
     def drawseg(self, p0, p1):
         x0=self.getxt(p0[TPOS])
@@ -100,8 +100,12 @@ class Scopetube(Canvas):
             if en: self.create_line(x0, gety(p0[i]), x1, gety(p1[i]), fill=c)
 
     def load(self,  fname):
-        self.resetpoints()
-        self.dpsfile.load(fname, self.addpoint)
+        del self.points[:]
+#        self.points+=
+        self.dpsfile.load(fname)
+#        print self.points
+        self.redraw()
+        
 
     def save(self, fname):
         self.dpsfile.save(fname)
@@ -109,5 +113,5 @@ class Scopetube(Canvas):
 if __name__=='__main__':
     from Tkinter import Tk
     root=Tk()
-    my_gui=Scopetube(root).pack()
+    my_gui=Scopetube(root, []).pack()
     root.mainloop()

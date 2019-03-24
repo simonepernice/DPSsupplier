@@ -10,7 +10,8 @@ class Dpsfile():
     def getpoints(self):
         return self.points
 
-    def load(self,  fname, addpoint=None):
+    def load(self,  fname):#, addpoint=None):
+#        print "called load on dps file"
         with open(fname) as f:
             l=f.readline()
             while l:
@@ -36,10 +37,11 @@ class Dpsfile():
                 if len(self.points)>0 and p[TPOS]<=self.points[-1][TPOS]:
                     raise ValueError('Not monotonic time found '+str(p[TPOS])+' at line'+l)
                 p=tuple(p)
-                if addpoint is not None: 
-                    addpoint(p)
-                else:
-                    self.points.append(p)
+#                if addpoint is not None: 
+#                    addpoint(p)
+#                else:
+#                    self.points.append(p)
+                self.points.append(p)
                 l=f.readline()
                 
 #        print self.points
