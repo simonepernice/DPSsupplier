@@ -11,7 +11,6 @@ class Dpsfile():
         return self.points
 
     def load(self,  fname):#, addpoint=None):
-#        print "called load on dps file"
         with open(fname) as f:
             l=f.readline()
             while l:
@@ -29,22 +28,19 @@ class Dpsfile():
                     i+=1
                 while i<4:#Try to add what is missing
                     if i==PPOS:#power missing
-                       p.append(p[VPOS]*p[CPOS]) 
+                       p.append(p[VPOS]*p[CPOS])                        
                     elif len(self.points)>0:#voltage or current missing copy from previous row
                         p.append(self.points[-1][i])
                     else:#on the first row add 0.
                         p.append(0.)
+                    i+=1
                 if len(self.points)>0 and p[TPOS]<=self.points[-1][TPOS]:
                     raise ValueError('Not monotonic time found '+str(p[TPOS])+' at line'+l)
                 p=tuple(p)
-#                if addpoint is not None: 
-#                    addpoint(p)
-#                else:
-#                    self.points.append(p)
+
                 self.points.append(p)
                 l=f.readline()
                 
-#        print self.points
         return self.points
 
     def convert(self, val):

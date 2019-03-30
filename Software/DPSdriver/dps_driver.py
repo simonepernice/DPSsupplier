@@ -7,7 +7,6 @@
 """
 
 import serial
-
 import modbus_tk.defines as cst
 from modbus_tk import modbus_rtu
 
@@ -83,8 +82,8 @@ class DPSdriver():
         except Exception as e:
             raise ValueError('It was not possible to link to the power supplier '+str(e))
 
-        self.master.set_timeout(5.0)
-        self.master.set_verbose(True)
+        #Without time out rise exception for missing answer
+        self.master.set_timeout(2.0)
 
     def ___del___(self):
         self.master.__del__()
@@ -109,7 +108,7 @@ class DPSdriver():
             r = DPSdriver.REGISTERS[reg]
             if 'r' not in r[1]:
                 raise MemoryError('The register '+reg+' is not readable, therefore get is not allowed.')
-            adrdgt .append((r[0], r[2]))
+            adrdgt.append((r[0], r[2]))
 
         #Sort the registers in order to collect all the calls for adiacent register in only one to make it faster
         adrdgtsrt = sorted(adrdgt)

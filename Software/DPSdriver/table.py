@@ -1,6 +1,7 @@
 from Tkinter import Label, DoubleVar, IntVar, Button, E, W, Entry
 
-from constants import ENTRYWIDTH
+from constants import ENTRYWIDTH, TPOS
+from gridlayoutrowinsert import insertlabelrow
 
 class Table:
     
@@ -9,12 +10,8 @@ class Table:
         self.data=data
         self.NROWS=NROWS
         self.firstvisiblerow=0
-        
-        c=0
-        for l in labels:
-            if l is not None:
-                Label(root, text=l[0], width=ENTRYWIDTH, foreground=l[1]).grid(row=row0, column=col0+c)
-            c+=1
+
+        insertlabelrow(root, row0, col0, labels)
         
         self.dvararoutput=[]
         for r in range(NROWS):
@@ -44,13 +41,13 @@ class Table:
                         self.dvargototime=DoubleVar()
                         Entry(root, textvariable=self.dvargototime, width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
                         row=NROWS-3
-                        col=NCOLS
+                        col=col0+NCOLS
                         Button(root, text="Goto Step", command=self.butcmdgotostep).grid(row=row, column=col, sticky=E+W, padx=8)        
                         col+=colspan
                         self.ivargotostep=IntVar()
                         Entry(root, textvariable=self.ivargotostep, width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
                         row+=rowspan
-                    col=NCOLS
+                    col=col0+NCOLS
                     Button(root, text="Bottom", command=self.butcmdbottom).grid(row=row, column=col, sticky=E+W, padx=8)
                     row+=rowspan
                 Button(root, text="Page down", command=self.butcmdpgedwn).grid(row=row, column=col, sticky=E+W, padx=8)
@@ -79,7 +76,7 @@ class Table:
 
         while rows<self.NROWS:#clean next fields not written if eny
             for ocol in self.dvararoutput[rows]:
-                ocol.set(0)
+                ocol.set('')
             rows+=1
 
     def butcmdgototime(self):
@@ -116,8 +113,10 @@ class Table:
     
     def findtime(self, t):
         for r in range(len(self.data)):
-            if self.data[r][0]>t :
+            if self.data[r][TPOS]>t :
                 break
+        else:
+            r=len(self.data)
         return r
 
 if __name__=='__main__':

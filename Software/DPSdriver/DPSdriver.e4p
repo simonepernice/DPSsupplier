@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project DPSdriver -->
-<!-- Saved: 2019-03-17, 19:38:43 -->
+<!-- Saved: 2019-03-30, 16:25:47 -->
 <!-- Copyright (C) 2019 Simone Pernice, pernice@libero.it -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -15,15 +15,38 @@
   <Eol index="0"/>
   <Sources>
     <Source>__init__.py</Source>
+    <Source>__main__.py</Source>
+    <Source>clipboard.py</Source>
     <Source>constants.py</Source>
-    <Source>dps.py</Source>
     <Source>dps_driver.py</Source>
     <Source>dps_interface.py</Source>
     <Source>dpsfile.py</Source>
+    <Source>gridlayoutrowinsert.py</Source>
     <Source>mem_interface.py</Source>
+    <Source>modbus_tk/__init__.py</Source>
+    <Source>modbus_tk/defines.py</Source>
+    <Source>modbus_tk/exceptions.py</Source>
+    <Source>modbus_tk/hooks.py</Source>
+    <Source>modbus_tk/modbus.py</Source>
+    <Source>modbus_tk/modbus_rtu.py</Source>
+    <Source>modbus_tk/modbus_tcp.py</Source>
+    <Source>modbus_tk/simulator.py</Source>
+    <Source>modbus_tk/simulator_rpc_client.py</Source>
+    <Source>modbus_tk/utils.py</Source>
+    <Source>poller.py</Source>
     <Source>scope.py</Source>
     <Source>scopetube.py</Source>
+    <Source>serial/__init__.py</Source>
+    <Source>serial/rfc2217.py</Source>
+    <Source>serial/rs485.py</Source>
+    <Source>serial/serialcli.py</Source>
+    <Source>serial/serialjava.py</Source>
+    <Source>serial/serialposix.py</Source>
+    <Source>serial/serialutil.py</Source>
+    <Source>serial/serialwin32.py</Source>
+    <Source>serial/win32.py</Source>
     <Source>table.py</Source>
+    <Source>waver.py</Source>
     <Source>wve_interface.py</Source>
   </Sources>
   <Forms/>
@@ -31,7 +54,7 @@
   <Resources/>
   <Interfaces/>
   <Others/>
-  <MainScript>dps.py</MainScript>
+  <MainScript>__main__.py</MainScript>
   <Vcs>
     <VcsType>None</VcsType>
   </Vcs>

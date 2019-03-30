@@ -1,13 +1,10 @@
 from Tkinter import Label, Checkbutton, Entry, Scale, IntVar, StringVar, DoubleVar, E, W, NORMAL, Menu, Toplevel, PhotoImage
 import tkMessageBox
 import tkFileDialog
+
 from ttk import Separator
+from time import time
 
-from threading import Thread, Lock
-
-from time import time, sleep
-
-#from scopetube import Scopetube
 from scope import Scope
 
 from dps_driver import DPSdriver
@@ -15,6 +12,9 @@ from mem_interface import Meminterface
 from wve_interface import Wveinterface
 from constants import ENTRYWIDTH, VCOL, CCOL, PCOL, TPOS
 from dpsfile import Dpsfile
+from gridlayoutrowinsert import insertlabelrow, insertentryrow
+from poller import Poller
+from waver import Waver
 
 class DPSinterface:        
     def __init__(self, root):        
@@ -22,9 +22,10 @@ class DPSinterface:
         root.title("DPS power supplier interface by Simone Pernice")
         
         self.dps=None
-        self.lock=Lock()
-        self.threadacquire=None
+        self.poller=None
+        self.waver=None
         self.strtme=time()
+        self.dpsfwave=None
         
         menubar=Menu(root)
         
@@ -38,9 +39,10 @@ class DPSinterface:
         menubar.add_cascade(label="Scope", menu=scopemenu)
         
         wavemenu=Menu(menubar, tearoff=0)
-        wavemenu.add_command(label="Load wave...", command=self.mnucmdselwve)
+        wavemenu.add_command(label="New wave", command=self.mnucmdnewwve)
+        wavemenu.add_command(label="Load wave...", command=self.mnucmdloadwve)
         wavemenu.add_command(label="Edit wave...", command=self.mnucmdedtwve)
-        wavemenu.add_command(label="Save wave as...", command=self.toimplement)
+        wavemenu.add_command(label="Save wave as...", command=self.mnucmdsavewve)
         menubar.add_cascade(label="Wave", menu=wavemenu)
  
         memmenu=Menu(menubar, tearoff=0)
@@ -58,18 +60,17 @@ class DPSinterface:
         col=0
         rowspan=1
         colspan=1
-        Label(root, text="Serial port: ").grid(row=row, column=col, sticky=E)
+        insertlabelrow(root, row, col, ("Serial: ", None, "Addr,Baud: "), E)
         col+=colspan
         self.svardpsport=StringVar()
         self.svardpsport.set('/dev/ttyUSB0')        
         self.entryserport=Entry(root, textvariable=self.svardpsport, width=ENTRYWIDTH, justify='right')
         self.entryserport.grid(row=row, column=col, sticky=W)                
         col+=colspan
-        Label(root, text="DPS address: ").grid(row=row, column=col, sticky=E)
         col+=colspan
-        self.ivardpsaddr=IntVar()
-        self.ivardpsaddr.set(1)
-        self.entrydpsadd=Entry(root, textvariable=self.ivardpsaddr, width=ENTRYWIDTH, justify='right')
+        self.svardpsaddbrt=StringVar()
+        self.svardpsaddbrt.set('1, 9600')
+        self.entrydpsadd=Entry(root, textvariable=self.svardpsaddbrt, width=ENTRYWIDTH, justify='right')
         self.entrydpsadd.grid(row=row, column=col, sticky=W)
         col+=colspan
         colspan=2
@@ -100,72 +101,39 @@ class DPSinterface:
         colspan=2
         self.ivarsetmem=IntVar()
         s=Scale(root, label='Mem Recall', variable=self.ivarsetmem, from_=1, to=9, resolution=1, orient="horizontal")
-        s.bind("<ButtonRelease-1>", self.entbndmemory)
+        s.bind("<ButtonRelease-1>", self.sclbndmemory)
         s.grid(row=row, column=col, columnspan=colspan, sticky=E+W)
   
         row+=rowspan
         colspan=1
         col=0
-        Label(root, text="Vinp [V]: ").grid(row=row, column=col, sticky=E)
-        col+=colspan
+        insertlabelrow(root, row, col, (("Vinp [V]: ", VCOL), None, "Out Mode: ", None, "Protection: "), E)
         self.dvarvinp=DoubleVar()
-        Entry(root, textvariable=self.dvarvinp, state='readonly', width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)       
-        col+=colspan
-        Label(root, text="Out Mode: ").grid(row=row, column=col, sticky=E)
-        col+=colspan
         self.svarwrmde=StringVar()
         self.setworkmode(0)
-        Entry(root, textvariable=self.svarwrmde, state='readonly', width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
-        col+=colspan
-        Label(root, text="Protection: ").grid(row=row, column=col, sticky=E)        
-        col+=1
         self.svarprot=StringVar()
         self.setprotection(0)
-        Entry(root, textvariable=self.svarprot, state='readonly', width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
+        insertentryrow(root, row, col, (None, self.dvarvinp, None, self.svarwrmde, None, self.svarprot), 'right', W, 'readonly')
 
         colspan=1
         row+=rowspan
         col=0
-        Label(root, text="Vmax [V]: ", foreground=VCOL).grid(row=row, column=col, sticky=E)
-        col+=colspan
+        insertlabelrow(root, row, col, (("Vmax [V]: ", VCOL), None, ("Cmax [A]: ", CCOL), None, ("Pmax [W]: ", PCOL)), E)
         self.dvarvmaxm0=DoubleVar()
-        e=Entry(root, textvariable=self.dvarvmaxm0, width=ENTRYWIDTH, justify='right')
-        e.bind('<FocusOut>', self.entbndvmax)
-        e.bind('<Return>', self.entbndvmax)
-        e.grid(row=row, column=col, sticky=W)
-        col+=colspan
-        Label(root, text="Cmax [A]: ", foreground=CCOL).grid(row=row, column=col, sticky=E)
-        col+=1
         self.dvarcmaxm0=DoubleVar()
-        e=Entry(root, textvariable=self.dvarcmaxm0, width=ENTRYWIDTH, justify='right')
-        e.bind('<FocusOut>', self.entbndcmax)
-        e.bind('<Return>', self.entbndcmax)        
-        e.grid(row=row, column=col, sticky=W)
-        col+=colspan
-        Label(root, text="Pmax [W]: ", foreground=PCOL).grid(row=row, column=col, sticky=E)
-        col+=colspan
         self.dvarpmaxm0=DoubleVar()
-        e=Entry(root, textvariable=self.dvarpmaxm0, width=ENTRYWIDTH, justify='right')
-        e.bind('<FocusOut>', self.entbndpmax)
-        e.bind('<Return>', self.entbndpmax)
-        e.grid(row=row, column=col, sticky=W)        
+        entries=insertentryrow(root, row, col, (None, self.dvarvmaxm0, None, self.dvarcmaxm0, None, self.dvarpmaxm0), 'right', W)
+        for e, f in zip(entries, (self.entbndvmax, self.entbndcmax, self.entbndpmax)):
+            e.bind('<FocusOut>', f)
+            e.bind('<Return>', f)
         
         row+=rowspan
         col=0
-        Label(root, text="Vout [V]: ", foreground=VCOL).grid(row=row, column=col, sticky=E)
-        col+=colspan
+        insertlabelrow(root, row, col, (("Vout [V]: ", VCOL), None, ("Cout [A]: ", CCOL), None, ("Pout [W]: ", PCOL)), E)
         self.dvarvout=DoubleVar()
-        Entry(root, textvariable=self.dvarvout, state='readonly', width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
-        col+=colspan
-        Label(root, text="Cout [A]: ", foreground=CCOL).grid(row=row, column=col, sticky=E)
-        col+=colspan
         self.dvarcout=DoubleVar()
-        Entry(root, textvariable=self.dvarcout, state='readonly', width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
-        col+=colspan
-        Label(root, text="Pout [W]: ", foreground=PCOL).grid(row=row, column=col, sticky=E)
-        col+=colspan
         self.dvarpout=DoubleVar()
-        Entry(root, textvariable=self.dvarpout, state='readonly', width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)                
+        insertentryrow(root, row, col, (None, self.dvarvout, None, self.dvarcout, None, self.dvarpout), 'right', W, 'readonly')
 
         row+=rowspan
         col=0
@@ -178,123 +146,7 @@ class DPSinterface:
         self.dvarsecsmp=DoubleVar()
         self.dvarsecsmp.set(self.scope.sampletime())
         e=Entry(root, textvariable=self.dvarsecsmp, width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W) 
-        
-        
-#        row+=rowspan
-#        col=0
-#        rowspan=6
-#        colspan=6        
-#        self.scope=Scopetube(root)
-#        self.scope.grid(row=row, column=col, columnspan=colspan, rowspan=rowspan, sticky=E+W)
-#        
-#        row+=rowspan
-#        rowspan=1
-#        colspan=1
-#        col=0 
-#        Label(root, text="Y [V/div]: ", foreground=VCOL).grid(row=row, column=col, sticky=E)
-#        col+=colspan
-#        self.dvarvdiv=DoubleVar()
-#        self.dvarvdiv.set(1.)          
-#        e=Entry(root, textvariable=self.dvarvdiv, width=ENTRYWIDTH, justify='right')
-#        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-#        e.bind('<Return>', self.entbndcmdbutscpupdt)
-#        e.grid(row=row, column=col, sticky=W)
-#        col+=colspan
-#        Label(root, text="Y [A/div]: ", foreground=CCOL).grid(row=row, column=col, sticky=E)
-#        col+=colspan
-#        self.dvarcdiv=DoubleVar()
-#        self.dvarcdiv.set(1.)        
-#        e=Entry(root, textvariable=self.dvarcdiv, width=ENTRYWIDTH, justify='right')
-#        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-#        e.bind('<Return>', self.entbndcmdbutscpupdt)
-#        e.grid(row=row, column=col, sticky=W)
-#        col+=colspan
-#        Label(root, text="Y [W/div]: ", foreground=PCOL).grid(row=row, column=col, sticky=E)
-#        col+=colspan
-#        self.dvarpdiv=DoubleVar()
-#        self.dvarpdiv.set(1.)          
-#        e=Entry(root, textvariable=self.dvarpdiv, width=ENTRYWIDTH, justify='right')
-#        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-#        e.bind('<Return>', self.entbndcmdbutscpupdt)
-#        e.grid(row=row, column=col, sticky=W)
-#
-#        row+=rowspan
-#        rowspan=1
-#        colspan=1
-#        col=0 
-#        Label(root, text="Y0 [V]: ", foreground=VCOL).grid(row=row, column=col, sticky=E)
-#        col+=colspan
-#        self.dvarv0=DoubleVar()
-#        self.dvarv0.set(0.)          
-#        e=Entry(root, textvariable=self.dvarv0, width=ENTRYWIDTH, justify='right')
-#        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-#        e.bind('<Return>', self.entbndcmdbutscpupdt)
-#        e.grid(row=row, column=col, sticky=W)
-#        col+=colspan
-#        Label(root, text="Y0 [A]: ", foreground=CCOL).grid(row=row, column=col, sticky=E)
-#        col+=colspan
-#        self.dvarc0=DoubleVar()
-#        self.dvarc0.set(0.)        
-#        e=Entry(root, textvariable=self.dvarc0, width=ENTRYWIDTH, justify='right')
-#        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-#        e.bind('<Return>', self.entbndcmdbutscpupdt)
-#        e.grid(row=row, column=col, sticky=W)
-#        col+=colspan
-#        Label(root, text="Y0 [W]: ", foreground=PCOL).grid(row=row, column=col, sticky=E)
-#        col+=colspan
-#        self.dvarp0=DoubleVar()
-#        self.dvarp0.set(0.)          
-#        e=Entry(root, textvariable=self.dvarp0, width=ENTRYWIDTH, justify='right')
-#        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-#        e.bind('<Return>', self.entbndcmdbutscpupdt)
-#        e.grid(row=row, column=col, sticky=W)
-#
-#        row+=rowspan
-#        rowspan=1
-#        colspan=2
-#        col=0
-#        self.ivarvena=IntVar()
-#        self.ivarvena.set(1)        
-#        Checkbutton(root, variable=self.ivarvena, text='Voltage show', foreground=VCOL, command=self.entbndcmdbutscpupdt).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
-#        col+=colspan
-#        self.ivarcena=IntVar()
-#        self.ivarcena.set(1)        
-#        Checkbutton(root, variable=self.ivarcena, text='Current show', foreground=CCOL, command=self.entbndcmdbutscpupdt).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
-#        col+=colspan
-#        self.ivarpena=IntVar()
-#        self.ivarpena.set(1)        
-#        Checkbutton(root, variable=self.ivarpena, text='Power show', foreground=PCOL, command=self.entbndcmdbutscpupdt).grid(row=row, column=col, columnspan=colspan, sticky=E+W)
-#
-#        row+=rowspan
-#        col=0
-#        colspan=1
-#        rowspan=1
-#        Label(root, text="X [s/div]: ").grid(row=row, column=col, sticky=E)
-#        col+=colspan
-#        self.dvarsdiv=DoubleVar()
-#        self.dvarsdiv.set(60.)        
-#        e=Entry(root, textvariable=self.dvarsdiv, width=ENTRYWIDTH, justify='right')
-#        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-#        e.bind('<Return>', self.entbndcmdbutscpupdt)
-#        e.grid(row=row, column=col, sticky=W)
-#        col+=colspan        
-#        Label(root, text="X0 [s]: ").grid(row=row, column=col, sticky=E)
-#        col+=colspan
-#        self.dvars0=DoubleVar()
-#        self.dvars0.set(0.)        
-#        e=Entry(root, textvariable=self.dvars0, width=ENTRYWIDTH, justify='right')
-#        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-#        e.bind('<Return>', self.entbndcmdbutscpupdt)
-#        e.grid(row=row, column=col, sticky=W)        
-#        col+=colspan
-#        Label(root, text="S.Rate[s/Sa]: ").grid(row=row, column=col, sticky=E)
-#        col+=colspan
-#        self.dvarsecsmp=DoubleVar()        
-#        e=Entry(root, textvariable=self.dvarsecsmp, width=ENTRYWIDTH, justify='right')
-#        e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
-#        e.bind('<Return>', self.entbndcmdbutscpupdt)
-#        e.grid(row=row, column=col, sticky=W)
-
+    
         row+=rowspan
         col=0
         colspan=2
@@ -358,15 +210,20 @@ class DPSinterface:
         self.ivarpausewv=IntVar()
         self.ivarpausewv.set(0)        
         Checkbutton(root, variable=self.ivarpausewv, text='Pause', command=self.butcmdpausewave).grid(row=row, column=col, sticky=E+W)
-
-#        self.scope.update()
-#        self.entbndcmdbutscpupdt(None) 
-#        self.dvarsecsmp.set(round(self.scope.sampletime(), 1))
         
     def butcmdconnect(self):
         if self.ivarconctd.get():
             try:
-                self.dps=DPSdriver(self.svardpsport.get(), self.ivardpsaddr.get())
+                flds=self.svardpsaddbrt.get().split(',')
+                if len(flds)>0:
+                    ch=int(flds[0])
+                else:
+                    ch=1
+                if len(flds)>1:
+                    br=int(flds[1])
+                else:
+                    br=9600
+                self.dps=DPSdriver(self.svardpsport.get(), ch, br) 
             except Exception as e:
                 tkMessageBox.showerror('Error',  'Cannot connect: '+str(e))
                 self.ivarconctd.set(0)
@@ -377,28 +234,28 @@ class DPSinterface:
             m=m[0]
             self.ivarmodel.set(m)
             self.voltscale.config(to=m/100)
-            self.curntscale.config(to=m%100)            
+            self.curntscale.config(to=m%100)
+            
+            self.scope.resetpoints()
 
-            self.ivarkeylock.set(0) #otherwise update fields does not read all
-            self.updatefields()
             self.ivarkeylock.set(1)
             self.butcmdkeylock()
-            
+            self.updatefields(True)
+                        
             self.entryserport.config(state='readonly')
             self.entrydpsadd.config(state='readonly')
         else:
+            #stop polling 
+            self.ivaracquire.set(0)
+            if self.poller:
+                self.poller.wake()
+            #stop waveform generation
+            self.ivarplaywv.set(0)
+            if self.waver:
+                self.waver.wake()
             self.dps=None
             self.entryserport.config(state=NORMAL)
             self.entrydpsadd.config(state=NORMAL)
-
-    def polling(self):
-        while self.ivaracquire.get() and self.dps is not None:
-            t=time()
-            vip=self.updatefields()
-            self.scope.addpoint(vip)
-            t=self.dvarsecsmp.get()-(time()-t)
-            if t>0:
-                sleep(t)
 
     def setvscale(self, v):
         self.dvarvscale.set(int(v))
@@ -416,9 +273,7 @@ class DPSinterface:
         
     def updatefields(self, forcereadall=False):
         if not forcereadall and self.ivarkeylock.get():#if user keep locked fewer data are read, otherwise all 
-            self.lock.acquire()
-            data=self.dps.get(['vout', 'cout', 'pout', 'vinp', 'lock', 'prot', 'cvcc'])
-            self.lock.release()                      
+            data=self.dps.get(['vout', 'cout', 'pout', 'vinp', 'lock', 'prot', 'cvcc'])                     
             self.dvarvout.set(data[0])
             self.dvarcout.set(data[1])
             self.dvarpout.set(data[2])
@@ -428,25 +283,28 @@ class DPSinterface:
             self.setworkmode(data[6])
             vcp=data[0:3]
             vcp.insert(TPOS, time()-self.strtme)
-            return vcp
 
-        self.lock.acquire()
-        data=self.dps.get(['vset', 'cset',  'vout', 'cout', 'pout', 'vinp', 'lock', 'prot', 'cvcc', 'onoff', 'brght', 'mset'])
-        self.lock.release()
-        self.setvscale(data[0])
-        self.setcscale(data[1])
-        self.dvarvout.set(data[2])
-        self.dvarcout.set(data[3])
-        self.dvarpout.set(data[4])
-        self.dvarvinp.set(data[5])
-        self.ivarkeylock.set(data[6])
-        self.setprotection(data[7])
-        self.setworkmode(data[8])
-        self.ivaroutenab.set(data[9])
-        self.ivarbrghtnes.set(data[10])
-        self.ivarsetmem.set(data[11])
-        vcp=data[2:5]
-        vcp.insert(TPOS, time()-self.strtme)
+        else:#all data is read
+            data=self.dps.get(['vset', 'cset',  'vout', 'cout', 'pout', 'vinp', 'lock', 'prot', 'cvcc', 'onoff', 'brght', 'mset', 'm0ovp', 'm0ocp', 'm0opp'])
+            self.setvscale(data[0])
+            self.setcscale(data[1])
+            self.dvarvout.set(data[2])
+            self.dvarcout.set(data[3])
+            self.dvarpout.set(data[4])
+            self.dvarvinp.set(data[5])
+            self.ivarkeylock.set(data[6])
+            self.setprotection(data[7])
+            self.setworkmode(data[8])
+            self.ivaroutenab.set(data[9])
+            self.ivarbrghtnes.set(data[10])
+            self.ivarsetmem.set(data[11])
+            self.dvarvmaxm0.set(data[12])
+            self.dvarcmaxm0.set(data[13])
+            self.dvarpmaxm0.set(data[14])
+            vcp=data[2:5]
+            vcp.insert(TPOS, time()-self.strtme)
+
+        self.scope.addpoint(vcp)
         return vcp        
 
     def setprotection(self, p):
@@ -460,69 +318,72 @@ class DPSinterface:
             if not self.isconnected():
                 self.ivaracquire.set(0)
                 return
-            if self.threadacquire is not None and self.threadacquire.isAlive():
-                self.ivaracquire.set(0)
-                tkMessageBox.showwarning('Still acquiring',  'Previous acquisition session is still running, it will finish after the next sample acquisition.')
-                return
             self.scope.resetpoints()
             self.strtme=time()
-            self.threadacquire=Thread(target=self.polling)
-            self.threadacquire.start()
+            self.poller=Poller(self.ivaracquire, self.dvarsecsmp, self.updatefields)            
         else:
-            if self.threadacquire is not None and self.threadacquire.isAlive():
-                tkMessageBox.showinfo('Still acquiring',  'Current acquisition session will complete after the next sample') 
-
-#    def entbndcmdbutscpupdt(self,  *event):
-#        self.scope.setratios(
-#            self.dvarvdiv.get(), self.dvarv0.get(), self.ivarvena.get(),
-#            self.dvarcdiv.get(), self.dvarc0.get(), self.ivarcena.get(),  
-#            self.dvarpdiv.get(), self.dvarp0.get(), self.ivarpena.get(),  
-#            self.dvarsdiv.get(), self.dvars0.get()
-#        )
-#        self.scope.redraw()
+            self.poller.wake()
 
     def sclbndvolt(self, event):
         if self.isconnected():
-            self.lock.acquire()
             self.dps.set(['vset'],  [self.getvscale()])
-            self.lock.release()
 
     def sclbndcrnt(self, event):
         if self.isconnected():
-            self.lock.acquire()
             self.dps.set(['cset'],  [self.getcscale()])
-            self.lock.release()
 
-    def mnucmdselwve (self):
-        fname=tkFileDialog.askopenfilename(initialdir=".", title="Select dps file", filetypes=(("dps files","*.dps"), ("all files","*.*")))
+    def mnucmdnewwve(self):
+        self.dpsfwave=Dpsfile()
+        self.svarwave.set('unnamed wave')
+
+    def mnucmdloadwve (self):
+        fname=tkFileDialog.askopenfilename(initialdir=".", title="Select wave file to load", filetypes=(("dps files","*.dps"), ("all files","*.*")))
         if fname:
             self.svarwave.set(fname)
             self.dpsfwave=Dpsfile()
             self.dpsfwave.load(fname)
 
+    def mnucmdedtwve(self):
+        if self.dpsfwave is not None:
+            tl=Toplevel(self.root)
+            try:
+                tl.tk.call('wm', 'iconphoto', tl._w, PhotoImage(file='pwrsup.png'))
+            except:
+                print ('It is not possible to load the application icon')
+            tl.focus_force()
+            tl.grab_set()
+            Wveinterface(tl, self.dpsfwave.getpoints())
+        else:
+            tkMessageBox.showinfo('No wave loaded', 'Load or create a new wave file to modify')         
+
+    def mnucmdsavewve (self):
+        if self.dpsfwave is not None:
+            fname=tkFileDialog.asksaveasfilename(initialdir=".", title="Select wave file to save", filetypes=(("dps files","*.dps"), ("all files","*.*")))
+            if fname:
+                self.dpsfwave.save(fname)
+                self.svarwave.set(fname)
+        else:
+            tkMessageBox.showinfo('No wave in memory', 'Load or create a wave file to modify') 
+
     def mnucmdload (self):
-        fname=tkFileDialog.askopenfilename(initialdir=".", title="Select point file", filetypes=(("dps files","*.dps"), ("all files","*.*")))
+        fname=tkFileDialog.askopenfilename(initialdir=".", title="Select data file to load", filetypes=(("dps files","*.dps"), ("all files","*.*")))
         if fname:
             self.scope.load(fname)
 
     def mnucmdsave(self):
-        fname=tkFileDialog.asksaveasfilename(initialdir=".", title="Select dps file", filetypes=(("dps files","*.dps"), ("all files","*.*")))
+        fname=tkFileDialog.asksaveasfilename(initialdir=".", title="Select data file to save", filetypes=(("dps files","*.dps"), ("all files","*.*")))
         if fname:
             self.scope.save(fname)
 
     def butcmdkeylock(self):
         if self.isconnected():
-            self.lock.acquire()
             self.dps.set(['lock'], [self.ivarkeylock.get()])
-            self.lock.release()
         else:
             self.ivarkeylock.set(0)
 
     def butcmdoutenable(self):
         if self.isconnected():
-            self.lock.acquire()
             self.dps.set(['onoff'], [self.ivaroutenab.get()])
-            self.lock.release()
         else:
             self.ivaroutenab.set(0)
 
@@ -533,10 +394,23 @@ class DPSinterface:
         return True
 
     def butcmdplaywave(self):
-        pass
+        if self.ivarplaywv.get():
+            if not self.isconnected():
+                self.ivarplaywv.set(0)
+                return
+            if not self.dpsfwave:
+                tkMessageBox.showinfo('No wave in memory', 'Load or create a wave file to modify')
+                self.ivarplaywv.set(0)
+                return
+            if not self.ivaroutenab.get():
+                self.ivaroutenab.set(1)
+                self.butcmdoutenable()
+            self.waver=Waver(self.setvcdps, self.ivarplaywv, self.ivarpausewv, self.dpsfwave.getpoints())            
+        else:
+            self.waver.wake()
         
     def butcmdpausewave(self):
-        pass
+        self.waver.wake()
 
     def toimplement(self):
         pass
@@ -549,52 +423,44 @@ class DPSinterface:
             print ('It is not possible to load the application icon')            
         tl.focus_force()
         tl.grab_set()
-        Meminterface(tl, self.dps, self.lock)
+        Meminterface(tl, self.dps, self.updatefields)
 
-    def mnucmdedtwve(self):
-        if self.dpsfwave is not None:
-            tl=Toplevel(self.root)
-            try:
-                tl.tk.call('wm', 'iconphoto', tl._w, PhotoImage(file='pwrsup.png'))
-            except:
-                print ('It is not possible to load the application icon')
-            tl.focus_force()
-            tl.grab_set()
-            Wveinterface(tl, self.dpsfwave)
-
-    def entbndmemory(self, event):
+    def sclbndmemory(self, event):
         if self.isconnected():            
             m=self.ivarsetmem.get()
-            self.lock.acquire()
             self.dps.set(['mset'], [m])
-            self.lock.release()
             self.updatefields(True)
-            #self.ivarsetmem.set(0) #not sure that is required because the active memory is always 0, when a different is set, it is actually copied on 0
 
     def entbndbrghtnss(self, event):
         if self.isconnected():            
             b=self.ivarbrghtnes.get()
-            self.lock.acquire()
             self.dps.set(['brght'], [b])
-            self.lock.release()
     
     def entbndvmax(self, event):
         if self.isconnected():
-            self.lock.acquire()
-            self.dps.set(['m0vmax'], [self.dvarvmaxm0.get()])
-            self.lock.release()            
+            self.dps.set(['m0ovp'], [self.dvarvmaxm0.get()])         
 
     def entbndcmax(self, event):
         if self.isconnected():
-            self.lock.acquire()
-            self.dps.set(['m0cmax'], [self.dvarcmaxm0.get()])
-            self.lock.release()
+            self.dps.set(['m0ocp'], [self.dvarcmaxm0.get()])
 
     def entbndpmax(self, event):
         if self.isconnected():
-            self.lock.acquire()
-            self.dps.set(['m0pmax'], [self.dvarpmaxm0.get()])
-            self.lock.release()  
+            self.dps.set(['m0opp'], [self.dvarpmaxm0.get()])
+            
+    def setvcdps(self, v, c):
+#        print ('Setting v={} c={}'.format(v, c))
+        if v>=0:
+            if c>=0:
+                self.setvscale(v)
+                self.setcscale(c)
+                self.dps.set(['vset', 'cset'], [v, c])
+            else:
+                self.setvscale(v)
+                self.dps.set(['vset'], [v])
+        elif c>=0:
+            self.setcscale(c)
+            self.dps.set(['cset'], [c])
 
 if __name__=='__main__':
     from Tkinter import Tk

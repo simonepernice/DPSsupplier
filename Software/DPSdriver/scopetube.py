@@ -5,20 +5,11 @@ from constants import XDIV, YDIV, GRIDDASH, GRIDCOL, VCOL, CCOL, PCOL, MINSAMPLE
 from dpsfile import Dpsfile
 
 class Scopetube(Canvas):
-    def __init__(self, root, data):
+    def __init__(self, root, data, horizontaljoin=False):
         Canvas.__init__(self, root, background='white')
-        
-#        self.v0=0
-#        self.c0=0
-#        self.p0=0
-#        self.t0=0
-#        
-#        self.vm=1
-#        self.cm=1
-#        self.pm=1
-#        self.tm=1
-        
+
         self.ena=(True, True, True)
+        self.horizontaljoin=horizontaljoin
         
         self.points=data
         self.dpsfile=Dpsfile(self.points)
@@ -91,21 +82,24 @@ class Scopetube(Canvas):
     def drawsignals(self):
         for p0, p1 in zip(self.points[0:-1], self.points[1:]):
             self.drawseg(p0, p1)
-#            print p0[0], p1[0]
     
     def drawseg(self, p0, p1):
         x0=self.getxt(p0[TPOS])
         x1=self.getxt(p1[TPOS])
         for i, c, gety, en in zip((VPOS, CPOS, PPOS), (VCOL, CCOL, PCOL), (self.getyv, self.getyc, self.getyp), self.ena):
-            if en and len(p0)>i: self.create_line(x0, gety(p0[i]), x1, gety(p1[i]), fill=c)
+            if en and len(p0)>i:
+                if self.horizontaljoin:
+                    y0=gety(p0[i])
+                    y1=gety(p1[i])
+                    self.create_line(x0, y0, x1, y0, fill=c)
+                    self.create_line(x1, y0, x1, y1, fill=c)
+                else:
+                    self.create_line(x0, gety(p0[i]), x1, gety(p1[i]), fill=c)
 
     def load(self,  fname):
         del self.points[:]
-#        self.points+=
         self.dpsfile.load(fname)
-#        print self.points
         self.redraw()
-        
 
     def save(self, fname):
         self.dpsfile.save(fname)

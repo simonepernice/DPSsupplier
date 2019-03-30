@@ -1,14 +1,15 @@
-from Tkinter import Label, Button, Checkbutton, Entry, Scale, IntVar, DoubleVar, E, W
+from Tkinter import Label, Button, Checkbutton, Scale, IntVar, DoubleVar, E, W
 
-from constants import ENTRYWIDTH, VCOL, CCOL, PCOL
+from constants import VCOL, CCOL, PCOL
+from gridlayoutrowinsert import insertlabelrow, insertentryrow
 
 class Meminterface:        
-    def __init__(self, root,  dps,  lock):    
+    def __init__(self, root,  dps, updatefields):    
         root.title("DPS memory setup")
         
         self.root=root
         self.dps=dps
-        self.lock=lock
+        self.updatefields=updatefields
 
         row=0
         col=0
@@ -24,33 +25,21 @@ class Meminterface:
         colspan=1
         row+=rowspan        
         col=0
-        Label(root, text="Vset [V]: ", foreground=VCOL).grid(row=row, column=col, sticky=E)
-        col+=colspan
+       
+        insertlabelrow(root, row, col, (("Vset [V]: ", VCOL), None, ("Cset [A]: ", CCOL)), E)
         self.dvarvset=DoubleVar()
-        Entry(root, textvariable=self.dvarvset, width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
-        col+=colspan
-        Label(root, text="Cset [A]: ", foreground=CCOL).grid(row=row, column=col, sticky=E)
-        col+=colspan
         self.dvarcset=DoubleVar()
-        Entry(root, textvariable=self.dvarcset, width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
+        insertentryrow(root, row, col, (None, self.dvarvset, None, self.dvarcset), 'right', W)
 
         colspan=1
         row+=rowspan
         col=0
-        Label(root, text="Vmax [V]: ", foreground=VCOL).grid(row=row, column=col, sticky=E)
-        col+=colspan
+
+        insertlabelrow(root, row, col, (("Vmax [V]: ", VCOL), None, ("Cmax [A]: ", CCOL), None, ("Pmax [W]: ", PCOL)), E)
         self.dvarvmax=DoubleVar()
-        Entry(root, textvariable=self.dvarvmax, width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
-        col+=colspan
-        Label(root, text="Cmax [A]: ", foreground=CCOL).grid(row=row, column=col, sticky=E)
-        col+=colspan
         self.dvarcmax=DoubleVar()
-        Entry(root, textvariable=self.dvarcmax, width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
-        col+=colspan
-        Label(root, text="Pmax [W]: ", foreground=PCOL).grid(row=row, column=col, sticky=E)
-        col+=colspan
         self.dvarpmax=DoubleVar()
-        Entry(root, textvariable=self.dvarpmax, width=ENTRYWIDTH, justify='right').grid(row=row, column=col, sticky=W)
+        insertentryrow(root, row, col, (None, self.dvarvmax, None, self.dvarcmax, None, self.dvarpmax), 'right', W)
 
         row+=rowspan
         colspan=1
@@ -63,18 +52,16 @@ class Meminterface:
         colspan=2
         self.ivaroutmset=IntVar()
         self.ivaroutmset.set(0)
-        Checkbutton(root, variable=self.ivaroutmset, text="Out same/off@MSet", command=self.toimplement).grid(row=row, column=col, sticky=E+W, columnspan=colspan)
+        Checkbutton(root, variable=self.ivaroutmset, text="Out same/off@MSet").grid(row=row, column=col, sticky=E+W, columnspan=colspan)
         col+=colspan
         self.ivaroutpwron=IntVar()
         self.ivaroutpwron.set(0)
-        Checkbutton(root, variable=self.ivaroutpwron, text="Out on/off@PwOn", command=self.toimplement).grid(row=row, column=col, sticky=E+W, columnspan=colspan)
+        Checkbutton(root, variable=self.ivaroutpwron, text="Out on/off@PwOn").grid(row=row, column=col, sticky=E+W, columnspan=colspan)
 
         row+=rowspan
         colspan=2
         col=4
         Button(root, text="Done", command=self.btncmddone).grid(row=row, column=col, sticky=E+W, columnspan=colspan)
-        
-        #self.butcmdrecall()
 
     def memregs(self):
         mem='m'+str(self.ivarmem.get())
@@ -82,9 +69,7 @@ class Meminterface:
 
     def butcmdrecall(self):
         mr=self.memregs()
-        self.lock.acquire()
         data=self.dps.get(mr)
-        self.lock.release()
         self.dvarvset.set(data[0])
         self.dvarcset.set(data[1])
         self.dvarvmax.set(data[2])
@@ -106,12 +91,9 @@ class Meminterface:
             self.ivaroutmset.get(), 
             self.ivaroutpwron.get()
         ]
-        self.lock.acquire()
         self.dps.set(mr, mv)
-        self.lock.release()
-        
-    def toimplement(self):
-        pass
+        if self.ivarmem.get()==0:
+            self.updatefields(True)
 
     def btncmddone(self):
         self.root.destroy()
