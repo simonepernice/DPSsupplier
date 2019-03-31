@@ -11,9 +11,9 @@ from gridlayoutrowinsert import insertlabelrow, insertentryrow
 class Wveinterface:        
 
     def __init__(self, root, datawve):    
-        root.title("DPS wave editor")
-        
         self.root=root
+        self.root.title("Wave editor")
+        
         self.datawve=datawve
 
         self.dataclpbrd=[]

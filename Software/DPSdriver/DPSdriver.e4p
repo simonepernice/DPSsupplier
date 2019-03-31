@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project DPSdriver -->
-<!-- Saved: 2019-03-30, 16:25:47 -->
+<!-- Saved: 2019-03-31, 19:55:43 -->
 <!-- Copyright (C) 2019 Simone Pernice, pernice@libero.it -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -46,6 +46,7 @@
     <Source>serial/serialwin32.py</Source>
     <Source>serial/win32.py</Source>
     <Source>table.py</Source>
+    <Source>txtinterface.py</Source>
     <Source>waver.py</Source>
     <Source>wve_interface.py</Source>
   </Sources>

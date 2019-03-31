@@ -9,5 +9,7 @@ if __name__=='__main__':
     except:
         print ('It is not possible to load the application icon')
 
+    root.title("DPS supplier driver")
+    
     my_gui=DPSinterface(root)
     root.mainloop()

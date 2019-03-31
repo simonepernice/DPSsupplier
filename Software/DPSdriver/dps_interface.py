@@ -15,11 +15,12 @@ from dpsfile import Dpsfile
 from gridlayoutrowinsert import insertlabelrow, insertentryrow
 from poller import Poller
 from waver import Waver
+from txtinterface import Txtinterface
 
 class DPSinterface:        
     def __init__(self, root):        
         self.root=root
-        root.title("DPS power supplier interface by Simone Pernice")
+        root.title("DPS power supplier interface")
         
         self.dps=None
         self.poller=None
@@ -34,8 +35,8 @@ class DPSinterface:
         menubar.add_cascade(label="File", menu=filemenu)
         
         scopemenu=Menu(menubar, tearoff=0)
-        scopemenu .add_command(label="Load sampled points...", command=self.mnucmdload)
-        scopemenu .add_command(label="Save sampled points as...", command=self.mnucmdsave)
+        scopemenu .add_command(label="Load sampled points...", command=self.mnucmdloadsmppts)
+        scopemenu .add_command(label="Save sampled points as...", command=self.mnucmdsavesmppts)
         menubar.add_cascade(label="Scope", menu=scopemenu)
         
         wavemenu=Menu(menubar, tearoff=0)
@@ -50,8 +51,8 @@ class DPSinterface:
         menubar.add_cascade(label="Memory", menu=memmenu)
   
         helpmenu=Menu(menubar, tearoff=0)
-        helpmenu.add_command(label="Help", command=self.toimplement)
-        helpmenu.add_command(label="About...", command=self.toimplement)
+        helpmenu.add_command(label="Help...", command=self.toimplement)
+        helpmenu.add_command(label="About...", command=self.mnucmdabout)
         menubar.add_cascade(label="Help", menu=helpmenu)
 
         root.config(menu=menubar)
@@ -89,7 +90,7 @@ class DPSinterface:
         col=0
         self.ivarbrghtnes=IntVar()
         s=Scale(root, label='Brightness', variable=self.ivarbrghtnes, from_=0, to=5, resolution=1, orient="horizontal")
-        s.bind("<ButtonRelease-1>", self.entbndbrghtnss)
+        s.bind("<ButtonRelease-1>", self.sclbndbrghtnss)
         s.grid(row=row, column=col, columnspan=colspan, sticky=E+W)                
         col+=colspan
         colspan=1
@@ -211,6 +212,76 @@ class DPSinterface:
         self.ivarpausewv.set(0)        
         Checkbutton(root, variable=self.ivarpausewv, text='Pause', command=self.butcmdpausewave).grid(row=row, column=col, sticky=E+W)
         
+    def sclbndvolt(self, event):
+        if self.isconnected():
+            self.dps.set(['vset'],  [self.getvscale()])
+
+    def sclbndcrnt(self, event):
+        if self.isconnected():
+            self.dps.set(['cset'],  [self.getcscale()])
+    
+    def sclbndmemory(self, event):
+        if self.isconnected():            
+            m=self.ivarsetmem.get()
+            self.dps.set(['mset'], [m])
+            self.updatefields(True)
+    
+    def sclbndbrghtnss(self, event):
+        if self.isconnected():            
+            b=self.ivarbrghtnes.get()
+            self.dps.set(['brght'], [b])
+
+    def mnucmdnewwve(self):
+        self.dpsfwave=Dpsfile()
+        self.svarwave.set('unnamed wave')
+
+    def mnucmdloadwve (self):
+        fname=tkFileDialog.askopenfilename(initialdir=".", title="Select wave file to load", filetypes=(("dps files","*.dps"), ("all files","*.*")))
+        if fname:
+            self.svarwave.set(fname)
+            self.dpsfwave=Dpsfile()
+            self.dpsfwave.load(fname)
+
+    def mnucmdedtwve(self):
+        if self.dpsfwave is not None:
+            Wveinterface(self.maketoplevel(), self.dpsfwave.getpoints())
+        else:
+            tkMessageBox.showinfo('No wave loaded', 'Load or create a new wave file to modify')         
+
+    def mnucmdsavewve(self):
+        if self.dpsfwave is not None:
+            fname=tkFileDialog.asksaveasfilename(initialdir=".", title="Select wave file to save", filetypes=(("dps files","*.dps"), ("all files","*.*")))
+            if fname:
+                self.dpsfwave.save(fname)
+                self.svarwave.set(fname)
+        else:
+            tkMessageBox.showinfo('No wave in memory', 'Load or create a wave file to modify') 
+
+    def mnucmdloadsmppts (self):
+        fname=tkFileDialog.askopenfilename(initialdir=".", title="Select data file to load", filetypes=(("dps files","*.dps"), ("all files","*.*")))
+        if fname:
+            self.scope.load(fname)
+
+    def mnucmdsavesmppts(self):
+        fname=tkFileDialog.asksaveasfilename(initialdir=".", title="Select data file to save", filetypes=(("dps files","*.dps"), ("all files","*.*")))
+        if fname:
+            self.scope.save(fname)
+
+    def mnucmdedtmem(self):
+        if self.isconnected():
+            Meminterface(self.maketoplevel(True), self.dps, self.updatefields)
+
+    def mnucmdabout(self):
+        Txtinterface(self.maketoplevel(True), 'About', 
+"""
+DPS interface is designed by Simone Pernice
+For question email to me: pernice@libero.it
+Version 1.0 released on 31st March 2019 Turin Italy
+DPS interface is under licence GPL 3.0
+
+If you like this program please consider a donation
+""",  width=60,  height=10)
+        
     def butcmdconnect(self):
         if self.ivarconctd.get():
             try:
@@ -256,6 +327,82 @@ class DPSinterface:
             self.dps=None
             self.entryserport.config(state=NORMAL)
             self.entrydpsadd.config(state=NORMAL)
+
+    def butcmdacquire(self):
+        if self.ivaracquire.get():
+            if not self.isconnected():
+                self.ivaracquire.set(0)
+                return
+            self.scope.resetpoints()
+            self.strtme=time()
+            self.poller=Poller(self.ivaracquire, self.dvarsecsmp, self.updatefields)            
+        else:
+            self.poller.wake()
+
+    def butcmdkeylock(self):
+        if self.isconnected():
+            self.dps.set(['lock'], [self.ivarkeylock.get()])
+        else:
+            self.ivarkeylock.set(0)
+
+    def butcmdoutenable(self):
+        if self.isconnected():
+            self.dps.set(['onoff'], [self.ivaroutenab.get()])
+        else:
+            self.ivaroutenab.set(0)
+
+    def butcmdplaywave(self):
+        if self.ivarplaywv.get():
+            if not self.isconnected():
+                self.ivarplaywv.set(0)
+                return
+            if not self.dpsfwave:
+                tkMessageBox.showinfo('No wave in memory', 'Load or create a wave file to modify')
+                self.ivarplaywv.set(0)
+                return
+            if not self.ivaroutenab.get():
+                self.ivaroutenab.set(1)
+                self.butcmdoutenable()
+            self.waver=Waver(self.setvcdps, self.ivarplaywv, self.ivarpausewv, self.dpsfwave.getpoints())            
+        else:
+            self.waver.wake()
+        
+    def butcmdpausewave(self):
+        self.waver.wake()
+
+    def toimplement(self):
+        pass
+        
+    def entbndvmax(self, event):
+        if self.isconnected():
+            self.dps.set(['m0ovp'], [self.dvarvmaxm0.get()])         
+
+    def entbndcmax(self, event):
+        if self.isconnected():
+            self.dps.set(['m0ocp'], [self.dvarcmaxm0.get()])
+
+    def entbndpmax(self, event):
+        if self.isconnected():
+            self.dps.set(['m0opp'], [self.dvarpmaxm0.get()])
+            
+    def setvcdps(self, v, c):
+        if v>=0:
+            if c>=0:
+                self.setvscale(v)
+                self.setcscale(c)
+                self.dps.set(['vset', 'cset'], [v, c])
+            else:
+                self.setvscale(v)
+                self.dps.set(['vset'], [v])
+        elif c>=0:
+            self.setcscale(c)
+            self.dps.set(['cset'], [c])
+
+    def isconnected(self):
+        if self.dps is None:
+            tkMessageBox.showinfo('Not connected',  'Enstablish a connection before') 
+            return False
+        return True
 
     def setvscale(self, v):
         self.dvarvscale.set(int(v))
@@ -312,155 +459,18 @@ class DPSinterface:
 
     def setworkmode(self, wm):
         self.svarwrmde.set({0: 'cv', 1: 'cc'}[wm])
-
-    def butcmdacquire(self):
-        if self.ivaracquire.get():
-            if not self.isconnected():
-                self.ivaracquire.set(0)
-                return
-            self.scope.resetpoints()
-            self.strtme=time()
-            self.poller=Poller(self.ivaracquire, self.dvarsecsmp, self.updatefields)            
-        else:
-            self.poller.wake()
-
-    def sclbndvolt(self, event):
-        if self.isconnected():
-            self.dps.set(['vset'],  [self.getvscale()])
-
-    def sclbndcrnt(self, event):
-        if self.isconnected():
-            self.dps.set(['cset'],  [self.getcscale()])
-
-    def mnucmdnewwve(self):
-        self.dpsfwave=Dpsfile()
-        self.svarwave.set('unnamed wave')
-
-    def mnucmdloadwve (self):
-        fname=tkFileDialog.askopenfilename(initialdir=".", title="Select wave file to load", filetypes=(("dps files","*.dps"), ("all files","*.*")))
-        if fname:
-            self.svarwave.set(fname)
-            self.dpsfwave=Dpsfile()
-            self.dpsfwave.load(fname)
-
-    def mnucmdedtwve(self):
-        if self.dpsfwave is not None:
-            tl=Toplevel(self.root)
-            try:
-                tl.tk.call('wm', 'iconphoto', tl._w, PhotoImage(file='pwrsup.png'))
-            except:
-                print ('It is not possible to load the application icon')
-            tl.focus_force()
-            tl.grab_set()
-            Wveinterface(tl, self.dpsfwave.getpoints())
-        else:
-            tkMessageBox.showinfo('No wave loaded', 'Load or create a new wave file to modify')         
-
-    def mnucmdsavewve (self):
-        if self.dpsfwave is not None:
-            fname=tkFileDialog.asksaveasfilename(initialdir=".", title="Select wave file to save", filetypes=(("dps files","*.dps"), ("all files","*.*")))
-            if fname:
-                self.dpsfwave.save(fname)
-                self.svarwave.set(fname)
-        else:
-            tkMessageBox.showinfo('No wave in memory', 'Load or create a wave file to modify') 
-
-    def mnucmdload (self):
-        fname=tkFileDialog.askopenfilename(initialdir=".", title="Select data file to load", filetypes=(("dps files","*.dps"), ("all files","*.*")))
-        if fname:
-            self.scope.load(fname)
-
-    def mnucmdsave(self):
-        fname=tkFileDialog.asksaveasfilename(initialdir=".", title="Select data file to save", filetypes=(("dps files","*.dps"), ("all files","*.*")))
-        if fname:
-            self.scope.save(fname)
-
-    def butcmdkeylock(self):
-        if self.isconnected():
-            self.dps.set(['lock'], [self.ivarkeylock.get()])
-        else:
-            self.ivarkeylock.set(0)
-
-    def butcmdoutenable(self):
-        if self.isconnected():
-            self.dps.set(['onoff'], [self.ivaroutenab.get()])
-        else:
-            self.ivaroutenab.set(0)
-
-    def isconnected(self):
-        if self.dps is None:
-            tkMessageBox.showinfo('Not connected',  'Enstablish a connection before') 
-            return False
-        return True
-
-    def butcmdplaywave(self):
-        if self.ivarplaywv.get():
-            if not self.isconnected():
-                self.ivarplaywv.set(0)
-                return
-            if not self.dpsfwave:
-                tkMessageBox.showinfo('No wave in memory', 'Load or create a wave file to modify')
-                self.ivarplaywv.set(0)
-                return
-            if not self.ivaroutenab.get():
-                self.ivaroutenab.set(1)
-                self.butcmdoutenable()
-            self.waver=Waver(self.setvcdps, self.ivarplaywv, self.ivarpausewv, self.dpsfwave.getpoints())            
-        else:
-            self.waver.wake()
-        
-    def butcmdpausewave(self):
-        self.waver.wake()
-
-    def toimplement(self):
-        pass
-        
-    def mnucmdedtmem(self):
+    def maketoplevel(self,  modal=False):
         tl=Toplevel(self.root)
         try:
             tl.tk.call('wm', 'iconphoto', tl._w, PhotoImage(file='pwrsup.png'))
         except:
-            print ('It is not possible to load the application icon')            
-        tl.focus_force()
-        tl.grab_set()
-        Meminterface(tl, self.dps, self.updatefields)
+            print ('It is not possible to load the application icon')
 
-    def sclbndmemory(self, event):
-        if self.isconnected():            
-            m=self.ivarsetmem.get()
-            self.dps.set(['mset'], [m])
-            self.updatefields(True)
-
-    def entbndbrghtnss(self, event):
-        if self.isconnected():            
-            b=self.ivarbrghtnes.get()
-            self.dps.set(['brght'], [b])
-    
-    def entbndvmax(self, event):
-        if self.isconnected():
-            self.dps.set(['m0ovp'], [self.dvarvmaxm0.get()])         
-
-    def entbndcmax(self, event):
-        if self.isconnected():
-            self.dps.set(['m0ocp'], [self.dvarcmaxm0.get()])
-
-    def entbndpmax(self, event):
-        if self.isconnected():
-            self.dps.set(['m0opp'], [self.dvarpmaxm0.get()])
+        if modal:
+            tl.grab_set()
+            tl.focus_force()
             
-    def setvcdps(self, v, c):
-#        print ('Setting v={} c={}'.format(v, c))
-        if v>=0:
-            if c>=0:
-                self.setvscale(v)
-                self.setcscale(c)
-                self.dps.set(['vset', 'cset'], [v, c])
-            else:
-                self.setvscale(v)
-                self.dps.set(['vset'], [v])
-        elif c>=0:
-            self.setcscale(c)
-            self.dps.set(['cset'], [c])
+        return tl
 
 if __name__=='__main__':
     from Tkinter import Tk

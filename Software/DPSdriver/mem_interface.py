@@ -4,10 +4,10 @@ from constants import VCOL, CCOL, PCOL
 from gridlayoutrowinsert import insertlabelrow, insertentryrow
 
 class Meminterface:        
-    def __init__(self, root,  dps, updatefields):    
-        root.title("DPS memory setup")
-        
+    def __init__(self, root,  dps, updatefields):                
         self.root=root
+        self.root.title("Memory editor")
+        
         self.dps=dps
         self.updatefields=updatefields
 
