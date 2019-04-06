@@ -5,14 +5,14 @@ from gridlayoutrowinsert import insertlabelrow, insertentryrow
 from constants import VCOL, CCOL, PCOL
 
 class Scope:        
-    def __init__(self, root, data, row0, col0, rowspan=10, colspan=6, showpower=True, horizontaljoin=False):
+    def __init__(self, root, data, row0, col0, rowspan=10, colspan=6, showpower=True, horizontaljoin=False, buttoncallback=None):
         self.root=root
         
         row=row0
 
         rowspan-=4 #those lines are used for inputs
 
-        self.scopetube=Scopetube(root, data, horizontaljoin)
+        self.scopetube=Scopetube(root, data, horizontaljoin, self.newratios, buttoncallback)
         self.scopetube.grid(row=row, column=col0, columnspan=colspan, rowspan=rowspan, sticky=E+W)
         
         row+=rowspan
@@ -64,27 +64,28 @@ class Scope:
         row+=rowspan
         col=col0
         insertlabelrow(root, row, col0, ("X [s/div]: ", None, "X0 [s]: "), E)
-        self.dvarsdiv=DoubleVar()
-        self.dvarsdiv.set(60.)        
-        self.dvars0=DoubleVar()
-        self.dvars0.set(0.)        
-        entries+=insertentryrow(root, row, col0, (None, self.dvarsdiv, None, self.dvars0), 'right', W)
+        self.dvartdiv=DoubleVar()
+        self.dvartdiv.set(60.)        
+        self.dvart0=DoubleVar()
+        self.dvart0.set(0.)        
+        entries+=insertentryrow(root, row, col0, (None, self.dvartdiv, None, self.dvart0), 'right', W)
 
         for e in entries:
             e.bind('<FocusOut>', self.entbndcmdbutscpupdt)
             e.bind('<Return>', self.entbndcmdbutscpupdt)
 
+        self.varlist=(self.ivarvena, self.ivarcena, self.ivarpena, self.dvarvdiv, self.dvarcdiv, self.dvarpdiv, self.dvarv0, self.dvarc0, self.dvarp0, self.dvartdiv, self.dvart0)
+
         self.scopetube.update()
-        self.entbndcmdbutscpupdt(None) 
+        self.entbndcmdbutscpupdt(None)
 
     def entbndcmdbutscpupdt(self,  *event):
-        self.scopetube.setratios(
-            self.dvarvdiv.get(), self.dvarv0.get(), self.ivarvena.get(),
-            self.dvarcdiv.get(), self.dvarc0.get(), self.ivarcena.get(),  
-            self.dvarpdiv.get(), self.dvarp0.get(), self.ivarpena.get(),  
-            self.dvarsdiv.get(), self.dvars0.get()
-        )
+        self.scopetube.setratios([e.get() for e in self.varlist])
         self.scopetube.redraw()
+
+    def newratios(self, ratios):
+        for var, val in zip(self.varlist, ratios):
+            var.set(val)
 
     def update(self):
         self.scopetube.update()
@@ -115,6 +116,7 @@ if __name__=='__main__':
     root=Tk()
 
     scope=Scope(root, [], 0, 0)
+    
     scope.load('../tests/testpoints.dps')
     root.mainloop()
         

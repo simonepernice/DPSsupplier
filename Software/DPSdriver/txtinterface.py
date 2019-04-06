@@ -1,11 +1,12 @@
 from Tkinter import Text, END, DISABLED
+from toplevel import maketoplevel
 
 class Txtinterface:        
-    def __init__(self, root,  title,  txt,  readfromfile=False, width=40, height=20):                
-        self.root=root
+    def __init__(self, prevroot,  title,  txt,  readfromfile=False, width=40, height=20):        
+        self.root=maketoplevel(prevroot, True)
         self.root.title(title)
         
-        outputtext=Text(root, width=width, height=height)
+        outputtext=Text(self.root, width=width, height=height)
         
         if readfromfile:
             with open(txt) as infile:

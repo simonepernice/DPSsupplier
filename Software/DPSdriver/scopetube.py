@@ -5,44 +5,54 @@ from constants import XDIV, YDIV, GRIDDASH, GRIDCOL, VCOL, CCOL, PCOL, MINSAMPLE
 from dpsfile import Dpsfile
 
 class Scopetube(Canvas):
-    def __init__(self, root, data, horizontaljoin=False):
+    def __init__(self, root, data, horizontaljoin=False, ratiocallback=None, buttoncallback=None):
         Canvas.__init__(self, root, background='white')
+        
+        self.bind('<Button-1>', self.bndbtnmovebegin)
+        self.bind('<B1-Motion>', self.bndbtnmove)
+        self.bind('<ButtonRelease-1>', self.bndbtnmoveend)
+        
+        self.bind('<Button-2>', self.bndbtnfit)
+        
+        self.bind('<Button-4>', self.bndbtnwheel)
+        self.bind('<Button-5>', self.bndbtnwheel)
+        root.bind('<MouseWheel>', self.bndbtnwheel)#do not understand why if bind to this canvas does not catch the mousewheel
 
-        self.ena=(True, True, True)
+        self.bind('<ButtonRelease-3>', self.bndbtn3press)
+
         self.horizontaljoin=horizontaljoin
         
         self.points=data
         self.dpsfile=Dpsfile(self.points)
+
+        self.ratiocallback=ratiocallback
+
+        self.buttoncallback=buttoncallback
                 
-    def setratios(self, vdiv, v0, vena, cdiv, c0, cena, pdiv, p0, pena, tdiv, t0):
-        self.yq=self.winfo_height()
-        self.ena=(vena, cena, pena)
+    def setratios(self, data):
+        self.ena=data[0:3]
+        
+        self.winheight=self.winfo_height()        
+        self.ym=[-self.winheight/YDIV/a for a in data[3:6]]
+        self.y0=data[6:9]
 
-        self.vm=-self.yq/YDIV/vdiv        
-        self.v0=v0
-
-        self.cm=-self.yq/YDIV/cdiv
-        self.c0=c0
-
-        self.pm=-self.yq/YDIV/pdiv
-        self.p0=p0
-
-        self.tm=self.winfo_width()/XDIV/tdiv
-        self.t0=t0
-        self.tdiv=tdiv
+        self.winwidth=self.winfo_width()
+        self.tm=self.winwidth/XDIV/data[9]
+        self.t0=data[10]
 
         self.smpt=1./self.tm
         if self.smpt<MINSAMPLETIME:
-            self.smpt=MINSAMPLETIME            
+            self.smpt=MINSAMPLETIME
+            
+    def sendnewsettings(self):
+        if self.ratiocallback:
+            nv = [-self.winheight/YDIV/m for m in self.ym]+self.y0+[self.winwidth/XDIV/self.tm, self.t0]
+            nv = self.ena+[round(v, 2) for v in nv]
+            self.ratiocallback(nv)
 
-    def getyv(self,  v):
-        return (v-self.v0)*self.vm+self.yq
-
-    def getyc(self,  c):
-        return (c-self.c0)*self.cm+self.yq
-
-    def getyp(self,  p):
-        return (p-self.p0)*self.pm+self.yq
+    def gety(self, vcp, i):
+        i-=1
+        return (vcp-self.y0[i])*self.ym[i]+self.winheight
 
     def getxt(self,  t):
         return (t-self.t0)*self.tm
@@ -61,11 +71,12 @@ class Scopetube(Canvas):
         self.drawgrid()
         self.drawsignals()
 
-    def drawgrid(self):
-        YMAX=float(self.winfo_height())
-        XMAX=float(self.winfo_width())
+    def drawgrid(self):               
+        XMAX=float(self.winwidth)
+        YMAX=float(self.winheight)
         DX=XMAX/XDIV
         DY=YMAX/YDIV
+
         x=0.
         for i in range(int(XDIV)+1):
             self.create_line(x, 0, x, YMAX, fill=GRIDCOL, dash=GRIDDASH)
@@ -86,16 +97,109 @@ class Scopetube(Canvas):
     def drawseg(self, p0, p1):
         x0=self.getxt(p0[TPOS])
         x1=self.getxt(p1[TPOS])
-        for i, c, gety, en in zip((VPOS, CPOS, PPOS), (VCOL, CCOL, PCOL), (self.getyv, self.getyc, self.getyp), self.ena):
+
+        for i, c, en in zip((VPOS, CPOS, PPOS), (VCOL, CCOL, PCOL), self.ena):
             if en and len(p0)>i:
+                y0=self.gety(p0[i], i)
+                y1=self.gety(p1[i], i)
+
                 if self.horizontaljoin:
-                    y0=gety(p0[i])
-                    y1=gety(p1[i])
                     self.create_line(x0, y0, x1, y0, fill=c)
                     self.create_line(x1, y0, x1, y1, fill=c)
                 else:
-                    self.create_line(x0, gety(p0[i]), x1, gety(p1[i]), fill=c)
+                    self.create_line(x0, y0, x1, y1, fill=c)        
 
+    def bndbtnmovebegin(self, event):
+        self.movex=event.x
+        self.movey=event.y
+
+    def bndbtnmove(self, event):
+        enabled=0
+        delta=event.y-self.movey
+        
+        for i, ym, en in zip(range(3), self.ym, self.ena):
+            if en:
+                enabled+=1
+                self.y0[i]-=delta/ym
+        self.movey=event.y
+
+        if enabled>0:
+            delta=event.x-self.movex        
+            self.t0-=delta/self.tm
+            self.movex=event.x        
+        
+            self.redraw()
+
+    def bndbtnmoveend(self, event):
+        self.sendnewsettings()
+
+    def bndbtnwheel(self, event):
+        if event.num == 4 or event.delta>0:
+            k=2
+            k2=1
+        elif event.num == 5 or event.delta<0:
+            k=0.5
+            k2=-1
+        else:
+            return
+
+        #shift pressed bndbtnwheel on Y
+        if event.state & 0x0001:
+            for i, en in zip(range(3), self.ena):
+                if en:
+                    self.ym[i]*=k
+
+        #control pressed switch enabled waveform
+        elif event.state & 0x0004:
+            #convert enables to bits
+            a=0
+            s=1
+            for e in self.ena:
+                if e:
+                    a |= s
+                s <<= 1
+
+            a+=k2
+            
+            #convert bits to enables
+            s=1
+            for i in range(3):
+                self.ena[i]= 1 if a & s else 0
+                s <<= 1            
+
+        #nothing pressed bndbtnwheel on X
+        else:
+            self.tm*=k
+        
+        self.sendnewsettings()
+        self.redraw()
+
+    def bndbtnfit(self, event):
+        for e, i in zip(self.ena,  range(1, 4)):
+            if e and len(self.points[i])>0:
+                min=max=self.points[i][0]
+                for p in self.points[i][1:]:
+                    if p<min: min=p
+                    elif p>max: max=p
+                print ("min {} max {} index {}".format(min,  max,  i))
+                self.y0[i-1]=min
+                self.ym[i-1]=-self.winheight/(max-min)
+        
+        self.sendnewsettings()
+        self.redraw()        
+        
+    def bndbtn3press(self, event):
+        if self.buttoncallback:
+            t=[round(event.x/self.tm+self.t0, 2)]
+            y=[]
+            for y0, ym, en in zip(self.y0, self.ym, self.ena):
+                if en:
+                    y.append(round((event.y-self.winheight)/ym+y0, 2))
+                else:
+                    y.append(-1)
+            self.buttoncallback(t+y)
+            
+            
     def load(self,  fname):
         del self.points[:]
         self.dpsfile.load(fname)
@@ -107,5 +211,27 @@ class Scopetube(Canvas):
 if __name__=='__main__':
     from Tkinter import Tk
     root=Tk()
-    my_gui=Scopetube(root, []).pack()
+    from random import random
+
+    data=[]
+    for index in range(100):
+        v=abs(10*random())
+        i=abs(10*random())
+        data.append([index*10,v, i, v*i])
+        
+    my_gui=Scopetube(root, data, False)
+
+    my_gui.pack()
+
+    my_gui.update()
+
+    my_gui.setratios(
+        [1, 1, 1,
+        1, 1, 1, 
+         0, 0,  0, 
+        60, 0]
+    )
+    
+    my_gui.redraw()
+    
     root.mainloop()

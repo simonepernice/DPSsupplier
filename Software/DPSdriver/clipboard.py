@@ -1,5 +1,4 @@
 from Tkinter import Button, IntVar, DoubleVar, E, W
-#import tkMessageBox
 
 from constants import TABLECOL, CLIPROW, VCOL, CCOL, TPOS
 from table import Table

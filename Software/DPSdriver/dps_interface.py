@@ -1,4 +1,4 @@
-from Tkinter import Label, Checkbutton, Entry, Scale, IntVar, StringVar, DoubleVar, E, W, NORMAL, Menu, Toplevel, PhotoImage
+from Tkinter import Label, Checkbutton, Entry, Scale, IntVar, StringVar, DoubleVar, E, W, NORMAL, Menu, PhotoImage
 import tkMessageBox
 import tkFileDialog
 
@@ -51,7 +51,7 @@ class DPSinterface:
         menubar.add_cascade(label="Memory", menu=memmenu)
   
         helpmenu=Menu(menubar, tearoff=0)
-        helpmenu.add_command(label="Help...", command=self.toimplement)
+        helpmenu.add_command(label="Help...", command=self.mnucmdhelp)
         helpmenu.add_command(label="About...", command=self.mnucmdabout)
         menubar.add_cascade(label="Help", menu=helpmenu)
 
@@ -244,7 +244,7 @@ class DPSinterface:
 
     def mnucmdedtwve(self):
         if self.dpsfwave is not None:
-            Wveinterface(self.maketoplevel(), self.dpsfwave.getpoints())
+            Wveinterface(self.root, self.dpsfwave.getpoints())
         else:
             tkMessageBox.showinfo('No wave loaded', 'Load or create a new wave file to modify')         
 
@@ -269,19 +269,22 @@ class DPSinterface:
 
     def mnucmdedtmem(self):
         if self.isconnected():
-            Meminterface(self.maketoplevel(True), self.dps, self.updatefields)
+            Meminterface(self.root, self.dps, self.updatefields)
 
     def mnucmdabout(self):
-        Txtinterface(self.maketoplevel(True), 'About', 
-"""
-DPS interface is designed by Simone Pernice
-For question email to me: pernice@libero.it
+        Txtinterface(self.root, 'About', 
+"""DPS interface is designed by Simone Pernice
+For question email to me: pernice@libero.com
 Version 1.0 released on 31st March 2019 Turin Italy
 DPS interface is under licence GPL 3.0
 
-If you like this program please consider a donation
-""",  width=60,  height=10)
-        
+If you like this program please make a donation with PayPal to simone.pernice@gmail.com""",  width=80,  height=10)
+
+    def mnucmdhelp(self):
+        Txtinterface(self.root, 'Help', 
+"""This is an interface to remote controll a supplier of DPS series.
+This project was born because nothing open source nor for Linux distribution were available.""",  width=80,  height=10)
+
     def butcmdconnect(self):
         if self.ivarconctd.get():
             try:
@@ -370,8 +373,8 @@ If you like this program please consider a donation
     def butcmdpausewave(self):
         self.waver.wake()
 
-    def toimplement(self):
-        pass
+#    def toimplement(self):
+#        pass
         
     def entbndvmax(self, event):
         if self.isconnected():
@@ -459,18 +462,6 @@ If you like this program please consider a donation
 
     def setworkmode(self, wm):
         self.svarwrmde.set({0: 'cv', 1: 'cc'}[wm])
-    def maketoplevel(self,  modal=False):
-        tl=Toplevel(self.root)
-        try:
-            tl.tk.call('wm', 'iconphoto', tl._w, PhotoImage(file='pwrsup.png'))
-        except:
-            print ('It is not possible to load the application icon')
-
-        if modal:
-            tl.grab_set()
-            tl.focus_force()
-            
-        return tl
 
 if __name__=='__main__':
     from Tkinter import Tk
