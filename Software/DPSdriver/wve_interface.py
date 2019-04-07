@@ -179,9 +179,13 @@ class Wveinterface:
         Txtinterface(self.root, 'Help', 
 """Wave editor window is designed to create new waveform to play on the DPS supplier.
 It is based on two output windows:
-- one is textual and shows what happens at every time
-- one is graphical and shows the output waveform
-
+- top-left is text table showing what happens at voltage and current at every time
+- bottom-left is graphical and shows the output waveform equivalent to 
+The data can be entered:
+- graphically clicking with right button on the bottom-left graph
+- textually with top-right commands
+A clipboard is available to modify the data:
+- it is located on the bottom-right side
 """,  width=60,  height=10)         
 
 if __name__=='__main__':

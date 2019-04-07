@@ -1,4 +1,4 @@
-from Tkinter import Text, END, DISABLED
+from Tkinter import Text, END, DISABLED, Button, BOTH
 from toplevel import maketoplevel
 
 class Txtinterface:        
@@ -15,8 +15,12 @@ class Txtinterface:
              outputtext.insert(END, txt)
         outputtext.config(state=DISABLED)
         
-        outputtext.pack()
-                    
+        outputtext.pack(fill=BOTH, expand=1)
+        
+        Button(self.root, text="OK", command=self.butcmdok).pack()   
+    
+    def butcmdok(self):
+        self.root.destroy()
 
 if __name__=='__main__':
     from Tkinter import Tk
