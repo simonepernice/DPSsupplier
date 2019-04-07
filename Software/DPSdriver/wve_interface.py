@@ -178,14 +178,39 @@ class Wveinterface:
     def btncmdhelp(self):
         Txtinterface(self.root, 'Help', 
 """Wave editor window is designed to create new waveform to play on the DPS supplier.
-It is based on two output windows:
+It is based on two output formats:
 - top-left is text table showing what happens at voltage and current at every time
 - bottom-left is graphical and shows the output waveform equivalent to 
 The data can be entered:
 - graphically clicking with right button on the bottom-left graph
 - textually with top-right commands
-A clipboard is available to modify the data:
+A clipboard is available to play with the data section:
 - it is located on the bottom-right side
+It can copy/cut and paste from data section. Clipboard can be amplified or translated before pasting.
+Clipboard can become a ramp before pasting.
+On the graphical section it is possible to manage the waveforms:
+- the actions works only on enabled waveforms
+- drage with riight button to move the waveform
+- rotate wheel to zoom the time (x)
+- press shift while rotate wheel to zoom y
+- press ctrs while rotate wheel to change the enabled waveform
+On the top-right side it is possible to add new points:
+- insert add a new point at given time, use -1 on voltage/current to keep previous value
+- insert on a time already present modifies it
+- modify and delete buttons can be used to work on a given step
+- append is used to add a new point to the tail known the delta time between last one
+On the clipboard are available the following buttons:
+- Note the time on the clipboard is stored as delta between adiacent points
+- Copy and past from begin/end steps
+- Amplify or translate the clipboard
+- Transform the clipboard in a ramp using first and last points with given steps
+- Paste inserting or overwriteing the clipboard
+The clipboard and the data are showed in table with following functions:
+- Line up/down to move up or down by 1 line
+- Page up/down to move up or dosn by all row available minus 1
+- Top/bottom to go to the first or last element
+- Goto time/step to move the first line at the given step
+- Pick begin/end to read the first/second line and put is in begin/end fields
 """,  width=60,  height=10)         
 
 if __name__=='__main__':
