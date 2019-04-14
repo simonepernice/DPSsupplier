@@ -10,7 +10,7 @@ from scope import Scope
 from dps_driver import DPSdriver
 from mem_interface import Meminterface
 from wve_interface import Wveinterface
-from constants import ENTRYWIDTH, VCOL, CCOL, PCOL, TPOS
+from constants import ENTRYWIDTH, VCOL, CCOL, PCOL, TPOS, PROTEXCEED
 from dpsfile import Dpsfile
 from gridlayoutrowinsert import insertlabelrow, insertentryrow
 from poller import Poller
@@ -404,14 +404,20 @@ This project was born because nothing open source nor for Linux distribution wer
 
     def entbndvmax(self, event):
         if self.isconnected():
+            if self.dvarvmaxm0.get() > self.maxoutv * PROTEXCEED : self.dvarvmaxm0.set(self.maxoutv * PROTEXCEED)
+            elif self.dvarvmaxm0.get() < 0. : self.dvarvmaxm0.set(0.)
             self.dps.set(['m0ovp'], [self.dvarvmaxm0.get()])         
 
     def entbndcmax(self, event):
         if self.isconnected():
+            if self.dvarcmaxm0.get() > self.maxoutc * PROTEXCEED : self.dvarcmaxm0.set(self.maxoutc * PROTEXCEED)
+            elif self.dvarcmaxm0.get() < 0. : self.dvarcmaxm0.set(0.)            
             self.dps.set(['m0ocp'], [self.dvarcmaxm0.get()])
 
     def entbndpmax(self, event):
         if self.isconnected():
+            if self.dvarpmaxm0.get() > self.maxoutv * self.maxoutc * PROTEXCEED * PROTEXCEED : self.dvarpmaxm0.set(self.maxoutv * self.maxoutc * PROTEXCEED * PROTEXCEED)
+            elif self.dvarpmaxm0.get() < 0. : self.dvarcmaxm0.set(0.)             
             self.dps.set(['m0opp'], [self.dvarpmaxm0.get()])
             
     def setvcdps(self, v, c):
