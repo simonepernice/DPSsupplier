@@ -17,52 +17,78 @@ from poller import Poller
 from waver import Waver
 from txtinterface import Txtinterface
 
-class DPSinterface:        
-    def __init__(self, root):        
+"""
+DPS supplier serial driver.
+
+This module is designed to be used as DPS power supplier interface.
+
+(C)2019 - Simone Pernice - pernice@libero.it
+This is distributed under GNU LGPL license, see license.txt
+
+"""
+
+
+class DPSinterface:
+
+    """
+    DSPinterface is a Tk graphical interface to drive a DPS power supplier.
+
+    """
+    def __init__(self, root):
+        """
+        Create a DSP interface instance.
+
+        :param root: is the Tk() interface where the DPS will be drawedstring with the prot name i.e. /dev/ttyUSB0 or COM5 for Windows
+        :returns: a new instance of DPS graphical interface
+
+        """
+
         self.root=root
         root.title("DPS power supplier interface")
+
+        self.dps = None
+        self.poller = None
+        self.waver = None
+        self.strtme = time()
+        self.dpsfwave = None
+        self.maxoutv=5
+        self.maxoutc=5
+
+        menubar = Menu(root)
         
-        self.dps=None
-        self.poller=None
-        self.waver=None
-        self.strtme=time()
-        self.dpsfwave=None
-        
-        menubar=Menu(root)
-        
-        filemenu=Menu(menubar, tearoff=0)
+        filemenu = Menu(menubar, tearoff=0)
         filemenu.add_command(label="Exit", command=root.quit)
         menubar.add_cascade(label="File", menu=filemenu)
         
-        scopemenu=Menu(menubar, tearoff=0)
-        scopemenu .add_command(label="Load sampled points...", command=self.mnucmdloadsmppts)
-        scopemenu .add_command(label="Save sampled points as...", command=self.mnucmdsavesmppts)
+        scopemenu = Menu(menubar, tearoff=0)
+        scopemenu.add_command(label="Load sampled points...", command=self.mnucmdloadsmppts)
+        scopemenu.add_command(label="Save sampled points as...", command=self.mnucmdsavesmppts)
         menubar.add_cascade(label="Scope", menu=scopemenu)
-        
-        wavemenu=Menu(menubar, tearoff=0)
+
+        wavemenu = Menu(menubar, tearoff=0)
         wavemenu.add_command(label="New wave", command=self.mnucmdnewwve)
         wavemenu.add_command(label="Load wave...", command=self.mnucmdloadwve)
         wavemenu.add_command(label="Edit wave...", command=self.mnucmdedtwve)
         wavemenu.add_command(label="Save wave as...", command=self.mnucmdsavewve)
         menubar.add_cascade(label="Wave", menu=wavemenu)
  
-        memmenu=Menu(menubar, tearoff=0)
-        memmenu .add_command(label="Edit memories...", command=self.mnucmdedtmem)
+        memmenu = Menu(menubar, tearoff=0)
+        memmenu.add_command(label="Edit memories...", command=self.mnucmdedtmem)
         menubar.add_cascade(label="Memory", menu=memmenu)
   
-        helpmenu=Menu(menubar, tearoff=0)
+        helpmenu = Menu(menubar, tearoff=0)
         helpmenu.add_command(label="Help...", command=self.mnucmdhelp)
         helpmenu.add_command(label="About...", command=self.mnucmdabout)
         menubar.add_cascade(label="Help", menu=helpmenu)
 
         root.config(menu=menubar)
 
-        row=0
-        col=0
-        rowspan=1
-        colspan=1
+        row = 0
+        col = 0
+        rowspan = 1
+        colspan = 1
         insertlabelrow(root, row, col, ("Serial: ", None, "Addr,Baud: "), E)
-        col+=colspan
+        col +=  colspan
         self.svardpsport=StringVar()
         self.svardpsport.set('/dev/ttyUSB0')        
         self.entryserport=Entry(root, textvariable=self.svardpsport, width=ENTRYWIDTH, justify='right')
@@ -168,12 +194,12 @@ class DPSinterface:
         rowspan=1        
         colspan=3
         self.dvarvscale=DoubleVar()
-        self.voltscale=Scale(root, label='Vset [V]', foreground=VCOL, variable=self.dvarvscale, from_=0, to=15, resolution=1, orient="horizontal")#, label='Vset[V]'
+        self.voltscale=Scale(root, label='Vset [V]', foreground=VCOL, variable=self.dvarvscale, from_=0, to=self.maxoutv, resolution=1, orient="horizontal")#, label='Vset[V]'
         self.voltscale.bind("<ButtonRelease-1>", self.sclbndvolt)
         self.voltscale.grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         col+=colspan
         self.dvarcscale=DoubleVar()
-        self.curntscale=Scale(root, label='Cset[A]', foreground=CCOL, variable=self.dvarcscale, from_=0, to=5, resolution=1, orient="horizontal")#,label='Cset[A]'
+        self.curntscale=Scale(root, label='Cset[A]', foreground=CCOL, variable=self.dvarcscale, from_=0, to=self.maxoutc, resolution=1, orient="horizontal")#,label='Cset[A]'
         self.curntscale.bind("<ButtonRelease-1>", self.sclbndcrnt)
         self.curntscale.grid(row=row, column=col, columnspan=colspan, sticky=E+W)
 
@@ -211,6 +237,9 @@ class DPSinterface:
         self.ivarpausewv=IntVar()
         self.ivarpausewv.set(0)        
         Checkbutton(root, variable=self.ivarpausewv, text='Pause', command=self.butcmdpausewave).grid(row=row, column=col, sticky=E+W)
+        
+        self.scope.update()
+        self.scope.redraw()
         
     def sclbndvolt(self, event):
         if self.isconnected():
@@ -278,12 +307,12 @@ For question email to me: pernice@libero.com
 Version 1.0 released on 31st March 2019 Turin Italy
 DPS interface is under licence GPL 3.0
 
-If you like this program please make a donation with PayPal to simone.pernice@gmail.com""",  width=80,  height=10)
+If you like this program please make a donation with PayPal to simone.pernice@gmail.com""")
 
     def mnucmdhelp(self):
         Txtinterface(self.root, 'Help', 
 """This is an interface to remote controll a supplier of DPS series.
-This project was born because nothing open source nor for Linux distribution were available.""",  width=80,  height=10)
+This project was born because nothing open source nor for Linux distribution were available.""")
 
     def butcmdconnect(self):
         if self.ivarconctd.get():
@@ -373,9 +402,6 @@ This project was born because nothing open source nor for Linux distribution wer
     def butcmdpausewave(self):
         self.waver.wake()
 
-#    def toimplement(self):
-#        pass
-        
     def entbndvmax(self, event):
         if self.isconnected():
             self.dps.set(['m0ovp'], [self.dvarvmaxm0.get()])         
@@ -408,6 +434,8 @@ This project was born because nothing open source nor for Linux distribution wer
         return True
 
     def setvscale(self, v):
+        if v > self.maxoutv : v = self.maxoutv
+        elif v < 0 : v = 0
         self.dvarvscale.set(int(v))
         self.dvarvscalef.set(round(v-int(v), 2))
 
@@ -415,6 +443,8 @@ This project was born because nothing open source nor for Linux distribution wer
         return self.dvarvscale.get()+self.dvarvscalef.get()
 
     def setcscale(self, c):
+        if c > self.maxoutc : c = self.maxoutc
+        elif c < 0 : c = 0        
         self.dvarcscale.set(int(c))
         self.dvarcscalef.set(round(c-int(c), 2))
 

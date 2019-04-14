@@ -76,8 +76,9 @@ class Scope:
 
         self.varlist=(self.ivarvena, self.ivarcena, self.ivarpena, self.dvarvdiv, self.dvarcdiv, self.dvarpdiv, self.dvarv0, self.dvarc0, self.dvarp0, self.dvartdiv, self.dvart0)
 
-        self.scopetube.update()
-        self.entbndcmdbutscpupdt(None)
+        self.update()
+#        self.scopetube.update()
+#        self.entbndcmdbutscpupdt(None)
 
     def entbndcmdbutscpupdt(self,  *event):
         self.scopetube.setratios([e.get() for e in self.varlist])
@@ -89,6 +90,7 @@ class Scope:
 
     def update(self):
         self.scopetube.update()
+        self.entbndcmdbutscpupdt(None)
 
     def resetpoints(self):
         self.scopetube.resetpoints()
@@ -99,8 +101,8 @@ class Scope:
     def redraw(self):
         self.scopetube.redraw()
 
-    def drawgrid(self):
-        self.scopetube.drawgrid()
+#    def drawgrid(self):
+#        self.scopetube.drawgrid()
 
     def sampletime(self):
         return self.scopetube.sampletime()
@@ -118,6 +120,7 @@ if __name__=='__main__':
     scope=Scope(root, [], 0, 0)
     
     scope.load('../tests/testpoints.dps')
+    scope.redraw()
     root.mainloop()
         
 

@@ -1,3 +1,12 @@
+"""
+ DPS interface: an interface for DPS supplier
+
+(C)2019 - Simone Pernice - pernice@libero.it
+This is distributed under GNU LGPL license, see license.txt
+
+This files contains a set of constants used over all the modules
+"""
+
 #Entry width used for all iuputs
 ENTRYWIDTH=10
 

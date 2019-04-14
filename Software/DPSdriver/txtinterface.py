@@ -2,10 +2,19 @@ from Tkinter import Text, END, DISABLED, Button, BOTH
 from toplevel import maketoplevel
 
 class Txtinterface:        
-    def __init__(self, prevroot,  title,  txt,  readfromfile=False, width=40, height=20):        
+    def __init__(self, prevroot,  title,  txt,  readfromfile=False, width=-1, height=-1):        
         self.root=maketoplevel(prevroot, True)
         self.root.title(title)
         
+        if width<0 or height<0:
+            h=0
+            w=0
+            for line in txt.split('\n'):
+                if len(line) > w: w = len(line)
+                h+=1
+            if width < 0: width = w
+            if height < 0: height = h
+
         outputtext=Text(self.root, width=width, height=height)
         
         if readfromfile:

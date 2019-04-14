@@ -46,7 +46,7 @@ class Scopetube(Canvas):
             self.smpt = MINSAMPLETIME
 
     def sendnewsettings(self):
-        if self.ratiocallback:
+        if self.ratiocallback and self.winfo_ismapped() : # Check if it is mapped is very important otherwise it may hang if catch a scale modification but the windows is not made
             nv = [-self.winheight/YDIV/m for m in self.ym]+self.y0+[self.winwidth/XDIV/self.tm, self.t0]
             nv = self.ena+[round(v, 2) for v in nv]
             self.ratiocallback(nv)

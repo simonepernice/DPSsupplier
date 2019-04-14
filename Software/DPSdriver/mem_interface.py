@@ -109,7 +109,7 @@ On each memory is possible to set:
 - output status at memory recall and at power on.
 The memory 0 is automatically overwritte with the configuration in use.
 This interface is for recall and store the memories settings. 
-From the main interface it is possible to recall every memory .""",  width=80,  height=20)
+From the main interface it is possible to recall every memory .""")
 
     def btncmddone(self):
         self.root.destroy()

@@ -1,15 +1,21 @@
+#! /usr/bin/eng python
+
+"""
+ DPS interface: an interface for DPS supplier.
+
+(C)2019 - Simone Pernice - pernice@libero.it
+This is distributed under GNU LGPL license, see license.txt
+
+"""
+
 from dps_interface import DPSinterface
-from Tkinter import Tk, PhotoImage
+from toplevel import makeroot
 
-if __name__=='__main__':
-    root=Tk()
-
-    try:
-        root.tk.call('wm', 'iconphoto', root._w, PhotoImage(file='pwrsup.png'))
-    except:
-        print ('It is not possible to load the application icon')
+if __name__ == '__main__':
+    root = makeroot()
 
     root.title("DPS supplier driver")
-    
-    my_gui=DPSinterface(root)
+
+    my_gui = DPSinterface(root)
+
     root.mainloop()

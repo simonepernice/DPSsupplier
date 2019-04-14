@@ -1,9 +1,13 @@
-
 """
- clipboard class is used to make a clipboard for some data.
+ DPS interface: an interface for DPS supplier
+
+ Clipboard class is used to make a clipboard to manage wave data.
 
  (C)2019 - Simone Pernice - pernice@libero.it
   This is distributed under GNU LGPL license, see license.txt
+
+ (C)2009 - Luc Jean - luc.jean@gmail.com
+ (C)2009 - Apidev - http://www.apidev.fr
 
 """
 

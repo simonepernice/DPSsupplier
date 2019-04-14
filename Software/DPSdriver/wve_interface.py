@@ -179,39 +179,43 @@ class Wveinterface:
         Txtinterface(self.root, 'Help', 
 """Wave editor window is designed to create new waveform to play on the DPS supplier.
 It is based on two output formats:
-- top-left is text table showing what happens at voltage and current at every time
-- bottom-left is graphical and shows the output waveform equivalent to 
-The data can be entered:
+- top-left is text table showing what happens at voltage and current versus time (step is showed for edit purpose) 
+- bottom-left is graphical and shows the output waveform equivalent to the table above
+The data can be entered in three ways:
 - graphically clicking with right button on the bottom-left graph
-- textually with top-right commands
-A clipboard is available to play with the data section:
-- it is located on the bottom-right side
-It can copy/cut and paste from data section. Clipboard can be amplified or translated before pasting.
-Clipboard can become a ramp before pasting.
+- textually with the commands on top-right 
+- from clipboard on bottom-right side
+The clipboard can copy/cut and paste from data section. 
+Clipboard data can be modified bebore pasting:
+- amplified (or attenuated if factor is below 1)
+- translated 
+- transformed in a ramp
 On the graphical section it is possible to manage the waveforms:
-- the actions works only on enabled waveforms
-- drage with riight button to move the waveform
+- the following mouse actions works only on enabled waveforms
+- drage with right button pressed to move the waveform(s)
 - rotate wheel to zoom the time (x)
-- press shift while rotate wheel to zoom y
-- press ctrs while rotate wheel to change the enabled waveform
+- press shift while rotating wheel to zoom y
+- press ctrs while rotating wheel to change the enabled waveform(s)
+- press wheel to fit x and y scale
+On the bottom of the screen the scale, translation and enables are available for manual editing
 On the top-right side it is possible to add new points:
-- insert add a new point at given time, use -1 on voltage/current to keep previous value
-- insert on a time already present modifies it
-- modify and delete buttons can be used to work on a given step
-- append is used to add a new point to the tail known the delta time between last one
+- insert button adds a new point at given time, use -1 on voltage/current to keep previous value
+- insert button with time already present modifies it
+- modify and delete buttons can be used to edit or delete the given step
+- append is used to add a new point to the tail of current waaveform known the delta time between last one
+On the clipboard the time on the clipboard is stored as delta between adiacent points while on the main table it is absolute.
 On the clipboard are available the following buttons:
-- Note the time on the clipboard is stored as delta between adiacent points
 - Copy and past from begin/end steps
 - Amplify or translate the clipboard
-- Transform the clipboard in a ramp using first and last points with given steps
-- Paste inserting or overwriteing the clipboard
+- Transform the clipboard in a ramp using first and last points with given number of steps
+- Paste clipboard at the diven step inserting or overwriteing the data present there
 The clipboard and the data are showed in table with following functions:
 - Line up/down to move up or down by 1 line
 - Page up/down to move up or dosn by all row available minus 1
 - Top/bottom to go to the first or last element
 - Goto time/step to move the first line at the given step
 - Pick begin/end to read the first/second line and put is in begin/end fields
-""",  width=60,  height=10)         
+""")         
 
 if __name__=='__main__':
     from Tkinter import Tk
