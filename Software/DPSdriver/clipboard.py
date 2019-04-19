@@ -1,22 +1,47 @@
-"""
- DPS interface: an interface for DPS supplier
-
- Clipboard class is used to make a clipboard to manage wave data.
-
- (C)2019 - Simone Pernice - pernice@libero.it
-  This is distributed under GNU LGPL license, see license.txt
-
- (C)2009 - Luc Jean - luc.jean@gmail.com
- (C)2009 - Apidev - http://www.apidev.fr
+# coding: utf-8
 
 """
+Wave editor clipboard.
 
-from Tkinter import Button, IntVar, DoubleVar, E, W
+Clipboard class is used as a clipboard in the wave editor to make wave data.
+
+(C)2019 - Simone Pernice - pernice@libero.it
+
+This file is part of DPSinterface.
+
+DPSinterface is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation version 3.
+
+DPSinterface is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with DPSinterface.  If not, see <http://www.gnu.org/licenses/>.
+This is distributed under GNU LGPL license, see license.txt
+
+"""
 
 from constants import TABLECOL, CLIPROW, VCOL, CCOL, TPOS
 from table import Table
 from gridlayoutrowinsert import insertlabelrow, insertentryrow
 
+try:
+    from Tkinter import Button, IntVar, DoubleVar, E, W
+except ImportError:
+    from tkinter import Button, IntVar, DoubleVar, E, W
+
+__author__ = "Simone Pernice"
+__copyright__ = "Copyright 2019, DPS supplier"
+__credits__ = ["Simone Pernice"]
+__license__ = "GNU GPL v3.0"
+__version__ = "0.9.0"
+__date__ = "16 April 2019"
+__maintainer__ = "Simone Pernice"
+__email__ = "perniceb@libero.it"
+__status__ = "Development"
 
 class Clipboard:
 
@@ -303,7 +328,10 @@ class Clipboard:
 
 
 if __name__ == '__main__':
-    from Tkinter import Tk
+    try:
+        from Tkinter import Tk
+    except ImportError:
+        from tkinter import Tk
 
     root = Tk()
     points = []

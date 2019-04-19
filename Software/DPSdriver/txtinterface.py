@@ -1,5 +1,9 @@
-from Tkinter import Text, END, DISABLED, Button, BOTH
 from toplevel import maketoplevel
+
+try:
+    from Tkinter import Text, END, DISABLED, Button, BOTH
+except ImportError:
+    from tkinter import Text, END, DISABLED, Button, BOTH
 
 class Txtinterface:        
     def __init__(self, prevroot,  title,  txt,  readfromfile=False, width=-1, height=-1):        
@@ -32,7 +36,11 @@ class Txtinterface:
         self.root.destroy()
 
 if __name__=='__main__':
-    from Tkinter import Tk
+    try:
+        from Tkinter import Tk
+    except ImportError:
+        from tkinter import Tk
+
     root=Tk()
     my_gui=Txtinterface(root,  'info',  'This is just\Several lines of \ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext')
     root.mainloop()

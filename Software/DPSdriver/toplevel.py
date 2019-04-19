@@ -1,4 +1,8 @@
-from Tkinter import Toplevel, PhotoImage, Tk
+
+try:
+    from Tkinter import Toplevel, PhotoImage, Tk
+except ImportError:
+    from tkinter import Toplevel, PhotoImage, Tk
 
 def maketoplevel(root, modal=False):
     tl=Toplevel(root)

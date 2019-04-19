@@ -1,9 +1,10 @@
-from Tkinter import Canvas, ALL
-
 from constants import XDIV, YDIV, GRIDDASH, GRIDCOL, VCOL, CCOL, PCOL, MINSAMPLETIME, TPOS, VPOS, CPOS, PPOS
-
 from dpsfile import Dpsfile
 
+try:
+    from Tkinter import Canvas, ALL
+except ImportError:
+    from tkinter import Canvas, ALL
 
 class Scopetube(Canvas):
     def __init__(self, root, data, horizontaljoin=False, ratiocallback=None, buttoncallback=None):
@@ -229,7 +230,11 @@ class Scopetube(Canvas):
 
 
 if __name__ == '__main__':
-    from Tkinter import Tk
+    try:
+        from Tkinter import Tk
+    except ImportError:
+        from tkinter import Tk
+
     root = Tk()
     from random import random
 

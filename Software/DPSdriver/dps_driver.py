@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# coding: utf-8
+
+# Copyright (C) 2019 - Simone Pernice - pernice@libero.it
 
 """
 DPS supplier serial driver.
@@ -32,6 +35,7 @@ __copyright__ = "Copyright 2019, DPS supplier"
 __credits__ = ["Simone Pernice"]
 __license__ = "GNU GPL v3.0"
 __version__ = "0.9.0"
+__date__ = "16 April 2019"
 __maintainer__ = "Simone Pernice"
 __email__ = "perniceb@libero.it"
 __status__ = "Development"
@@ -334,35 +338,35 @@ if __name__ == "__main__":
     import time
     DPS = DPSdriver('/dev/ttyUSB1')
     t = time.time()
-    print DPS.get(['vinp'])
-    print time.time() - t
+    print (DPS.get(['vinp']))
+    print (str(time.time() - t))
     t = time.time()
-    print DPS.get(['cset', 'vset'])
-    print time.time() - t
+    print (DPS.get(['cset', 'vset']))
+    print (str(time.time() - t))
     t = time.time()
-    print DPS.get(['vset', 'cset'])
-    print time.time() - t
-#    print DPS.get(['model'])
-#    print DPS.get(['fware'])
-#    print DPS.set(['mset'], [0])
-#    print DPS.get(['vset'])
-#    print DPS.set(['vset'], [4.55])
-#    print DPS.get(['vset'])
-#    print DPS.set(['vset'], [4.56])
-#    print DPS.get(['vset'])
-#    print DPS.set(['vset'], [4.57])
-#    print DPS.get(['vset'])
-#    print DPS.set(['cset', 'vset'],  [1.23,  5.67])
-#    print DPS.set(['cset', 'vset', 'lock'],  [15.80,  22.78, 0])
-    print DPS.set(['cset'],  [14.80])
-#    print DPS.get(['m0pre',  'm1pre',  'm2pre', 'm3pre',  'm4pre',  'm5pre',  'm6pre',  'm7pre',  'm8pre',  'm9pre'])
-#    print DPS.set(['mset'], [5])
-#    print DPS.get(['m0pre',  'm1pre',  'm2pre', 'm3pre',  'm4pre',  'm5pre',  'm6pre',  'm7pre',  'm8pre',  'm9pre'])
-#    print DPS.set('vset',  10.04)
-#    print DPS.set('cset',  0.12)
-#    print DPS.set('onoff',  0)
-#    print DPS.get('lock')
-#    print DPS.set('lock',  1)
-#    print DPS.get('vout')
-#    print DPS.get('cout')
-#    print DPS.set('brght', 0)
+    print (DPS.get(['vset', 'cset']))
+    print (str(time.time() - t))
+#    print (DPS.get(['model']))
+#    print (DPS.get(['fware']))
+#    print (DPS.set(['mset'], [0]))
+#    print (DPS.get(['vset']))
+#    print (DPS.set(['vset'], [4.55]))
+#    print (DPS.get(['vset']))
+#    print (DPS.set(['vset'], [4.56]))
+#    print (DPS.get(['vset']))
+#    print (DPS.set(['vset'], [4.57]))
+#    print (DPS.get(['vset']))
+#    print (DPS.set(['cset', 'vset'],  [1.23,  5.67]))
+#    print (DPS.set(['cset', 'vset', 'lock'],  [15.80,  22.78, 0]))
+    print (DPS.set(['cset'],  [14.80]))
+#    print (DPS.get(['m0pre',  'm1pre',  'm2pre', 'm3pre',  'm4pre',  'm5pre',  'm6pre',  'm7pre',  'm8pre',  'm9pre']))
+#    print (DPS.set(['mset'], [5]))
+#    print (DPS.get(['m0pre',  'm1pre',  'm2pre', 'm3pre',  'm4pre',  'm5pre',  'm6pre',  'm7pre',  'm8pre',  'm9pre']))
+#    print (DPS.set('vset',  10.04))
+#    print (DPS.set('cset',  0.12))
+#    print (DPS.set('onoff',  0))
+#    print (DPS.get('lock'))
+#    print (DPS.set('lock',  1))
+#    print (DPS.get('vout'))
+#    print (DPS.get('cout'))
+#    print (DPS.set('brght', 0))

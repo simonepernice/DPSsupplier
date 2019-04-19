@@ -1,8 +1,11 @@
-from Tkinter import Checkbutton, IntVar, DoubleVar, E, W
-
 from scopetube import Scopetube
 from gridlayoutrowinsert import insertlabelrow, insertentryrow
 from constants import VCOL, CCOL, PCOL
+
+try:
+    from Tkinter import Checkbutton, IntVar, DoubleVar, E, W
+except ImportError:
+    from tkinter import Checkbutton, IntVar, DoubleVar, E, W
 
 class Scope:        
     def __init__(self, root, data, row0, col0, rowspan=10, colspan=6, showpower=True, horizontaljoin=False, buttoncallback=None):
@@ -114,7 +117,11 @@ class Scope:
         self.scopetube.save(fname)
 
 if __name__=='__main__':
-    from Tkinter import Tk
+    try:
+        from Tkinter import Tk
+    except ImportError:
+        from tkinter import Tk
+
     root=Tk()
 
     scope=Scope(root, [], 0, 0)

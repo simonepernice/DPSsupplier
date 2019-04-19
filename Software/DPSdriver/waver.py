@@ -1,5 +1,6 @@
 from threading import Thread, Event
 from time import time
+
 from constants import TPOS, CPOS, VPOS
 
 class Waver (Thread):

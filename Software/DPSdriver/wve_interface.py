@@ -1,7 +1,3 @@
-from Tkinter import Button, IntVar, DoubleVar, E, W, N, S
-from ttk import Separator
-import tkMessageBox
-
 from constants import TABLEROW, TABLECOL, VCOL, CCOL, TPOS, VPOS, CPOS
 from clipboard import Clipboard
 from table import Table
@@ -9,6 +5,15 @@ from scope import Scope
 from gridlayoutrowinsert import insertlabelrow, insertentryrow
 from txtinterface import Txtinterface
 from toplevel import maketoplevel
+
+try:
+    from Tkinter import Button, IntVar, DoubleVar, E, W, N, S
+    from ttk import Separator
+    import tkMessageBox
+except ImportError:
+    from tkinter import Button, IntVar, DoubleVar, E, W, N, S
+    from tkinter.ttk import Separator
+    from tkinter import messagebox as tkMessageBox
 
 class Wveinterface:        
 
@@ -218,7 +223,11 @@ The clipboard and the data are showed in table with following functions:
 """)         
 
 if __name__=='__main__':
-    from Tkinter import Tk
+    try:
+        from Tkinter import Tk
+    except ImportError:
+        from tkinter import Tk
+
     root=Tk()
     points=[]
     for r in range(1,35):

@@ -1,9 +1,12 @@
-from Tkinter import Label, Button, Checkbutton, Scale, IntVar, DoubleVar, E, W
-
 from constants import VCOL, CCOL, PCOL
 from gridlayoutrowinsert import insertlabelrow, insertentryrow
 from toplevel import maketoplevel
 from txtinterface import Txtinterface
+
+try:
+    from Tkinter import Label, Button, Checkbutton, Scale, IntVar, DoubleVar, E, W
+except ImportError:
+    from tkinter import Label, Button, Checkbutton, Scale, IntVar, DoubleVar, E, W
 
 class Meminterface:        
     def __init__(self, prevroot,  dps, updatefields):                
@@ -115,7 +118,11 @@ From the main interface it is possible to recall every memory .""")
         self.root.destroy()
 
 if __name__=='__main__':
-    from Tkinter import Tk
+    try:
+        from Tkinter import Tk
+    except ImportError:
+        from tkinter import Tk
+
     root=Tk()
     my_gui=Meminterface(root,  None,  None)
     root.mainloop()

@@ -1,7 +1,11 @@
-from Tkinter import Label, DoubleVar, IntVar, Button, E, W, Entry
-
 from constants import ENTRYWIDTH, TPOS
 from gridlayoutrowinsert import insertlabelrow
+
+try:
+    from Tkinter import Label, DoubleVar, IntVar, Button, E, W, Entry
+except ImportError:
+    from tkinter import Label, DoubleVar, IntVar, Button, E, W, Entry
+
 
 class Table:
     
@@ -120,7 +124,11 @@ class Table:
         return r
 
 if __name__=='__main__':
-    from Tkinter import Tk
+    try:
+        from Tkinter import Tk
+    except ImportError:
+        from tkinter import Tk
+
     root=Tk()
     data=[]
     table=Table(root, data,  (('step', 'black'), ('time [s]', 'black'), ('voltage [V]', 'red'), ('current [A]', 'blue')), 0, 0, 10, 4)
