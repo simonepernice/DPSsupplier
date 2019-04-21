@@ -41,48 +41,90 @@ __maintainer__ = "Simone Pernice"
 __email__ = "perniceb@libero.it"
 __status__ = "Development"
 
-class Point():
-    # Position of values on dps files
-    TPOS = 0
-    VPOS = 1
-    CPOS = 2
-    PPOS = 3
+REVALUNIT=re.compile(r"([\+\-]*[0-9]*\.[0-9]+)\s*([a-zA-Z]*)")
+   
+def convert(val):
+    """
+    Convert a string value read from file to float. It understands engineer notation. 
+
+    :param val: the string containing the value to convert.
+    :returns: the floating value converted.
 
     """
-    Point represent the value of voltage, current and power in a given time instant.
+    try:
+        return float(val)
+    except Exception:
+        fields=REVALUNIT.match(val)
+        if fields:
+            values=fields.groups()
+            return float(values[0])*{'T':1e12, 'G':1e9, 'M':1e6, 'k':1e3, '':1, 'm':1e-3, 'u':1e-6, 'n':1e-9, 'p':1e-12}[values[1]]
+        raise ValueError('Not understood number'+val)    
+
+class Point():
+#    # Position of values on dps list
+#    TPOS = 0
+#    VPOS = 1
+#    CPOS = 2
+#    PPOS = 3
+
+    """
+    Point represent the value of voltage, current and power in a given absolute time instant.
 
     """
 
     def __init__(self, t, v, c, p=None, t0=None):
+        """
+        Make a new point.
+        
+        Make a new point knowing its time, voltage, current.
+
+        :param t: the absolute time istant of the pointe. Define t0 to make t relative to t0
+        :param v: the voltage at t. Use None to copy later from another point.
+        :param c: the current at t. Use None to copy later from another point.
+        :param p: the power. Use None to compute from c and v if availables otherwise can can be copied later from another point.
+        :param t0: the begin time reference for t
+        :returns: the new point
+
+        """        
         self.v = v
         self.c = c
-        self.p = v * c if p is None else p
-        self.t = t if t0 is None else t - t0        
+        self.p = v * c if p is None and v is not None and c is not None else p
+        self.t = t if t0 is None else t - t0
+        if self.t is None or self.t < 0:
+            raise ValueError('None or negative time is not allowed for a point')
 
-    @classmethod
-    def fromlist(cls, list, t0=0):
-        if len(list) > 4:
-            return cls(list[0], list[1], list[2], list[3], t0)
-        else:
-            return cls(list[0], list[1], list[2], t0=t0)
+#    @classmethod
+#    def fromlist(cls, list, t0=None):
+#        if len(list) > 4:
+#            return cls(list[Point.TPOS], list[Point.VPOS], list[Point.CPOS], list[Point.PPOS], t0)
+#        else:
+#            return cls(list[Point.TPOS], list[Point.VPOS], list[Point.CPOS], t0=t0)
     
     @classmethod    
     def fromstring(cls, string):
+        """
+        Make a new point from a string.
+        
+        :param string: contains time, voltage, current and power can be expressed in engineer notation. 
+        If something missing is set to None to be copied from previous poin later
+        :returns: the new point
+
+        """                
         i=0
         p=[]
         for v in string.split(','):
             try:
                 p.append(convert(v))
             except Exception:
-                print('Not understood value '+v+' at line '+string+' using the previous one')
-                p.append(-1.)
+                print('Not understood a value on the line '+string+' it will be used the previous one')
+                p.append(None)
             i+=1
-        if i<4:#Try to add what is missing
-            if i==Point.PPOS:#power missing
-               p.append(p[Point.VPOS]*p[Point.CPOS])                        
-            else: 
+        if i<4: # Try to add what is missing
+            if i==3 and p[2] is not None and p[1] is not None: # Power missing
+               p.append(p[2] * p[1])                        
+            else: # At list current and power are missing if not more
                 while i < 4:
-                    p.append(-1.)
+                    p.append(None)
                     i+=1
 
         return cls.fromlist(p)
@@ -99,29 +141,24 @@ class Point():
     def gett(self):
         return self.t
 
-    def addtime(self, dtime):
-        self.t += dtime
-        
+    def copymissingfrom(self, prevpoint):
+        if prevpoint is None:
+            if self.v is None: self.v = 0.
+            if self.c is None: self.c = 0.
+            if self.p is None: self.p = self.v * self.c
+        else:
+            if self.v is None: self.v = prevpoint.v
+            if self.c is None: self.c = prevpoint.c
+            if self.p is None: self.p = prevpoint.p
 
+    def deltatimefrom(self, prevpoint):
+        if prevpoint is not None: self.t += prevpoint.t
 
-REVALUNIT=re.compile(r"([\+\-]*[0-9]*\.[0-9]+)\s*([a-zA-Z]*)")
-    
-def convert(val):
-    """
-    Convert a value read from file to float. It understands engineer notation. 
+    def __le__(self, point):
+        return self.t <= point.t
 
-    :param val: the value to convert.
-    :returns: the floating value converted.
-
-    """      
-    try:
-        return float(val)
-    except Exception:
-        fields=REVALUNIT.match(val)
-        if fields:
-            values=fields.groups()
-            return float(values[0])*{'T':1e12, 'G':1e9, 'M':1e6, 'k':1e3, '':1, 'm':1e-3, 'u':1e-6, 'n':1e-9, 'p':1e-12}[values[1]]
-        raise ValueError('Not understood number'+val)    
+    def __str__(self):
+        return '{}, {}, {}, {}\n'.format(self.t,  self.v,  self.c, self.p)
 
 class Waveform():
 
@@ -139,13 +176,14 @@ class Waveform():
         """
         self.points=[]
     
-    def append_dt(self, point):
-        if len(self.points) > 0:
-            point.addtime(self.points[-1])
+    def append_dt(self, point):        
+        point.copymissingfrom(self.points[-1] if len(self.points) > 0 else None)
+        point.deltatimefrom(self.points[-1] if len(self.points) > 0 else None)
         self.points.append(point)
 
     def append_t(self,  point):
-        if len(self.points)>0 and point.gett() <= self.points[-1].gett():
+        point.copymissingfrom(self.points[-1] if len(self.points) > 0 else None)
+        if len(self.points)>0 and point <= self.points[-1]:
             raise ValueError('Not monotonic time found '+str(point))
         self.points.append(point)
 
@@ -166,6 +204,8 @@ class Waveform():
     def delete(self, i):
         del self.point[i]
 
+    def deleteall(self):
+        del self.points[:]
 
     def __iter__(self):
         self.iterpoint=0
@@ -175,21 +215,22 @@ class Waveform():
         return next()
 
     def next(self): # Python 2
-        if len(self.points) < selt.iterpoint+1:
+        beg = self.iterpoint
+        end = self.iterpoint+1
+        if end >= len(self.points):
             raise StopIteration
         else:
-            start = self.iterpoint
             self.iterpoint += 1
-            return self.points[start, ] - 1
-            
-    def getpoints(self):
-        """
-        Provide the list of points.
-
-        :returns: the list of points of the DPS file  
-
-        """    
-        return self.points
+            return self.points[beg:end]
+#            
+#    def getpoints(self):
+#        """
+#        Provide the list of points.
+#
+#        :returns: the list of points of the DPS file  
+#
+#        """    
+#        return self.points
 
     def load(self,  fname):
         """
@@ -200,53 +241,10 @@ class Waveform():
 
         """    
         with open(fname) as f:
-            l=f.readline()
-            while l:
-                i=0
-                p=[]
-                for v in l.split(','):
-                    try:
-                        p.append(self.convert(v))
-                    except Exception:
-                        print('Not understood value '+v+' at line '+l+' using the previous one')
-                        if len(self.points)>0:
-                            p.append(self.points[-1][i])
-                        else:
-                            p.append(0.)
-                    i+=1
-                while i<4:#Try to add what is missing
-                    if i==PPOS:#power missing
-                       p.append(p[VPOS]*p[CPOS])                        
-                    elif len(self.points)>0:#voltage or current missing copy from previous row
-                        p.append(self.points[-1][i])
-                    else:#on the first row add 0.
-                        p.append(0.)
-                    i+=1
-                if len(self.points)>0 and p[TPOS]<=self.points[-1][TPOS]:
-                    raise ValueError('Not monotonic time found '+str(p[TPOS])+' at line'+l)
-                p=tuple(p)
-
-                self.points.append(p)
-                l=f.readline()
-                
-        return self.points
-
-    def convert(self, val):
-        """
-        Convert a value read from file to float. It understands engineer notation. 
-
-        :param val: the value to convert.
-        :returns: the floating value converted.
-
-        """      
-        try:
-            return float(val)
-        except Exception:
-            fields=self.REVALUNIT.match(val)
-            if fields:
-                values=fields.groups()
-                return float(values[0])*{'T':1e12, 'G':1e9, 'M':1e6, 'k':1e3, '':1, 'm':1e-3, 'u':1e-6, 'n':1e-9, 'p':1e-12}[values[1]]
-            raise ValueError('Not understood number'+val)
+            line = f.readline()
+            while line:
+                self.append_t(Point.fromstring(line))
+                line = f.readline()
         
     def save(self, fname):
         """
@@ -256,10 +254,5 @@ class Waveform():
 
         """    
         with open(fname, 'w') as f:
-            for p in self.points:
-                comma=''
-                for v in p:
-                    f.write(comma)
-                    f.write(str(v))
-                    comma=','
-                f.write('\n')
+            for point in self.points:
+                f.write(str(point))

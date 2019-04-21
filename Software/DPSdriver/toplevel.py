@@ -1,3 +1,4 @@
+import os
 
 try:
     from Tkinter import Toplevel, PhotoImage, Tk
@@ -7,7 +8,7 @@ except ImportError:
 def maketoplevel(root, modal=False):
     tl=Toplevel(root)
     try:
-        tl.tk.call('wm', 'iconphoto', tl._w, PhotoImage(file='pwrsup.png'))
+        root.tk.call('wm', 'iconphoto', root._w, PhotoImage(file=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'pwrsup.png')))
     except:
         print ('It is not possible to load the application icon')
 
@@ -20,8 +21,11 @@ def maketoplevel(root, modal=False):
 def makeroot():
     root=Tk()
     try:
-        root.tk.call('wm', 'iconphoto', root._w, PhotoImage(file='pwrsup.png'))
+        root.tk.call('wm', 'iconphoto', root._w, PhotoImage(file=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'pwrsup.png')))
     except:
         print ('It is not possible to load the application icon')
         
     return root
+
+def maindir():
+    pass
