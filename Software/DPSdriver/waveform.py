@@ -93,12 +93,16 @@ class Point():
         if self.t is None or self.t < 0:
             raise ValueError('None or negative time is not allowed for a point')
 
-#    @classmethod
-#    def fromlist(cls, list, t0=None):
-#        if len(list) > 4:
-#            return cls(list[Point.TPOS], list[Point.VPOS], list[Point.CPOS], list[Point.PPOS], t0)
-#        else:
-#            return cls(list[Point.TPOS], list[Point.VPOS], list[Point.CPOS], t0=t0)
+    @classmethod
+    def frompoint(cls, point):
+        return cls(point.t, point.v, point.c, point.p)
+
+    @classmethod
+    def fromlist(cls, list, t0=None):
+        if len(list) > 4:
+            return cls(list[Point.TPOS], list[Point.VPOS], list[Point.CPOS], list[Point.PPOS], t0)
+        else:
+            return cls(list[Point.TPOS], list[Point.VPOS], list[Point.CPOS], t0=t0)
     
     @classmethod    
     def fromstring(cls, string):
@@ -159,6 +163,19 @@ class Point():
 
     def __str__(self):
         return '{}, {}, {}, {}\n'.format(self.t,  self.v,  self.c, self.p)
+
+    def copywhatless(self, otherpoint):
+        if otherpoint.t < self.t: self.t = otherpoint.t
+        if otherpoint.v < self.v: self.v = otherpoint.v
+        if otherpoint.c < self.t: self.c = otherpoint.c
+        if otherpoint.p < self.p: self.p = otherpoint.p
+
+    def copywhatmore(self, otherpoint):
+        if otherpoint.t > self.t: self.t = otherpoint.t
+        if otherpoint.v > self.v: self.v = otherpoint.v
+        if otherpoint.c > self.t: self.c = otherpoint.c
+        if otherpoint.p > self.p: self.p = otherpoint.p
+
 
 class Waveform():
 
@@ -256,3 +273,17 @@ class Waveform():
         with open(fname, 'w') as f:
             for point in self.points:
                 f.write(str(point))
+
+    def lasttwopoints(self):
+        if len(self.points) > 1:
+            return self.points[-2:]
+        return None
+
+    def getminmax(self, enablist):
+        if len(self.points) < 1: return None
+        pmin = Point.frompoint(self.points[0])
+        pmax = Point.frompoint(self.points[0])
+        for p in self.points[1:]:
+            pmin.copywhatless(p)
+            pmax.copywhatmore(p)
+        return (pmin, pmax)
