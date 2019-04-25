@@ -3,7 +3,11 @@
 """
 DPS supplier waveform .
 
-This is the class with contains file of time, voltage, current and power.
+This file contains the classes required to hide DPS waveform interface internal structure 
+in classe. It is not used. At the moment the waveform is represnted as a list of:
+time (absolute), voltage, current, power. In the end it was not used to avoid
+rewriting of several other files.
+
 The file can be sampled by the dps interface or made from the wave interface.
 It is also possible to edit that file by hand, in that case more facility are availble:
 - do not write a parameter if it is equals to the one before
@@ -29,7 +33,6 @@ This is distributed under GNU LGPL license, see license.txt
 """
 
 import re
-
 
 __author__ = "Simone Pernice"
 __copyright__ = "Copyright 2019, DPS supplier"

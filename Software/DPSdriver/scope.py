@@ -1,3 +1,31 @@
+# coding: utf-8
+
+"""
+DPS scope
+
+This is the DPS scope interface with settings regulations.
+It is used to display polling wave on DPS output or 
+to edit a waveform.
+
+(C)2019 - Simone Pernice - pernice@libero.it
+
+This file is part of DPSinterface.
+
+DPSinterface is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation version 3.
+
+DPSinterface is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with DPSinterface.  If not, see <http://www.gnu.org/licenses/>.
+This is distributed under GNU LGPL license, see license.txt
+
+"""
+
 from scopetube import Scopetube
 from gridlayoutrowinsert import insertlabelrow, insertentryrow
 from constants import VCOL, CCOL, PCOL
@@ -7,8 +35,40 @@ try:
 except ImportError:
     from tkinter import Checkbutton, IntVar, DoubleVar, E, W
 
-class Scope:        
+__author__ = "Simone Pernice"
+__copyright__ = "Copyright 2019, DPS supplier"
+__credits__ = ["Simone Pernice"]
+__license__ = "GNU GPL v3.0"
+__version__ = "0.9.0"
+__date__ = "16 April 2019"
+__maintainer__ = "Simone Pernice"
+__email__ = "perniceb@libero.it"
+__status__ = "Development"
+
+class Scope:
+
+    """
+    Scope is class used to make a scope on grid layout with Tkinterface.
+
+    """
     def __init__(self, root, data, row0, col0, rowspan=10, colspan=6, showpower=True, horizontaljoin=False, buttoncallback=None):
+        """
+        Create a scope interface.
+
+        :param root: is the main window
+        :param data: is the data to display (update if enabled)
+        :param row0: is the beginning row as whitch the scope should be placed on the grid layout
+        :param col0: is the beginning column as whitch the scope should be placed on the grid layout
+        :param rowspan: is how many rows should be used to draw the whole scope
+        :param colspan: is how many columns should be used to draw the whole scope
+        :param showpower: is a boolean field used to show the power (not required in wave editor) 
+        :param horizontaljoin: if true the points are joined through horizontal segments then vertica 
+        (for waveditor) if it is false they are just joined as useful in the scope view
+        :param buttoncallback: it is the function to provide if the user can manage the graphs 
+        changing point (for wave editor)
+        :returns: a new instance of scope
+
+        """    
         self.root=root
         
         row=row0
@@ -80,40 +140,84 @@ class Scope:
         self.varlist=(self.ivarvena, self.ivarcena, self.ivarpena, self.dvarvdiv, self.dvarcdiv, self.dvarpdiv, self.dvarv0, self.dvarc0, self.dvarp0, self.dvartdiv, self.dvart0)
 
         self.update()
-#        self.scopetube.update()
-#        self.entbndcmdbutscpupdt(None)
 
     def entbndcmdbutscpupdt(self,  *event):
+        """
+        Updates scope view ratios when something changes on any of the setting.
+        
+        The change is detected by RETURN pressure or field change
+
+        :param event: may the event that made the change (not used), added to be used as command/event call back
+
+        """        
         self.scopetube.setratios([e.get() for e in self.varlist])
         self.scopetube.redraw()
 
     def newratios(self, ratios):
+        """
+        Updates scope ratios.
+        
+        Used by scopetube to update the ratios base on the mouse actions.
+
+        :param ratios: is the list of ratios to update: v, c, p enables; v, c, p initial value; v, c, p divisions; t initial value and divisions.
+
+        """     
         for var, val in zip(self.varlist, ratios):
             var.set(val)
 
     def update(self):
+        """
+        Updates scope tube view based on the dimensions of the screen.
+        
+        """    
         self.scopetube.update()
         self.entbndcmdbutscpupdt(None)
 
     def resetpoints(self):
+        """
+        Delete all the waveform points .
+        
+        """   
         self.scopetube.resetpoints()
     
     def addpoint(self, p):
+        """
+        Add a new point to the waveform.
+        
+        """
         self.scopetube.addpoint(p)
         
     def redraw(self):
+        """
+        Redraw the scopetube.
+        
+        """       
         self.scopetube.redraw()
 
-#    def drawgrid(self):
-#        self.scopetube.drawgrid()
-
     def sampletime(self):
+        """
+        Gets the scopetube suggested sample time. 
+        
+        That is the sample time required to have a sample for every pixel.
+        
+        """       
         return self.scopetube.sampletime()
 
     def load(self,  fname):
+        """
+        Load a waveform saved before (uses CSV files)
+        
+        :param fname: the file name from which retrieve the waveform
+        """
+    
         self.scopetube.load(fname)
 
     def save(self, fname):
+        """
+        Save the waveform currently in memory (uses CSV files)
+        
+        :param fname: the file name in which save the waveform
+        """
         self.scopetube.save(fname)
 
 if __name__=='__main__':

@@ -58,9 +58,9 @@ class Clipboard:
         """
         Create a Clipboard.
 
-        :param root is the top level Tkinterface where the clipboard sits.
-        :datawve: is the list of poins from which the data is copied and pasted
-        :updateview: is the function called when the main data is changed (paste/cut action)
+        :param root: is the top level Tkinterface where the clipboard sits.
+        :param datawve: is the list of poins from which the data is copied and pasted
+        :param updateview: is the function called when the main data is changed (paste/cut action)
         :param row0: is th first row of the grid where the clipborad sits
         :param col0: is th first column of the grid where the clipborad sits
 

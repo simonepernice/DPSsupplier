@@ -425,7 +425,7 @@ The maximum voltage, current and power to provide before triggering the protecti
 The current output voltage, current and power.
 A time diagram of the DPS output. 
 It is possible to play with the mouse on that screen:
-- wheel press to fit the highlighted curves
+- wheel press to fit the enabled drawings
 - wheel to zoom in time
 - shift+wheel to zoom on Y of the highlighted curves
 - ctrl+wheel to change the enabled curves
@@ -438,7 +438,11 @@ The same zoom features are available in the fields below the diagram:
 The sample time is used for the acquisition, the minimum is around 1 second.
 The next buttons are:
 - Run acquisition: starts a thread that read the DPS status, update the interface 
-fields as well as the time diagram
+fields as well as the time diagram. The acquisition may slow the wave player
+use low acquisition sample time to avoid delays.
+The acquisition points can be save and loaded to be showed lated with menu 
+commands on DPS scope load/save. They can be also edited through the
+wave edit window.
 - Key lock: set or reset the DPS key lock. It should be on in order to have faster
 communication becase less fields of DPS are read since user can change them only
 through the PC interface.
