@@ -242,15 +242,6 @@ class Waveform():
         else:
             self.iterpoint += 1
             return self.points[beg:end]
-#            
-#    def getpoints(self):
-#        """
-#        Provide the list of points.
-#
-#        :returns: the list of points of the DPS file  
-#
-#        """    
-#        return self.points
 
     def load(self,  fname):
         """
