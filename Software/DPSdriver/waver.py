@@ -42,20 +42,23 @@ class Waver (Thread):
     Waver is a Thread to play a wave prevously write by the user
     """
 
-    def __init__(self, setvcdps, ivarwvplay, ivarwvpause, wave):
+    def __init__(self, setvcdps, ivarwvplay, ivarwvpause, ivarwvloop, wave):
         """
         Make Waver thread instance and start it
         
         :param setvcdps: is the function to call when a new voltage or current is set on DPS
         :param ivarwvplay: is an IntVariable with play status (1: play, 0: stop). When 0 the thread die
         :param ivarwvpause: is an IntVariable with pause status (1: pause, 0: play). When 0 the thread die
+        :param ivarwvloop: is an IntVariable with loop status (1: loop restart after the end, 0: exits at the end). 
+        The status is checked only at the end of the current cycle
         :param wave: is the list of data to play
         """
         Thread.__init__(self)
 
-        self.setvcdps=setvcdps
-        self.ivarwvplay=ivarwvplay
-        self.ivarwvpause=ivarwvpause
+        self.setvcdps = setvcdps
+        self.ivarwvplay = ivarwvplay
+        self.ivarwvpause = ivarwvpause
+        self.ivarwvloop = ivarwvloop
         
         self.wave=wave
         
@@ -63,6 +66,16 @@ class Waver (Thread):
         
         self.event=Event()
 
+        self.initialize()
+
+        self.start()
+    
+    def initialize(self):
+        """
+        Initialize the supplier and the internal variables to begin a loop.
+        
+        If the wave begin is not close to time 0, the supplier is initialized with all parameters at 0.
+        """
         if abs(self.wave[0][TPOS]-0.)<0.01:
             self.pv=self.wave[0][VPOS]
             self.pc=self.wave[0][CPOS]
@@ -75,8 +88,6 @@ class Waver (Thread):
         self.setvcdps(self.pv, self.pc)
     
         self.t0=time()
-
-        self.start()
 
     def setvc(self, v, c):
         """
@@ -123,7 +134,7 @@ class Waver (Thread):
             self.event.wait()
             self.event.clear()
             self.t0+=time()-t1
-            self.checkpause()#verify pause was released
+            self.checkpause() # Recursive to verify pause was actually released
     
     def run(self):
         """
@@ -140,8 +151,13 @@ class Waver (Thread):
                     break
                 self.index+=1
             else:
-                self.ivarwvplay.set(0)
-                return
+                if self.ivarwvloop.get():
+                    self.initialize()
+                    ct=self.gettime()
+                    nt=self.wave[self.index][TPOS]
+                else:
+                    self.ivarwvplay.set(0)
+                    return
             
             if self.event.wait(nt-ct):
                 self.event.clear()

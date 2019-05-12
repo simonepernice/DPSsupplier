@@ -255,7 +255,7 @@ class DPSinterface:
         col=0
         Label(root, text="Waveform: ").grid(row=row, column=col, sticky=E)
         col+=colspan
-        colspan=3
+        colspan=2
         self.svarwave=StringVar()
         Entry(root, textvariable=self.svarwave, width=ENTRYWIDTH, justify='right', state='readonly').grid(row=row, column=col, columnspan=colspan, sticky=E+W)
         col+=colspan
@@ -267,6 +267,10 @@ class DPSinterface:
         self.ivarpausewv=IntVar()
         self.ivarpausewv.set(0)        
         Checkbutton(root, variable=self.ivarpausewv, text='Pause', command=self.butcmdpausewave).grid(row=row, column=col, sticky=E+W)
+        col+=colspan
+        self.ivarloopwv=IntVar()
+        self.ivarloopwv.set(0)        
+        Checkbutton(root, variable=self.ivarloopwv, text='Loop').grid(row=row, column=col, sticky=E+W)
         
         self.scope.update()
         self.scope.redraw()
@@ -575,7 +579,7 @@ play and pause it through the respective commands of the interface.""")
             if not self.ivaroutenab.get():
                 self.ivaroutenab.set(1)
                 self.butcmdoutenable()
-            self.waver=Waver(self.setvcdps, self.ivarplaywv, self.ivarpausewv, self.dpsfwave.getpoints())            
+            self.waver=Waver(self.setvcdps, self.ivarplaywv, self.ivarpausewv, self.ivarloopwv, self.dpsfwave.getpoints())            
         else:
             self.waver.wake()
         
