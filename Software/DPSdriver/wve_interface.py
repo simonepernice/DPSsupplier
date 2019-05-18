@@ -288,42 +288,45 @@ class Wveinterface:
         """
         Txtinterface(self.root, 'Help', 
 """Wave editor window is designed to create new waveform to play on the DPS supplier.
-It is based on two output formats:
-- top-left is text table showing what happens at voltage and current versus time 
-(the step number is showed for edit purpose) 
-- bottom-left is graphical and shows the output waveform equivalent to the table
-The data can be entered in three ways:
+The wave is visible on two different output formats:
+- top-left is text table showing what voltage and current set at give timing
+Every line has its step number useful for editing
+- bottom-left is the wave graphical picture representing the table above
+The wave data can be entered in three ways:
 - graphically with mouse clicking on the bottom-left graph
-- textually with the commands on top-right 
-- from clipboard on bottom-right side
-The clipboard can copy/cut and paste from data section. 
-Clipboard data can be modified bebore pasting:
-- amplified (or attenuated if factor is below 1)
-- translated 
-- transformed in a ramp
-On the graphical section it is possible to manage the enabled waveforms:
+- textually with the commands on top-right input section
+- from clipboard on the bottom-right side
+The clipboard can copy/cut and paste from the data section. 
+Clipboard data can be modified bebore pasting back:
+- amplified (or attenuated if the factor is below 1)
+- translated (on Y for voltage and current and also on time)
+- transformed in a ramp: the give number of steps are inserted between 
+the first and last data sample
+On the graphical section it is possible to manage the enabled waveforms
+with the mouse:
 - drage with left button pressed to move the waveform(s)
 - rotate wheel to zoom/unzoom the time (x)
 - press shift while rotating wheel to zoom/unzoom the amplitude (y)
 - press ctrl while rotating wheel to change the enabled waveform(s)
-- press wheel to fit waveform(s) on x and y scales 
-- press right button to insert a point (of enabled variables)
+- press wheel to fit waveform(s) on time and y scales 
+- press right button to insert a point (on the enabled variables)
 - press shift and right button to modify the amplitude of the point(s) at the right 
-of the mouse arrow with mouse amplitude
+of the mouse arrow with mouse amplitude on the enabled wave(s)
 - press ctrl and right button to delete the point at the right of the mouse pointer
+on the enabled wave(s)
 - press ctrl and shift to replace the point at the right of the mouse pointer with the 
-current mouse arrow place
+current mouse arrow place on the enabled wave(s)
 On the bottom of the screen the scale, translation and enables are available 
-for manual editing
+for manual zooming and moving.
 On the top-right side it is possible to add new points:
 - insert button adds a new point at given time, use -1 on voltage/current to 
 keep previous value
 - insert button to insert a new point (with absolute time) if the required time 
 is already present, that point is modified with new values
 - modify and delete buttons can be used to edit or delete the given step
-- append is used to add a new point to the tail of current waaveform known 
+- append is used to add a new point to the tail of current waveform known 
 the delta time between last one
-On the clipboard the time is stored as delta between adiacent points 
+On the clipboard the sample time is stored as delta between adiacent points 
 while on the main table it is absolute.
 On the clipboard are available the following functions:
 - Copy and cut from begin/end steps of the data into the clipboard
@@ -339,7 +342,7 @@ The clipboard and the data are showed with following buttons:
 - Top/bottom to go to the first or last element
 - Goto time/step to move the first line at the given step
 - Pick begin/end to read the first/second line and put is in begin/end fields
-That is useful for edit purpose without copying by hand
+That is useful for edit purpose without copying by hand.
 """)         
 
 if __name__=='__main__':

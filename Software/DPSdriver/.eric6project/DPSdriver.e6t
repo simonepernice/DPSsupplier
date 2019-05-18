@@ -1,85 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Tasks SYSTEM "Tasks-6.0.dtd">
 <!-- eric6 tasks file for project DPSdriver -->
-<!-- Saved: 2019-05-12, 16:29:25 -->
+<!-- Saved: 2019-05-18, 19:17:19 -->
 <Tasks version="6.0">
   <ProjectScanFilter></ProjectScanFilter>
-  <Task priority="1" completed="False" type="1" uid="{8422861c-7902-4cad-bcb2-ea5a8773f43d}">
+  <Task priority="1" completed="False" type="1" uid="{56877227-5551-4a2b-9571-5063eccd6528}">
     <Summary>TODO:</Summary>
     <Description></Description>
-    <Created>2019-05-12, 15:39:54</Created>
+    <Created>2019-05-18, 17:40:53</Created>
     <Resource>
       <Filename>serial/rfc2217.py</Filename>
       <Linenumber>12</Linenumber>
     </Resource>
   </Task>
-  <Task priority="1" completed="False" type="3" uid="{d9007600-0cf9-4405-ba10-4fd250122618}">
+  <Task priority="1" completed="False" type="3" uid="{4ec049d2-5a81-4338-bb19-3bcfa5e85b8f}">
     <Summary>NOTE: Some implementations may only support a subset of the settings.</Summary>
     <Description></Description>
-    <Created>2019-05-12, 15:39:54</Created>
+    <Created>2019-05-18, 17:40:53</Created>
     <Resource>
       <Filename>serial/rs485.py</Filename>
       <Linenumber>13</Linenumber>
     </Resource>
   </Task>
-  <Task priority="1" completed="False" type="3" uid="{bcaa4b8c-8106-423c-ac66-6ef978ff7449}">
+  <Task priority="1" completed="False" type="3" uid="{55b0a459-1100-4143-82d9-33566b7d5c5e}">
     <Summary>NOTE: This may work unreliably on some serial ports (control signals not</Summary>
     <Description></Description>
-    <Created>2019-05-12, 15:39:54</Created>
+    <Created>2019-05-18, 17:40:53</Created>
     <Resource>
       <Filename>serial/rs485.py</Filename>
       <Linenumber>40</Linenumber>
     </Resource>
   </Task>
-  <Task priority="1" completed="False" type="3" uid="{bf2e418a-76a2-4f43-a318-b2534b3000df}">
+  <Task priority="1" completed="False" type="3" uid="{69fc130e-cc28-4d63-b762-b3ef0fe627a3}">
     <Summary>NOTE: Some implementations support this natively. Better performance</Summary>
     <Description></Description>
-    <Created>2019-05-12, 15:39:54</Created>
+    <Created>2019-05-18, 17:40:53</Created>
     <Resource>
       <Filename>serial/rs485.py</Filename>
       <Linenumber>46</Linenumber>
     </Resource>
   </Task>
-  <Task priority="1" completed="False" type="3" uid="{df0a4b07-2302-4483-8156-e551b24c3109}">
+  <Task priority="1" completed="False" type="3" uid="{856f2c42-3a36-4794-b7d6-29836e25f211}">
     <Summary>NOTE: The loopback property is ignored by this implementation. The actual</Summary>
     <Description></Description>
-    <Created>2019-05-12, 15:39:54</Created>
+    <Created>2019-05-18, 17:40:53</Created>
     <Resource>
       <Filename>serial/rs485.py</Filename>
       <Linenumber>49</Linenumber>
     </Resource>
   </Task>
-  <Task priority="1" completed="False" type="2" uid="{f283d880-df25-4e25-8aea-3fa143b095f6}">
+  <Task priority="1" completed="False" type="2" uid="{d3fb2cef-0b95-4401-8b47-390a7323f93f}">
     <Summary>WARNING: this function is not portable to different platforms!</Summary>
     <Description></Description>
-    <Created>2019-05-12, 15:39:54</Created>
+    <Created>2019-05-18, 17:40:53</Created>
     <Resource>
       <Filename>serial/serialposix.py</Filename>
       <Linenumber>682</Linenumber>
     </Resource>
   </Task>
-  <Task priority="1" completed="False" type="2" uid="{5abaf2aa-6b4d-4f13-8665-c4fb3bce5ea6}">
+  <Task priority="1" completed="False" type="2" uid="{77105f34-c42f-4b60-83a0-b3e5e31ecf79}">
     <Summary>WARNING: this function is not portable to different platforms!</Summary>
     <Description></Description>
-    <Created>2019-05-12, 15:39:54</Created>
+    <Created>2019-05-18, 17:40:53</Created>
     <Resource>
       <Filename>serial/serialposix.py</Filename>
       <Linenumber>692</Linenumber>
     </Resource>
   </Task>
-  <Task priority="1" completed="False" type="2" uid="{2eb29ca4-9508-45d1-9ee7-de669e4381d5}">
+  <Task priority="1" completed="False" type="2" uid="{fd35bf84-a2e1-496e-9c93-f667de9a8e44}">
     <Summary>WARNING: this function is not portable to different platforms!</Summary>
     <Description></Description>
-    <Created>2019-05-12, 15:39:54</Created>
+    <Created>2019-05-18, 17:40:53</Created>
     <Resource>
       <Filename>serial/serialposix.py</Filename>
       <Linenumber>705</Linenumber>
     </Resource>
   </Task>
-  <Task priority="1" completed="False" type="2" uid="{a51e7abd-181d-43e6-9a9f-cc348f1960fc}">
+  <Task priority="1" completed="False" type="2" uid="{2492709d-ea0b-496e-949c-2995aee2f3dc}">
     <Summary>WARNING: this function is not portable to different platforms!</Summary>
     <Description></Description>
-    <Created>2019-05-12, 15:39:54</Created>
+    <Created>2019-05-18, 17:40:53</Created>
     <Resource>
       <Filename>serial/serialwin32.py</Filename>
       <Linenumber>430</Linenumber>

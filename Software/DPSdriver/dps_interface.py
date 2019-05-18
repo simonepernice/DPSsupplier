@@ -47,6 +47,7 @@ except ImportError:
     from tkinter.ttk import Separator
 
 from time import time
+import os
 
 __author__ = "Simone Pernice"
 __copyright__ = "Copyright 2019, DPS supplier"
@@ -75,6 +76,7 @@ class DPSinterface:
 
         self.root=root
         root.title("DPS power supplier interface")
+        root.protocol("WM_DELETE_WINDOW", self.wnwcmdclose)
 
         self.dps = None
         self.poller = None
@@ -87,7 +89,7 @@ class DPSinterface:
         menubar = Menu(root)
         
         filemenu = Menu(menubar, tearoff=0)
-        filemenu.add_command(label="Exit", command=root.quit)
+        filemenu.add_command(label="Exit", command=self.wnwcmdclose)
         menubar.add_cascade(label="File", menu=filemenu)
         
         scopemenu = Menu(menubar, tearoff=0)
@@ -333,7 +335,7 @@ class DPSinterface:
         """    
         fname=tkFileDialog.askopenfilename(initialdir=".", title="Select wave file to load", filetypes=(("dps files","*.dps"), ("all files","*.*")))
         if fname:
-            self.svarwave.set(fname)
+            self.svarwave.set(os.path.basename(fname))
             self.dpsfwave=Dpsfile()
             self.dpsfwave.load(fname)
 
@@ -356,7 +358,7 @@ class DPSinterface:
             fname=tkFileDialog.asksaveasfilename(initialdir=".", title="Select wave file to save", filetypes=(("dps files","*.dps"), ("all files","*.*")))
             if fname:
                 self.dpsfwave.save(fname)
-                self.svarwave.set(fname)
+                self.svarwave.set(os.path.basename(fname))
         else:
             tkMessageBox.showinfo('No wave in memory', 'Load or create a wave file to modify') 
 
@@ -394,7 +396,12 @@ class DPSinterface:
         Txtinterface(self.root, 'About', 
 """DPS interface is designed by Simone Pernice
 
-This project was born because nothing open source nor for Linux distribution were available.
+That project was born as a textual driver to interface any DPS device.
+After the driver I made also a graphical interface to manage DPS devices.
+
+This project was born because I was not able to find any Linux
+application to manage DPS devices via USB.
+
 For question email to me: pernice@libero.com
 Version {} relesed on {}
 First release on 3rd February 2019 Turin Italy
@@ -409,6 +416,7 @@ If you like this program please make a donation with PayPal to simone.pernice@gm
         """
         Txtinterface(self.root, 'Help', 
 """This is an interface to remote controll a power supplier of DPS series.
+The white fields can be edited, the gray are read only.
 To connect to DPS power supplier first link it to the PC through an USB cable.
 The data required to connect is on the first row of the graphical interface.
 Write the serial address on the first field (COMxx for Windows or 
@@ -416,47 +424,51 @@ Write the serial address on the first field (COMxx for Windows or
 Address and baudrate do not require update because they are the default 
 for DPS power supplier. Turn on DPS with up key pressed to change those values.
 Press 'Connect' check button and if the device is present it is linked. 
-Press again to disconnect.
-Once the link is in place all the data on the interface are updated and 
+Press again the same check button to disconnect the DPS.
+Once the link to DPS is in place all the data on the interface are updated and 
 on the DPS the keylock is set. 
 The second block of graphical interface contains all data about DPS.
 The brightness set which can be changed through the scale regulation.
-The model. The memory to recall to preset all parameters.
+The model number. The memory from which recall the preset parameters.
 The input voltage, the output mode cv (constant voltage) or cc (constant current).
-The protection mode: none, ovp (over voltage protection), ocp (over current protection), 
-opp (over power protection).
-The maximum voltage, current and power to provide before triggering the protection.
-The current output voltage, current and power.
-A time diagram of the DPS output. 
+The protection mode: none (no protection triggered), ovp (over voltage protection), 
+ocp (over current protection), opp (over power protection).
+The maximum voltage, current and power to provide before triggering the 
+self protection.
+The next row contains output voltage, current and power in textual form.
+A time diagram of the DPS output voltage, current and power is avaiable. 
 It is possible to play with the mouse on that screen:
-- wheel press to fit the enabled drawings
+- wheel press to fit in the screen all the enabled drawings
 - wheel to zoom in time
-- shift+wheel to zoom on Y of the highlighted curves
+- shift+wheel to zoom on Y for the highlighted curves
 - ctrl+wheel to change the enabled curves
 - left button drag to move the highlighted curve
-The same zoom features are available in the fields below the diagram:
+The same mouse functions are available in the fields below the diagram:
 - voltage per division, current per division and watt per division
 - zero position for voltage, current and power
-- check button for voltage, current and power
+- check button to view voltage, current and power
 - time: second per divisions and zero position for time
-The sample time is used for the acquisition, the minimum is around 1 second.
+The sample time is used for the acquisition. DPS is quite slot, the minimum read
+time is around 1 second. The suggested rate is to have a sample for displayed pixel.
 The next buttons are:
 - Run acquisition: starts a thread that read the DPS status, update the interface 
-fields as well as the time diagram. The acquisition may slow the wave player
-use low acquisition sample time to avoid delays.
-The acquisition points can be save and loaded to be showed lated with menu 
+fields as well as the time diagram. 
+The acquisition points can be saved and loaded to be showed lated with menu 
 commands on DPS scope load/save. They can be also edited through the
-wave edit window.
+wave edit window and played.
 - Key lock: set or reset the DPS key lock. It should be on in order to have faster
-communication becase less fields of DPS are read since user can change them only
-through the PC interface.
-- Output enable to set the DPS on
+communication. If key lock is on less fields of DPS are read since user can 
+change them only through the PC interface.
+- Output enable to enable the DPS output
 Eventually there are the voltage and current scale. Thery are split in two:
-- the first  is for coarse adjustment accurate at the unit of voltage/current 
-- the second is for fine adjustament accurate at the cents of voltage current
+- the first  is for coarse (1 unit/step) adjustment the unit of voltage/current 
+- the second is for fine (0.01 unit/step) adjustament of voltage/current
 On the last block of interface there is a waveform field showing the wave loaded.
 Wave is a set of required output voltage and current at give timings. It is possible
-play and pause it through the respective commands of the interface.""")
+play and pause it through the respective commands of the interface. If loop is
+set when the wave play is completed it restarts.
+The acquisition may slow the wave player, use low acquisition sample time 
+to avoid delays.""")
 
     def butcmdconnect(self):
         """
@@ -513,11 +525,13 @@ play and pause it through the respective commands of the interface.""")
             self.ivaracquire.set(0)
             if self.poller:
                 self.poller.wake()
+                time.sleep(1.) # Wait to be sure the thread exits
 
             # Stop waveform generation
             self.ivarplaywv.set(0)
             if self.waver:
                 self.waver.wake()
+                time.sleep(1.) # Wait to be sure the thread exits
 
             self.dps=None
 
@@ -590,6 +604,17 @@ play and pause it through the respective commands of the interface.""")
         """    
         self.waver.wake()
 
+    def wnwcmdclose(self):
+        """
+        DPS main window close. Before exiting the supplier is disconnected the external supplier.
+
+        """    
+        if self.ivarconctd.get() :
+            self.ivarconctd.set(0)
+            self.butcmdconnect()
+
+        self.root.destroy()
+        
     def entbndvmax(self, event):
         """
         Maximum voltage entry bind to set the protection maximum ouput voltage of the DSP.
